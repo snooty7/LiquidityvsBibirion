@@ -1,0 +1,1 @@
+"""Persistence package for SQLite-backed runtime state."""
