@@ -34,6 +34,7 @@ from src.strategy.confirmations import (
     ConfirmationResult,
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
+    evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import evaluate_bias, find_local_order_block, order_block_distance_pips, order_block_note
 from src.strategy.liquidity import detect_sweep_signal, extract_pivot_levels
@@ -675,20 +676,96 @@ def manage_symbol_positions(
 
     now_utc = datetime.now(timezone.utc)
     now_ts = time.time()
+    info = SymbolTradeInfo.from_mt5(adapter.symbol_info(cfg.symbol))
+    point = float(info.point)
+    stops_level_price = float((getattr(adapter.symbol_info(cfg.symbol), "trade_stops_level", 0) or 0) * point)
 
     for position in positions:
+        ticket = int(position.ticket)
+        side = "BUY" if int(position.type) == 0 else "SELL"
+        tick = adapter.symbol_tick(cfg.symbol)
+        current_price = current_exit_price(position, tick)
+        current_sl = float(getattr(position, "sl", 0.0) or 0.0)
+        current_tp = float(getattr(position, "tp", 0.0) or 0.0)
+
+        if runtime.trailing_stop_mode == "r_multiple":
+            desired_sl = compute_r_multiple_trailing_stop(
+                side=side,
+                open_price=float(getattr(position, "price_open", 0.0) or 0.0),
+                current_exit_price_value=current_price,
+                current_sl=current_sl,
+                risk_distance_price=position_risk_distance_price(cfg, info),
+                activation_r=float(runtime.trailing_activation_r),
+                gap_r=float(runtime.trailing_gap_r),
+            )
+            if desired_sl is not None:
+                if side == "BUY":
+                    desired_sl = min(desired_sl, current_price - stops_level_price)
+                    valid_trail = desired_sl > max(current_sl, 0.0) + point and desired_sl < current_price
+                else:
+                    desired_sl = max(desired_sl, current_price + stops_level_price)
+                    valid_trail = (current_sl <= 0 or desired_sl < current_sl - point) and desired_sl > current_price
+
+                if valid_trail:
+                    target_tp = 0.0 if runtime.trailing_remove_tp_on_activation else current_tp
+                    modify = adapter.modify_position_protection(
+                        cfg.symbol,
+                        position,
+                        sl=desired_sl,
+                        tp=target_tp,
+                    )
+                    with repo.transaction():
+                        emit_event(
+                            log_file=log_file,
+                            repo=repo,
+                            app_config=app_config,
+                            event_type="TRAILING_STOP_OK" if modify.ok else "TRAILING_STOP_FAIL",
+                            symbol=cfg.symbol,
+                            ticket=ticket,
+                            message=(
+                                f"trail sl->{desired_sl:.5f} tp->{target_tp:.5f} "
+                                f"mode=r_multiple"
+                            ),
+                            payload={
+                                "side": side,
+                                "from_sl": current_sl,
+                                "to_sl": desired_sl,
+                                "from_tp": current_tp,
+                                "to_tp": target_tp,
+                                "current_price": current_price,
+                                "activation_r": float(runtime.trailing_activation_r),
+                                "gap_r": float(runtime.trailing_gap_r),
+                                "retcode": modify.retcode,
+                            },
+                            csv_row={
+                                "ts": now_utc.isoformat(),
+                                "symbol": cfg.symbol,
+                                "timeframe": cfg.timeframe,
+                                "strategy": "SWEEP_V2",
+                                "event": "TRAILING_STOP_OK" if modify.ok else "TRAILING_STOP_FAIL",
+                                "position": ticket,
+                                "side": side,
+                                "price": current_price,
+                                "sl": desired_sl,
+                                "tp": target_tp,
+                                "retcode": modify.retcode,
+                            },
+                        )
+
         pnl_money = float(getattr(position, "profit", 0.0) or 0.0)
         reason: Optional[str] = None
+        loss_limit_money: Optional[float] = None
+        loss_guard_mode: Optional[str] = None
 
-        if runtime.max_loss_per_trade_usd > 0 and pnl_money <= -runtime.max_loss_per_trade_usd:
-            reason = f"max_loss ${runtime.max_loss_per_trade_usd:.2f}"
+        loss_limit_money, loss_reason, loss_guard_mode = resolve_loss_guard(runtime, position, info)
+        if loss_limit_money is not None and pnl_money <= -loss_limit_money:
+            reason = loss_reason
         if runtime.max_profit_per_trade_usd > 0 and pnl_money >= runtime.max_profit_per_trade_usd:
             reason = f"max_profit ${runtime.max_profit_per_trade_usd:.2f}"
 
         if reason is None:
             continue
 
-        ticket = int(position.ticket)
         retry_after = float(state.risk_close_retry_after.get(ticket, 0.0))
         if now_ts < retry_after:
             continue
@@ -715,9 +792,11 @@ def manage_symbol_positions(
                     ticket=ticket,
                     message=f"{reason} pnl=${pnl_money:.2f}",
                     payload={
-                        "side": "BUY" if int(position.type) == 0 else "SELL",
+                        "side": side,
                         "volume": float(position.volume),
                         "price": result.price,
+                        "loss_limit_money": loss_limit_money,
+                        "loss_guard_mode": loss_guard_mode,
                         "retcode": result.retcode,
                         "order": result.order,
                         "deal": result.deal,
@@ -728,7 +807,7 @@ def manage_symbol_positions(
                         "timeframe": cfg.timeframe,
                         "strategy": "SWEEP_V2",
                         "position": ticket,
-                        "side": "BUY" if int(position.type) == 0 else "SELL",
+                        "side": side,
                         "volume": float(position.volume),
                         "price": result.price,
                         "retcode": result.retcode,
@@ -755,9 +834,11 @@ def manage_symbol_positions(
                     ticket=ticket,
                     message=f"{reason} pnl=${pnl_money:.2f} {result.raw}",
                     payload={
-                        "side": "BUY" if int(position.type) == 0 else "SELL",
+                        "side": side,
                         "volume": float(position.volume),
                         "price": result.price,
+                        "loss_limit_money": loss_limit_money,
+                        "loss_guard_mode": loss_guard_mode,
                         "retcode": result.retcode,
                         "order": result.order,
                         "deal": result.deal,
@@ -769,7 +850,7 @@ def manage_symbol_positions(
                         "timeframe": cfg.timeframe,
                         "strategy": "SWEEP_V2",
                         "position": ticket,
-                        "side": "BUY" if int(position.type) == 0 else "SELL",
+                        "side": side,
                         "volume": float(position.volume),
                         "price": result.price,
                         "retcode": result.retcode,
@@ -802,6 +883,83 @@ def total_open_positions_count(adapter: MT5Adapter, app_config: AppConfig) -> in
     for cfg in app_config.symbols:
         total += len(adapter.positions_get(cfg.symbol, magic=cfg.magic))
     return total
+
+
+def resolve_loss_guard(
+    runtime: Any,
+    position: object,
+    symbol_info: SymbolTradeInfo,
+) -> tuple[Optional[float], Optional[str], Optional[str]]:
+    mode = str(getattr(runtime, "per_trade_loss_guard_mode", "fixed_usd") or "fixed_usd").lower()
+
+    if mode == "position_risk":
+        risk_multiple = max(0.0, float(getattr(runtime, "per_trade_loss_risk_multiple", 1.0) or 0.0))
+        risk_money = calc_position_risk_money(
+            entry_price=float(getattr(position, "price_open", 0.0) or 0.0),
+            stop_price=float(getattr(position, "sl", 0.0) or 0.0),
+            volume=float(getattr(position, "volume", 0.0) or 0.0),
+            symbol_info=symbol_info,
+        )
+        if math.isfinite(risk_money) and risk_money > 0 and risk_multiple > 0:
+            threshold = float(risk_money * risk_multiple)
+            return threshold, f"max_loss risk x{risk_multiple:.2f} (${threshold:.2f})", mode
+
+    fixed_limit = float(getattr(runtime, "max_loss_per_trade_usd", 0.0) or 0.0)
+    if fixed_limit > 0:
+        return fixed_limit, f"max_loss ${fixed_limit:.2f}", "fixed_usd"
+
+    return None, None, None
+
+
+def position_risk_distance_price(cfg: SymbolConfig, symbol_info: SymbolTradeInfo) -> float:
+    return float(cfg.sl_pips * MT5Adapter.pip_size(symbol_info))
+
+
+def current_exit_price(position: object, tick: object) -> float:
+    if int(position.type) == 0:
+        return float(getattr(tick, "bid", 0.0) or 0.0)
+    return float(getattr(tick, "ask", 0.0) or 0.0)
+
+
+def compute_r_multiple_trailing_stop(
+    *,
+    side: str,
+    open_price: float,
+    current_exit_price_value: float,
+    current_sl: float,
+    risk_distance_price: float,
+    activation_r: float,
+    gap_r: float,
+) -> Optional[float]:
+    if risk_distance_price <= 0 or activation_r <= 0 or gap_r < 0:
+        return None
+
+    normalized_side = side.upper()
+    if normalized_side == "BUY":
+        favorable_move = current_exit_price_value - open_price
+    else:
+        favorable_move = open_price - current_exit_price_value
+
+    current_r = favorable_move / risk_distance_price
+    if current_r + 1e-9 < activation_r:
+        return None
+
+    locked_r = current_r - gap_r
+    if locked_r <= 0:
+        desired_sl = open_price
+    elif normalized_side == "BUY":
+        desired_sl = open_price + (locked_r * risk_distance_price)
+    else:
+        desired_sl = open_price - (locked_r * risk_distance_price)
+
+    if normalized_side == "BUY":
+        if current_sl > 0 and desired_sl <= current_sl:
+            return None
+    else:
+        if current_sl > 0 and desired_sl >= current_sl:
+            return None
+
+    return float(desired_sl)
 
 
 def portfolio_caps_message(adapter: MT5Adapter, app_config: AppConfig, cfg: SymbolConfig, equity: float) -> Optional[str]:
@@ -847,6 +1005,15 @@ def evaluate_pending_confirmation(
     if mode == "cisd":
         cisd_rates = adapter.copy_rates(cfg.symbol, cfg.cisd_timeframe, cfg.cisd_lookback_bars)
         return evaluate_cisd_confirmation(cisd_rates, pending.side, pending.candle_time, cfg.cisd_structure_bars)
+
+    if mode == "sweep_displacement_mss":
+        confirm_rates = adapter.copy_rates(cfg.symbol, cfg.cisd_timeframe, cfg.cisd_lookback_bars)
+        return evaluate_sweep_displacement_mss_confirmation(
+            confirm_rates,
+            pending.side,
+            pending.candle_time,
+            cfg.cisd_structure_bars,
+        )
 
     return ConfirmationResult(False, False, f"unknown_confirmation_mode={mode}")
 
@@ -933,7 +1100,7 @@ def process_symbol(
     repo: SQLiteRepository,
 ) -> None:
     mode = cfg.confirmation_mode.lower()
-    if mode not in ("none", "c3", "c4", "cisd"):
+    if mode not in ("none", "c3", "c4", "cisd", "sweep_displacement_mss"):
         raise ValueError(f"Unsupported confirmation_mode={cfg.confirmation_mode}")
 
     info = adapter.symbol_info(cfg.symbol)
@@ -1517,8 +1684,14 @@ def run(config_path: str = "config/settings.json") -> None:
             f"bot_instance_id={bot_instance_id} "
             f"daily_loss=${app_config.runtime.daily_loss_limit_usd:.2f} "
             f"close_on_loss={app_config.runtime.close_positions_on_daily_loss} "
-            f"per_trade_loss=${app_config.runtime.max_loss_per_trade_usd:.2f} "
+            f"per_trade_loss_mode={app_config.runtime.per_trade_loss_guard_mode} "
+            f"per_trade_loss_fixed=${app_config.runtime.max_loss_per_trade_usd:.2f} "
+            f"per_trade_loss_risk_mult={app_config.runtime.per_trade_loss_risk_multiple:.2f} "
             f"per_trade_profit=${app_config.runtime.max_profit_per_trade_usd:.2f} "
+            f"trailing={app_config.runtime.trailing_stop_mode}/"
+            f"{app_config.runtime.trailing_activation_r:.2f}R/"
+            f"{app_config.runtime.trailing_gap_r:.2f}R/"
+            f"remove_tp={app_config.runtime.trailing_remove_tp_on_activation} "
             f"cap_positions={app_config.runtime.max_open_positions_total} "
             f"cap_open_risk_pct={app_config.runtime.max_total_open_risk_pct:.2f}"
         )

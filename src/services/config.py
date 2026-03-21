@@ -16,7 +16,13 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "daily_loss_limit_usd": 50.0,
         "close_positions_on_daily_loss": True,
         "max_loss_per_trade_usd": 5.0,
+        "per_trade_loss_guard_mode": "fixed_usd",
+        "per_trade_loss_risk_multiple": 1.0,
         "max_profit_per_trade_usd": 6.0,
+        "trailing_stop_mode": "off",
+        "trailing_activation_r": 1.0,
+        "trailing_gap_r": 1.0,
+        "trailing_remove_tp_on_activation": True,
         "risk_close_retry_sec": 20,
         "max_open_positions_total": 5,
         "max_total_open_risk_pct": 0.50,
@@ -73,7 +79,13 @@ class RuntimeConfig:
     daily_loss_limit_usd: float
     close_positions_on_daily_loss: bool
     max_loss_per_trade_usd: float
+    per_trade_loss_guard_mode: str
+    per_trade_loss_risk_multiple: float
     max_profit_per_trade_usd: float
+    trailing_stop_mode: str
+    trailing_activation_r: float
+    trailing_gap_r: float
+    trailing_remove_tp_on_activation: bool
     risk_close_retry_sec: int
     max_open_positions_total: int
     max_total_open_risk_pct: float
@@ -156,7 +168,13 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         daily_loss_limit_usd=float(runtime_raw.get("daily_loss_limit_usd", 50.0)),
         close_positions_on_daily_loss=bool(runtime_raw.get("close_positions_on_daily_loss", True)),
         max_loss_per_trade_usd=float(runtime_raw.get("max_loss_per_trade_usd", 5.0)),
+        per_trade_loss_guard_mode=str(runtime_raw.get("per_trade_loss_guard_mode", "fixed_usd")).lower(),
+        per_trade_loss_risk_multiple=float(runtime_raw.get("per_trade_loss_risk_multiple", 1.0)),
         max_profit_per_trade_usd=float(runtime_raw.get("max_profit_per_trade_usd", 6.0)),
+        trailing_stop_mode=str(runtime_raw.get("trailing_stop_mode", "off")).lower(),
+        trailing_activation_r=float(runtime_raw.get("trailing_activation_r", 1.0)),
+        trailing_gap_r=float(runtime_raw.get("trailing_gap_r", 1.0)),
+        trailing_remove_tp_on_activation=bool(runtime_raw.get("trailing_remove_tp_on_activation", True)),
         risk_close_retry_sec=int(runtime_raw.get("risk_close_retry_sec", 20)),
         max_open_positions_total=int(runtime_raw.get("max_open_positions_total", 5)),
         max_total_open_risk_pct=float(runtime_raw.get("max_total_open_risk_pct", 0.50)),

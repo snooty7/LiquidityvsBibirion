@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -11,8 +12,10 @@ from src.engine.orchestrator import (
     PendingSetup,
     SymbolState,
     checkpoint_state_snapshot,
+    compute_r_multiple_trailing_stop,
     portfolio_caps_message,
     _revalidate_restored_pending,
+    resolve_loss_guard,
     restore_runtime_state,
 )
 from src.persistence.maintenance import archive_and_prune_events
@@ -31,6 +34,7 @@ from src.persistence.recovery import (
     reconcile_broker_positions,
 )
 from src.persistence.repository import SQLiteRepository
+from src.risk.sizing import SymbolTradeInfo
 from src.services.config import AppConfig, RuntimeConfig, SymbolConfig
 
 
@@ -44,7 +48,13 @@ def _make_config(db_path: Path) -> AppConfig:
         daily_loss_limit_usd=50.0,
         close_positions_on_daily_loss=True,
         max_loss_per_trade_usd=5.0,
+        per_trade_loss_guard_mode="fixed_usd",
+        per_trade_loss_risk_multiple=1.0,
         max_profit_per_trade_usd=6.0,
+        trailing_stop_mode="off",
+        trailing_activation_r=1.0,
+        trailing_gap_r=1.0,
+        trailing_remove_tp_on_activation=True,
         risk_close_retry_sec=20,
         max_open_positions_total=5,
         max_total_open_risk_pct=0.5,
@@ -583,7 +593,13 @@ def test_portfolio_cap_continuity_after_restart(tmp_path: Path) -> None:
         daily_loss_limit_usd=base.runtime.daily_loss_limit_usd,
         close_positions_on_daily_loss=base.runtime.close_positions_on_daily_loss,
         max_loss_per_trade_usd=base.runtime.max_loss_per_trade_usd,
+        per_trade_loss_guard_mode=base.runtime.per_trade_loss_guard_mode,
+        per_trade_loss_risk_multiple=base.runtime.per_trade_loss_risk_multiple,
         max_profit_per_trade_usd=base.runtime.max_profit_per_trade_usd,
+        trailing_stop_mode=base.runtime.trailing_stop_mode,
+        trailing_activation_r=base.runtime.trailing_activation_r,
+        trailing_gap_r=base.runtime.trailing_gap_r,
+        trailing_remove_tp_on_activation=base.runtime.trailing_remove_tp_on_activation,
         risk_close_retry_sec=base.runtime.risk_close_retry_sec,
         max_open_positions_total=5,
         max_total_open_risk_pct=0.0,
@@ -612,7 +628,13 @@ def test_portfolio_cap_continuity_after_restart(tmp_path: Path) -> None:
         daily_loss_limit_usd=50.0,
         close_positions_on_daily_loss=True,
         max_loss_per_trade_usd=5.0,
+        per_trade_loss_guard_mode="fixed_usd",
+        per_trade_loss_risk_multiple=1.0,
         max_profit_per_trade_usd=6.0,
+        trailing_stop_mode="off",
+        trailing_activation_r=1.0,
+        trailing_gap_r=1.0,
+        trailing_remove_tp_on_activation=True,
         risk_close_retry_sec=20,
         max_open_positions_total=1,
         max_total_open_risk_pct=0.0,
@@ -742,3 +764,93 @@ def test_checkpoint_snapshot_persists_guard_and_runtime(tmp_path: Path) -> None:
         assert len(checkpoint_events) == 1
     finally:
         repo.close()
+
+
+def test_resolve_loss_guard_uses_position_risk_when_configured() -> None:
+    runtime = SimpleNamespace(
+        per_trade_loss_guard_mode="position_risk",
+        per_trade_loss_risk_multiple=1.0,
+        max_loss_per_trade_usd=3.0,
+    )
+    position = SimpleNamespace(price_open=1.15148, sl=1.15248, volume=0.10)
+    symbol_info = SymbolTradeInfo(
+        digits=5,
+        point=0.00001,
+        volume_min=0.01,
+        volume_max=100.0,
+        volume_step=0.01,
+        trade_tick_value=1.0,
+        trade_tick_size=0.00001,
+    )
+
+    limit_money, reason, mode = resolve_loss_guard(runtime, position, symbol_info)
+
+    assert limit_money is not None
+    assert math.isclose(limit_money, 10.0, rel_tol=0.0, abs_tol=1e-9)
+    assert reason == "max_loss risk x1.00 ($10.00)"
+    assert mode == "position_risk"
+
+
+def test_resolve_loss_guard_falls_back_to_fixed_usd_without_usable_sl() -> None:
+    runtime = SimpleNamespace(
+        per_trade_loss_guard_mode="position_risk",
+        per_trade_loss_risk_multiple=1.0,
+        max_loss_per_trade_usd=3.0,
+    )
+    position = SimpleNamespace(price_open=1.15148, sl=0.0, volume=0.10)
+    symbol_info = SymbolTradeInfo(
+        digits=5,
+        point=0.00001,
+        volume_min=0.01,
+        volume_max=100.0,
+        volume_step=0.01,
+        trade_tick_value=1.0,
+        trade_tick_size=0.00001,
+    )
+
+    limit_money, reason, mode = resolve_loss_guard(runtime, position, symbol_info)
+
+    assert limit_money == 3.0
+    assert reason == "max_loss $3.00"
+    assert mode == "fixed_usd"
+
+
+def test_compute_r_multiple_trailing_stop_buy_moves_to_break_even_at_one_r() -> None:
+    desired_sl = compute_r_multiple_trailing_stop(
+        side="BUY",
+        open_price=1.1000,
+        current_exit_price_value=1.1010,
+        current_sl=1.0990,
+        risk_distance_price=0.0010,
+        activation_r=1.0,
+        gap_r=1.0,
+    )
+    assert desired_sl is not None
+    assert math.isclose(desired_sl, 1.1000, rel_tol=0.0, abs_tol=1e-9)
+
+
+def test_compute_r_multiple_trailing_stop_sell_locks_one_r_at_two_r_profit() -> None:
+    desired_sl = compute_r_multiple_trailing_stop(
+        side="SELL",
+        open_price=1.2000,
+        current_exit_price_value=1.1980,
+        current_sl=1.2010,
+        risk_distance_price=0.0010,
+        activation_r=1.0,
+        gap_r=1.0,
+    )
+    assert desired_sl is not None
+    assert math.isclose(desired_sl, 1.1990, rel_tol=0.0, abs_tol=1e-9)
+
+
+def test_compute_r_multiple_trailing_stop_does_not_loosen_existing_stop() -> None:
+    desired_sl = compute_r_multiple_trailing_stop(
+        side="BUY",
+        open_price=1.1000,
+        current_exit_price_value=1.1015,
+        current_sl=1.1008,
+        risk_distance_price=0.0010,
+        activation_r=1.0,
+        gap_r=1.0,
+    )
+    assert desired_sl is None

@@ -1,6 +1,7 @@
 from src.strategy.confirmations import (
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
+    evaluate_sweep_displacement_mss_confirmation,
 )
 
 
@@ -44,3 +45,54 @@ def test_cisd_confirmation_buy() -> None:
 
     assert result.confirmed is True
     assert result.pending is False
+
+
+def test_sweep_displacement_mss_confirmation_buy_success() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1004, "low": 1.0997, "close": 1.1001},
+        {"time": 2, "open": 1.1001, "high": 1.1003, "low": 1.0998, "close": 1.1000},
+        {"time": 3, "open": 1.1000, "high": 1.1002, "low": 1.0997, "close": 1.0999},
+        {"time": 4, "open": 1.0999, "high": 1.1012, "low": 1.0998, "close": 1.1011},
+        {"time": 5, "open": 1.1010, "high": 1.1015, "low": 1.1007, "close": 1.1014},
+        {"time": 6, "open": 1.1014, "high": 1.1016, "low": 1.1010, "close": 1.1013},
+    ]
+
+    result = evaluate_sweep_displacement_mss_confirmation(rates, side="BUY", since_ts=1, structure_bars=3)
+
+    assert result.confirmed is True
+    assert result.pending is False
+    assert result.note == "sdmss_buy_confirmed"
+
+
+def test_sweep_displacement_mss_confirmation_pending_follow_through() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1004, "low": 1.0997, "close": 1.1001},
+        {"time": 2, "open": 1.1001, "high": 1.1003, "low": 1.0998, "close": 1.1000},
+        {"time": 3, "open": 1.1000, "high": 1.1002, "low": 1.0997, "close": 1.0999},
+        {"time": 4, "open": 1.0999, "high": 1.1012, "low": 1.0998, "close": 1.1011},
+        {"time": 5, "open": 1.1010, "high": 1.1011, "low": 1.1007, "close": 1.1009},
+        {"time": 6, "open": 1.1009, "high": 1.1010, "low": 1.1006, "close": 1.1008},
+    ]
+
+    result = evaluate_sweep_displacement_mss_confirmation(rates, side="BUY", since_ts=1, structure_bars=3)
+
+    assert result.confirmed is False
+    assert result.pending is True
+    assert result.note == "sdmss_wait_buy_mss"
+
+
+def test_sweep_displacement_mss_confirmation_sell_success() -> None:
+    rates = [
+        {"time": 1, "open": 1.2000, "high": 1.2003, "low": 1.1998, "close": 1.2001},
+        {"time": 2, "open": 1.2001, "high": 1.2004, "low": 1.1999, "close": 1.2002},
+        {"time": 3, "open": 1.2002, "high": 1.2005, "low": 1.2000, "close": 1.2001},
+        {"time": 4, "open": 1.2001, "high": 1.2002, "low": 1.1988, "close": 1.1989},
+        {"time": 5, "open": 1.1989, "high": 1.1990, "low": 1.1984, "close": 1.1985},
+        {"time": 6, "open": 1.1985, "high": 1.1987, "low": 1.1982, "close": 1.1986},
+    ]
+
+    result = evaluate_sweep_displacement_mss_confirmation(rates, side="SELL", since_ts=1, structure_bars=3)
+
+    assert result.confirmed is True
+    assert result.pending is False
+    assert result.note == "sdmss_sell_confirmed"

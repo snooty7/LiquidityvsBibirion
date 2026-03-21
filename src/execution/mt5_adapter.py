@@ -46,6 +46,15 @@ class CloseResult:
     raw: Optional[object]
 
 
+@dataclass(frozen=True)
+class ModifyResult:
+    ok: bool
+    retcode: Optional[int]
+    sl: float
+    tp: float
+    raw: Optional[object]
+
+
 class MT5Adapter:
     def __init__(self, default_deviation: int = 20) -> None:
         self.default_deviation = int(default_deviation)
@@ -271,6 +280,34 @@ class MT5Adapter:
             deal=getattr(last_result, "deal", None) if last_result is not None else None,
             price=close_price,
             raw=last_result,
+        )
+
+    def modify_position_protection(
+        self,
+        symbol: str,
+        position: object,
+        *,
+        sl: float,
+        tp: float,
+    ) -> ModifyResult:
+        self._ensure_mt5()
+
+        request = {
+            "action": mt5.TRADE_ACTION_SLTP,
+            "symbol": symbol,
+            "position": int(position.ticket),
+            "sl": float(sl),
+            "tp": float(tp),
+        }
+        result = mt5.order_send(request)
+        retcode = getattr(result, "retcode", None) if result is not None else None
+        is_done = retcode == mt5.TRADE_RETCODE_DONE
+        return ModifyResult(
+            ok=bool(is_done),
+            retcode=retcode,
+            sl=float(sl),
+            tp=float(tp),
+            raw=result,
         )
 
     def realized_pnl_today(self, magics: set[int], now_utc: datetime) -> float:
