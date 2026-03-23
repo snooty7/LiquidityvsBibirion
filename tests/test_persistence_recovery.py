@@ -13,6 +13,7 @@ from src.engine.orchestrator import (
     SymbolState,
     checkpoint_state_snapshot,
     compute_r_multiple_trailing_stop,
+    has_active_pending_setup,
     portfolio_caps_message,
     _revalidate_restored_pending,
     resolve_loss_guard,
@@ -854,3 +855,21 @@ def test_compute_r_multiple_trailing_stop_does_not_loosen_existing_stop() -> Non
         gap_r=1.0,
     )
     assert desired_sl is None
+
+
+def test_has_active_pending_setup_blocks_new_confirmed_modes() -> None:
+    state = SymbolState(
+        pending_setup=PendingSetup(
+            setup_id="s1",
+            dedupe_key="d1",
+            signal_key="k1",
+            side="BUY",
+            level=1.1000,
+            candle_time=1,
+            expires_at=9999999999,
+            status="PENDING",
+        )
+    )
+    assert has_active_pending_setup(state, "sweep_displacement_mss") is True
+    assert has_active_pending_setup(state, "c3") is True
+    assert has_active_pending_setup(state, "none") is False

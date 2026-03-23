@@ -992,6 +992,14 @@ def is_pending_expired(pending: PendingSetup) -> bool:
     return time.time() > float(pending.expires_at)
 
 
+def has_active_pending_setup(state: SymbolState, mode: str) -> bool:
+    if mode == "none":
+        return False
+    if state.pending_setup is None:
+        return False
+    return state.pending_setup.status not in PENDING_TERMINAL_STATUSES
+
+
 def evaluate_pending_confirmation(
     adapter: MT5Adapter,
     cfg: SymbolConfig,
@@ -1123,7 +1131,7 @@ def process_symbol(
     entry_candle_time: int = 0
     confirm_note: str = ""
 
-    if signal is not None:
+    if signal is not None and not has_active_pending_setup(state, mode):
         signal_key = semantic_setup_key(signal.candle_time, signal.side, signal.level)
         if signal_key != state.last_signal_key:
             state.last_signal_key = signal_key
@@ -1169,6 +1177,25 @@ def process_symbol(
                             "message": f"setup_id={stored_setup.setup_id} confirmation_mode={mode}",
                         },
                     )
+    elif signal is not None and has_active_pending_setup(state, mode):
+        now_utc = datetime.now(timezone.utc)
+        log_event(
+            log_file,
+            {
+                "ts": now_utc.isoformat(),
+                "symbol": cfg.symbol,
+                "timeframe": cfg.timeframe,
+                "strategy": "SWEEP_V2",
+                "event": "SKIP_NEW_SETUP_PENDING_EXISTS",
+                "side": signal.side,
+                "level": f"{signal.level:.5f}",
+                "candle_time": int(signal.candle_time),
+                "message": (
+                    f"active_setup_id={state.pending_setup.setup_id if state.pending_setup is not None else ''} "
+                    f"mode={mode}"
+                ).strip(),
+            },
+        )
 
     if state.pending_setup is not None and state.pending_setup.requires_revalidation:
         pending = state.pending_setup
