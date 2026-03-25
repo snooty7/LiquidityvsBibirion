@@ -35,6 +35,10 @@ def candle_body_size(candle: object) -> float:
     return abs(_price(candle, "close") - _price(candle, "open"))
 
 
+def candle_range(candle: object) -> float:
+    return max(_price(candle, "high") - _price(candle, "low"), 1e-10)
+
+
 def is_strong_c2(candle: object, side: str) -> bool:
     open_price = _price(candle, "open")
     close_price = _price(candle, "close")
@@ -147,7 +151,7 @@ def evaluate_sweep_displacement_mss_confirmation(
     structure_bars: int,
     *,
     displacement_body_ratio_min: float = 0.60,
-    displacement_body_multiple: float = 1.50,
+    displacement_range_multiple: float = 1.50,
 ) -> ConfirmationResult:
     closed = [bar for bar in rates[:-1] if int(bar["time"]) >= int(since_ts)]
     needed_context = max(2, int(structure_bars))
@@ -155,13 +159,13 @@ def evaluate_sweep_displacement_mss_confirmation(
         return ConfirmationResult(False, True, f"await_sdmss_context_{len(closed)}/{needed_context + 1}")
 
     displacement_idx: Optional[int] = None
+    saw_displacement_without_bos = False
     for idx in range(needed_context, len(closed)):
         candle = closed[idx]
         prior = closed[idx - needed_context : idx]
-        avg_body = sum(candle_body_size(item) for item in prior) / max(len(prior), 1)
-        body = candle_body_size(candle)
+        avg_range = sum(candle_range(item) for item in prior) / max(len(prior), 1)
         ratio_ok = candle_body_ratio(candle) >= displacement_body_ratio_min
-        size_ok = body >= max(avg_body * displacement_body_multiple, 1e-10)
+        size_ok = candle_range(candle) >= max(avg_range * displacement_range_multiple, 1e-10)
 
         if side == "BUY":
             direction_ok = _price(candle, "close") > _price(candle, "open")
@@ -172,27 +176,19 @@ def evaluate_sweep_displacement_mss_confirmation(
             structure_level = min(_price(item, "low") for item in prior)
             structure_break_ok = _price(candle, "close") < structure_level
 
+        if ratio_ok and size_ok and direction_ok and not structure_break_ok:
+            saw_displacement_without_bos = True
+            continue
+
         if ratio_ok and size_ok and direction_ok and structure_break_ok:
             displacement_idx = idx
             break
 
     if displacement_idx is None:
+        if saw_displacement_without_bos:
+            return ConfirmationResult(False, True, "sdmss_wait_bos")
         return ConfirmationResult(False, True, "sdmss_wait_displacement")
 
-    if displacement_idx >= len(closed) - 1:
-        return ConfirmationResult(False, True, "sdmss_wait_follow_through")
-
-    displacement = closed[displacement_idx]
-    follow_through = closed[displacement_idx + 1 :]
     if side == "BUY":
-        trigger_level = _price(displacement, "high")
-        for candle in follow_through:
-            if _price(candle, "close") > trigger_level:
-                return ConfirmationResult(True, False, "sdmss_buy_confirmed")
-        return ConfirmationResult(False, True, "sdmss_wait_buy_mss")
-
-    trigger_level = _price(displacement, "low")
-    for candle in follow_through:
-        if _price(candle, "close") < trigger_level:
-            return ConfirmationResult(True, False, "sdmss_sell_confirmed")
-    return ConfirmationResult(False, True, "sdmss_wait_sell_mss")
+        return ConfirmationResult(True, False, "sdmss_buy_confirmed")
+    return ConfirmationResult(True, False, "sdmss_sell_confirmed")

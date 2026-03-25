@@ -14,10 +14,12 @@ from src.engine.orchestrator import (
     checkpoint_state_snapshot,
     compute_r_multiple_trailing_stop,
     has_active_pending_setup,
+    matches_signal_key,
     portfolio_caps_message,
     _revalidate_restored_pending,
     resolve_loss_guard,
     restore_runtime_state,
+    semantic_setup_key,
 )
 from src.persistence.maintenance import archive_and_prune_events
 from src.persistence.models import (
@@ -36,7 +38,7 @@ from src.persistence.recovery import (
 )
 from src.persistence.repository import SQLiteRepository
 from src.risk.sizing import SymbolTradeInfo
-from src.services.config import AppConfig, RuntimeConfig, SymbolConfig
+from src.services.config import AppConfig, RuntimeConfig, SymbolConfig, load_config
 
 
 def _make_config(db_path: Path) -> AppConfig:
@@ -49,7 +51,7 @@ def _make_config(db_path: Path) -> AppConfig:
         daily_loss_limit_usd=50.0,
         close_positions_on_daily_loss=True,
         max_loss_per_trade_usd=5.0,
-        per_trade_loss_guard_mode="fixed_usd",
+        per_trade_loss_guard_mode="position_risk",
         per_trade_loss_risk_multiple=1.0,
         max_profit_per_trade_usd=6.0,
         trailing_stop_mode="off",
@@ -78,6 +80,7 @@ def _make_config(db_path: Path) -> AppConfig:
         max_spread_pips=1.8,
         cooldown_sec=300,
         magic=92001,
+        confirmation_mode="sweep_displacement_mss",
     )
     return AppConfig(runtime=runtime, symbols=(symbol,))
 
@@ -654,7 +657,7 @@ def test_restored_pending_requires_revalidation_semantic_key() -> None:
     pending = PendingSetup(
         setup_id="s1",
         dedupe_key="d1",
-        signal_key="1700000000|BUY|1.10000",
+        signal_key="BUY|1.10000",
         side="BUY",
         level=1.1000,
         candle_time=1_700_000_000,
@@ -684,6 +687,42 @@ def test_restored_pending_requires_revalidation_semantic_key() -> None:
     )
     assert fail_ok is False
     assert "semantic_key_mismatch" in fail_note
+
+
+def test_restored_pending_revalidation_accepts_legacy_signal_key() -> None:
+    pending = PendingSetup(
+        setup_id="s1",
+        dedupe_key="d1",
+        signal_key="1700000000|BUY|1.10000",
+        side="BUY",
+        level=1.1000,
+        candle_time=1_700_000_000,
+        expires_at=1_900_000_000,
+        requires_revalidation=True,
+    )
+    rates = [
+        {"time": 1_699_999_900},
+        {"time": 1_700_000_000},
+        {"time": 1_700_000_060},
+    ]
+
+    ok, note = _revalidate_restored_pending(
+        pending=pending,
+        mode="none",
+        rates=rates,
+        signal=SimpleNamespace(candle_time=1_700_000_000, side="BUY", level=1.1000),
+    )
+
+    assert ok is True
+    assert note == "revalidated"
+
+
+def test_stable_semantic_setup_key_blocks_duplicate_setup_across_bars() -> None:
+    key_a = semantic_setup_key(1_700_000_000, "BUY", 1.1000)
+    key_b = semantic_setup_key(1_700_000_300, "BUY", 1.1000)
+
+    assert key_a == key_b
+    assert matches_signal_key(key_a, 1_700_000_300, "BUY", 1.1000) is True
 
 
 def test_event_retention_archives_then_prunes(tmp_path: Path) -> None:
@@ -814,6 +853,40 @@ def test_resolve_loss_guard_falls_back_to_fixed_usd_without_usable_sl() -> None:
     assert limit_money == 3.0
     assert reason == "max_loss $3.00"
     assert mode == "fixed_usd"
+
+
+def test_default_config_uses_position_risk_guard() -> None:
+    cfg = load_config(Path("nonexistent-settings.json"))
+
+    assert cfg.runtime.per_trade_loss_guard_mode == "position_risk"
+    assert cfg.runtime.per_trade_loss_risk_multiple == 1.0
+
+
+def test_example_config_uses_position_risk_guard() -> None:
+    example_path = Path(__file__).resolve().parents[1] / "config" / "settings.example.json"
+    payload = json.loads(example_path.read_text(encoding="utf-8-sig"))
+
+    assert payload["runtime"]["per_trade_loss_guard_mode"] == "position_risk"
+    assert payload["runtime"]["per_trade_loss_risk_multiple"] == 1.0
+
+
+def test_load_config_rejects_invalid_loss_guard_mode(tmp_path: Path) -> None:
+    config_path = tmp_path / "bad.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "runtime": {"per_trade_loss_guard_mode": "bad_mode"},
+                "symbols": [{"symbol": "EURUSD", "magic": 92001}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        load_config(config_path)
+        raise AssertionError("Expected ValueError for invalid per_trade_loss_guard_mode")
+    except ValueError as exc:
+        assert "Unsupported per_trade_loss_guard_mode" in str(exc)
 
 
 def test_compute_r_multiple_trailing_stop_buy_moves_to_break_even_at_one_r() -> None:

@@ -6,14 +6,15 @@ This repository contains a modular hybrid v2 bot that combines:
 
 ## Implemented slice (v2)
 - Liquidity map from pivots and direct sweep signal detection
-- Configurable confirmation before entry: `none`, `c3`, `c4`, `cisd`
+- Configurable confirmation before entry: `none`, `c3`, `c4`, `cisd`, `sweep_displacement_mss`
+- Sweep significance gate and anti-chop range suppression before setup creation
 - Bias filter (EMA context on configurable higher timeframe)
 - Local order-block filter with max distance gating
 - Risk-based lot sizing from equity and stop distance
 - MT5 execution adapter with fill-mode fallback (`FOK -> IOC -> RETURN`)
 - Runtime guards: session, spread, cooldown, one-position-per-symbol
 - Daily loss guard with optional forced closing of bot positions
-- Per-trade hard close guard (`max_loss_per_trade_usd`, `max_profit_per_trade_usd`)
+- Per-trade hard close guard aligned to modeled position risk (`per_trade_loss_guard_mode=position_risk`)
 - Portfolio exposure caps (`max_open_positions_total`, `max_total_open_risk_pct`)
 - SQLite persistence for pending setups, open positions, and runtime guard state
 - Startup recovery that reconciles local state vs MT5 open positions (MT5 is source of truth)
@@ -72,3 +73,17 @@ python -m src.tools.state_maintenance --db-path bot_state.sqlite3 --retention-da
 - `c3`: wait for a strong C2 candle and a valid C3 close.
 - `c4`: wait for C3 and then C4 continuation close.
 - `cisd`: wait for lower-timeframe displacement/structure confirmation after sweep.
+- `sweep_displacement_mss`: require a significant sweep, anti-chop pass, lower-timeframe displacement, and BOS-style close through recent structure.
+
+## Entry model
+- Sweep remains necessary, but not sufficient.
+- New setup pipeline:
+  1. detect liquidity sweep
+  2. reject weak/insignificant sweeps
+  3. reject local chop/range conditions
+  4. require lower-timeframe displacement
+  5. require explicit BOS / structure break confirmation
+  6. consume the semantic setup key after trade so the same zone does not retrigger repeatedly
+- Demo/default risk protection uses:
+  - `per_trade_loss_guard_mode = "position_risk"`
+  - `per_trade_loss_risk_multiple = 1.0`

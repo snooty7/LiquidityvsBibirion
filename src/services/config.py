@@ -16,7 +16,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "daily_loss_limit_usd": 50.0,
         "close_positions_on_daily_loss": True,
         "max_loss_per_trade_usd": 5.0,
-        "per_trade_loss_guard_mode": "fixed_usd",
+        "per_trade_loss_guard_mode": "position_risk",
         "per_trade_loss_risk_multiple": 1.0,
         "max_profit_per_trade_usd": 6.0,
         "trailing_stop_mode": "off",
@@ -59,11 +59,19 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "order_block_zone_mode": "body",
             "order_block_min_impulse_pips": 3.0,
             "order_block_max_age_bars": 15,
-            "confirmation_mode": "none",
+            "confirmation_mode": "sweep_displacement_mss",
             "confirm_expiry_bars": 3,
             "cisd_timeframe": "M1",
             "cisd_lookback_bars": 120,
             "cisd_structure_bars": 4,
+            "sweep_significance_lookback_bars": 12,
+            "sweep_significance_range_multiple": 1.25,
+            "sweep_min_penetration_pips": 0.5,
+            "range_filter_lookback_bars": 8,
+            "range_filter_max_compression_ratio": 2.5,
+            "range_filter_min_overlap_ratio": 0.7,
+            "confirmation_displacement_body_ratio_min": 0.6,
+            "confirmation_displacement_range_multiple": 1.5,
         }
     ],
 }
@@ -123,11 +131,19 @@ class SymbolConfig:
     order_block_zone_mode: str = "body"
     order_block_min_impulse_pips: float = 3.0
     order_block_max_age_bars: int = 15
-    confirmation_mode: str = "none"
+    confirmation_mode: str = "sweep_displacement_mss"
     confirm_expiry_bars: int = 3
     cisd_timeframe: str = "M1"
     cisd_lookback_bars: int = 120
     cisd_structure_bars: int = 4
+    sweep_significance_lookback_bars: int = 12
+    sweep_significance_range_multiple: float = 1.25
+    sweep_min_penetration_pips: float = 0.5
+    range_filter_lookback_bars: int = 8
+    range_filter_max_compression_ratio: float = 2.5
+    range_filter_min_overlap_ratio: float = 0.7
+    confirmation_displacement_body_ratio_min: float = 0.6
+    confirmation_displacement_range_multiple: float = 1.5
 
     @property
     def tp_pips(self) -> float:
@@ -168,7 +184,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         daily_loss_limit_usd=float(runtime_raw.get("daily_loss_limit_usd", 50.0)),
         close_positions_on_daily_loss=bool(runtime_raw.get("close_positions_on_daily_loss", True)),
         max_loss_per_trade_usd=float(runtime_raw.get("max_loss_per_trade_usd", 5.0)),
-        per_trade_loss_guard_mode=str(runtime_raw.get("per_trade_loss_guard_mode", "fixed_usd")).lower(),
+        per_trade_loss_guard_mode=str(runtime_raw.get("per_trade_loss_guard_mode", "position_risk")).lower(),
         per_trade_loss_risk_multiple=float(runtime_raw.get("per_trade_loss_risk_multiple", 1.0)),
         max_profit_per_trade_usd=float(runtime_raw.get("max_profit_per_trade_usd", 6.0)),
         trailing_stop_mode=str(runtime_raw.get("trailing_stop_mode", "off")).lower(),
@@ -214,15 +230,56 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 order_block_zone_mode=str(row.get("order_block_zone_mode", "body")).lower(),
                 order_block_min_impulse_pips=float(row.get("order_block_min_impulse_pips", 3.0)),
                 order_block_max_age_bars=int(row.get("order_block_max_age_bars", 15)),
-                confirmation_mode=str(row.get("confirmation_mode", "none")).lower(),
+                confirmation_mode=str(row.get("confirmation_mode", "sweep_displacement_mss")).lower(),
                 confirm_expiry_bars=int(row.get("confirm_expiry_bars", 3)),
                 cisd_timeframe=str(row.get("cisd_timeframe", "M1")).upper(),
                 cisd_lookback_bars=int(row.get("cisd_lookback_bars", 120)),
                 cisd_structure_bars=int(row.get("cisd_structure_bars", 4)),
+                sweep_significance_lookback_bars=int(row.get("sweep_significance_lookback_bars", 12)),
+                sweep_significance_range_multiple=float(row.get("sweep_significance_range_multiple", 1.25)),
+                sweep_min_penetration_pips=float(row.get("sweep_min_penetration_pips", 0.5)),
+                range_filter_lookback_bars=int(row.get("range_filter_lookback_bars", 8)),
+                range_filter_max_compression_ratio=float(row.get("range_filter_max_compression_ratio", 2.5)),
+                range_filter_min_overlap_ratio=float(row.get("range_filter_min_overlap_ratio", 0.7)),
+                confirmation_displacement_body_ratio_min=float(
+                    row.get("confirmation_displacement_body_ratio_min", 0.6)
+                ),
+                confirmation_displacement_range_multiple=float(
+                    row.get("confirmation_displacement_range_multiple", 1.5)
+                ),
             )
         )
 
     if not symbols:
         raise ValueError("No symbols configured.")
+
+    valid_guard_modes = {"fixed_usd", "position_risk"}
+    if runtime.per_trade_loss_guard_mode not in valid_guard_modes:
+        raise ValueError(f"Unsupported per_trade_loss_guard_mode={runtime.per_trade_loss_guard_mode}")
+    if runtime.per_trade_loss_risk_multiple <= 0:
+        raise ValueError("per_trade_loss_risk_multiple must be > 0")
+
+    valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss"}
+    for symbol in symbols:
+        if symbol.confirmation_mode not in valid_confirmation_modes:
+            raise ValueError(f"Unsupported confirmation_mode={symbol.confirmation_mode} for {symbol.symbol}")
+        if symbol.sweep_significance_lookback_bars < 2:
+            raise ValueError(f"sweep_significance_lookback_bars must be >= 2 for {symbol.symbol}")
+        if symbol.sweep_significance_range_multiple <= 0:
+            raise ValueError(f"sweep_significance_range_multiple must be > 0 for {symbol.symbol}")
+        if symbol.sweep_min_penetration_pips <= 0:
+            raise ValueError(f"sweep_min_penetration_pips must be > 0 for {symbol.symbol}")
+        if symbol.range_filter_lookback_bars < 3:
+            raise ValueError(f"range_filter_lookback_bars must be >= 3 for {symbol.symbol}")
+        if symbol.range_filter_max_compression_ratio <= 0:
+            raise ValueError(f"range_filter_max_compression_ratio must be > 0 for {symbol.symbol}")
+        if not 0.0 <= symbol.range_filter_min_overlap_ratio <= 1.0:
+            raise ValueError(f"range_filter_min_overlap_ratio must be between 0 and 1 for {symbol.symbol}")
+        if not 0.0 < symbol.confirmation_displacement_body_ratio_min <= 1.0:
+            raise ValueError(
+                f"confirmation_displacement_body_ratio_min must be in (0, 1] for {symbol.symbol}"
+            )
+        if symbol.confirmation_displacement_range_multiple <= 0:
+            raise ValueError(f"confirmation_displacement_range_multiple must be > 0 for {symbol.symbol}")
 
     return AppConfig(runtime=runtime, symbols=tuple(symbols))

@@ -37,7 +37,12 @@ from src.strategy.confirmations import (
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import evaluate_bias, find_local_order_block, order_block_distance_pips, order_block_note
-from src.strategy.liquidity import detect_sweep_signal, extract_pivot_levels
+from src.strategy.liquidity import (
+    detect_sweep_signal,
+    evaluate_range_filter,
+    evaluate_sweep_significance,
+    extract_pivot_levels,
+)
 
 
 LOG_FIELDS = [
@@ -1021,6 +1026,8 @@ def evaluate_pending_confirmation(
             pending.side,
             pending.candle_time,
             cfg.cisd_structure_bars,
+            displacement_body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+            displacement_range_multiple=cfg.confirmation_displacement_range_multiple,
         )
 
     return ConfirmationResult(False, False, f"unknown_confirmation_mode={mode}")
@@ -1033,16 +1040,25 @@ def _build_setup_context(
     signal_side: str,
     signal_level: float,
     signal_candle_time: int,
+    *,
+    signal_key: str,
+    sweep_note: str = "",
+    range_note: str = "",
 ) -> dict[str, Any]:
     return {
         "symbol": cfg.symbol,
         "timeframe": cfg.timeframe,
         "confirmation_mode": mode,
         "confirm_expiry_bars": int(cfg.confirm_expiry_bars),
+        "signal_key": signal_key,
         "signal": {
             "side": signal_side,
             "level": float(signal_level),
             "candle_time": int(signal_candle_time),
+        },
+        "filters": {
+            "sweep_note": sweep_note,
+            "range_note": range_note,
         },
         "levels": [float(item) for item in levels],
         "risk": {
@@ -1054,7 +1070,24 @@ def _build_setup_context(
 
 
 def semantic_setup_key(candle_time: int, side: str, level: float) -> str:
+    return f"{side}|{float(level):.5f}"
+
+
+def legacy_semantic_setup_key(candle_time: int, side: str, level: float) -> str:
     return f"{int(candle_time)}|{side}|{float(level):.5f}"
+
+
+def signal_key_variants(candle_time: int, side: str, level: float) -> set[str]:
+    return {
+        semantic_setup_key(candle_time, side, level),
+        legacy_semantic_setup_key(candle_time, side, level),
+    }
+
+
+def matches_signal_key(existing_key: Optional[str], candle_time: int, side: str, level: float) -> bool:
+    if not existing_key:
+        return False
+    return existing_key in signal_key_variants(candle_time, side, level)
 
 
 def _revalidate_restored_pending(
@@ -1071,7 +1104,7 @@ def _revalidate_restored_pending(
         if signal is None:
             return False, "no_current_signal"
         current_key = semantic_setup_key(signal.candle_time, signal.side, signal.level)
-        if current_key != pending.signal_key:
+        if not matches_signal_key(pending.signal_key, signal.candle_time, signal.side, signal.level):
             return False, f"semantic_key_mismatch expected={pending.signal_key} got={current_key}"
 
     return True, "revalidated"
@@ -1133,7 +1166,63 @@ def process_symbol(
 
     if signal is not None and not has_active_pending_setup(state, mode):
         signal_key = semantic_setup_key(signal.candle_time, signal.side, signal.level)
-        if signal_key != state.last_signal_key:
+        prior_closed = rates[:-2]
+        chop_result = evaluate_range_filter(
+            prior_closed,
+            lookback_bars=cfg.range_filter_lookback_bars,
+            max_compression_ratio=cfg.range_filter_max_compression_ratio,
+            min_overlap_ratio=cfg.range_filter_min_overlap_ratio,
+        )
+        if chop_result.blocked:
+            now_utc = datetime.now(timezone.utc)
+            log_event(
+                log_file,
+                {
+                    "ts": now_utc.isoformat(),
+                    "symbol": cfg.symbol,
+                    "timeframe": cfg.timeframe,
+                    "strategy": "SWEEP_V2",
+                    "event": "SKIP_RANGE_CHOP",
+                    "side": signal.side,
+                    "level": f"{signal.level:.5f}",
+                    "candle_time": int(signal.candle_time),
+                    "message": (
+                        f"{chop_result.note} compression={chop_result.compression_ratio:.2f} "
+                        f"overlap={chop_result.overlap_ratio:.2f}"
+                    ),
+                },
+            )
+            return
+
+        sweep_quality = evaluate_sweep_significance(
+            rates,
+            signal,
+            lookback_bars=cfg.sweep_significance_lookback_bars,
+            min_range_multiple=cfg.sweep_significance_range_multiple,
+            min_penetration_price=cfg.sweep_min_penetration_pips * pip,
+        )
+        if not sweep_quality.valid:
+            now_utc = datetime.now(timezone.utc)
+            log_event(
+                log_file,
+                {
+                    "ts": now_utc.isoformat(),
+                    "symbol": cfg.symbol,
+                    "timeframe": cfg.timeframe,
+                    "strategy": "SWEEP_V2",
+                    "event": "SKIP_SWEEP_WEAK",
+                    "side": signal.side,
+                    "level": f"{signal.level:.5f}",
+                    "candle_time": int(signal.candle_time),
+                    "message": (
+                        f"{sweep_quality.note} sweep_range={sweep_quality.sweep_range:.5f} "
+                        f"avg_range={sweep_quality.avg_range:.5f} penetration={sweep_quality.penetration_price:.5f}"
+                    ),
+                },
+            )
+            return
+
+        if not matches_signal_key(state.last_signal_key, signal.candle_time, signal.side, signal.level):
             state.last_signal_key = signal_key
             tf_seconds = TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
             expires_at = compute_setup_expiry(signal.candle_time, tf_seconds, cfg.confirm_expiry_bars)
@@ -1154,6 +1243,9 @@ def process_symbol(
                     signal_side=signal.side,
                     signal_level=float(signal.level),
                     signal_candle_time=int(signal.candle_time),
+                    signal_key=signal_key,
+                    sweep_note=sweep_quality.note,
+                    range_note=chop_result.note,
                 ),
                 initial_status=initial_status,
             )
@@ -1177,6 +1269,22 @@ def process_symbol(
                             "message": f"setup_id={stored_setup.setup_id} confirmation_mode={mode}",
                         },
                     )
+        else:
+            now_utc = datetime.now(timezone.utc)
+            log_event(
+                log_file,
+                {
+                    "ts": now_utc.isoformat(),
+                    "symbol": cfg.symbol,
+                    "timeframe": cfg.timeframe,
+                    "strategy": "SWEEP_V2",
+                    "event": "SKIP_DUPLICATE_SETUP",
+                    "side": signal.side,
+                    "level": f"{signal.level:.5f}",
+                    "candle_time": int(signal.candle_time),
+                    "message": f"signal_key={signal_key}",
+                },
+            )
     elif signal is not None and has_active_pending_setup(state, mode):
         now_utc = datetime.now(timezone.utc)
         log_event(
