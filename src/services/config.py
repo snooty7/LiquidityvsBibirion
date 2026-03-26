@@ -31,6 +31,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "event_retention_days": 30,
         "event_retention_batch_size": 5000,
         "event_archive_dir": "state_archives",
+        "push_notifications_enabled": False,
+        "push_notification_url": "",
+        "push_notification_token": "",
+        "push_notification_timeout_sec": 5,
     },
     "symbols": [
         {
@@ -102,6 +106,10 @@ class RuntimeConfig:
     event_retention_days: int
     event_retention_batch_size: int
     event_archive_dir: str
+    push_notifications_enabled: bool
+    push_notification_url: str
+    push_notification_token: str
+    push_notification_timeout_sec: int
 
 
 @dataclass(frozen=True)
@@ -199,6 +207,10 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         event_retention_days=int(runtime_raw.get("event_retention_days", 30)),
         event_retention_batch_size=int(runtime_raw.get("event_retention_batch_size", 5000)),
         event_archive_dir=str(runtime_raw.get("event_archive_dir", "state_archives")),
+        push_notifications_enabled=bool(runtime_raw.get("push_notifications_enabled", False)),
+        push_notification_url=str(runtime_raw.get("push_notification_url", "")),
+        push_notification_token=str(runtime_raw.get("push_notification_token", "")),
+        push_notification_timeout_sec=int(runtime_raw.get("push_notification_timeout_sec", 5)),
     )
 
     symbols: list[SymbolConfig] = []
@@ -258,6 +270,10 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         raise ValueError(f"Unsupported per_trade_loss_guard_mode={runtime.per_trade_loss_guard_mode}")
     if runtime.per_trade_loss_risk_multiple <= 0:
         raise ValueError("per_trade_loss_risk_multiple must be > 0")
+    if runtime.push_notification_timeout_sec <= 0:
+        raise ValueError("push_notification_timeout_sec must be > 0")
+    if runtime.push_notifications_enabled and not runtime.push_notification_url:
+        raise ValueError("push_notification_url is required when push_notifications_enabled=true")
 
     valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss"}
     for symbol in symbols:

@@ -10,6 +10,7 @@ import time
 from uuid import uuid4
 
 from src.execution.mt5_adapter import MT5Adapter
+from src.notifications.push import send_push_notification
 from src.persistence.maintenance import archive_and_prune_events
 from src.persistence.models import (
     GuardStateRecord,
@@ -203,6 +204,18 @@ def emit_event(
     else:
         row.setdefault("message", message)
     log_event(log_file, row)
+    try:
+        send_push_notification(
+            app_config.runtime,
+            event_type=event_type,
+            symbol=symbol,
+            ticket=ticket,
+            setup_id=setup_id,
+            created_at_utc=ts,
+            payload=event_payload,
+        )
+    except Exception as exc:
+        print(f"[{datetime.now(timezone.utc).isoformat()}] PUSH_NOTIFY_FAIL {event_type} {symbol} {exc}")
 
 
 def recovery_event_logger(log_file: Path, app_config: AppConfig, repo: SQLiteRepository) -> Callable[[dict], None]:
@@ -502,24 +515,51 @@ def sync_open_positions_for_symbol(
         if ticket in broker_tickets:
             continue
         repo.mark_open_position_closed(ticket, "missing_on_broker_runtime_sync")
+        close_deal = adapter.latest_close_deal_for_position(ticket, now_utc)
+        close_payload = {
+            "side": local.side,
+            "policy": "mark_closed_missing_on_broker_runtime",
+        }
+        event_type = "POSITION_SYNC_LOCAL_CLOSED"
+        message = "runtime sync closed local-only position"
+        csv_row = {
+            "ts": now_utc.isoformat(),
+            "symbol": cfg.symbol,
+            "timeframe": cfg.timeframe,
+            "strategy": "SWEEP_V2",
+            "position": ticket,
+            "side": local.side,
+        }
+        if close_deal is not None:
+            event_type = "POSITION_CLOSED_BROKER"
+            profit = float(getattr(close_deal, "profit", 0.0) or 0.0)
+            commission = float(getattr(close_deal, "commission", 0.0) or 0.0)
+            swap = float(getattr(close_deal, "swap", 0.0) or 0.0)
+            fee = float(getattr(close_deal, "fee", 0.0) or 0.0)
+            realized_pnl = profit + commission + swap + fee
+            close_price = float(getattr(close_deal, "price", 0.0) or 0.0)
+            closed_at = int(getattr(close_deal, "time", 0) or 0)
+            close_payload.update(
+                {
+                    "close_price": close_price,
+                    "closed_at": closed_at,
+                    "realized_pnl": round(realized_pnl, 2),
+                    "close_reason": "broker_side_close_detected",
+                }
+            )
+            message = f"broker close detected pnl={realized_pnl:.2f}"
+            csv_row["price"] = close_price
         emit_event(
             log_file=log_file,
             repo=repo,
             app_config=app_config,
-            event_type="POSITION_SYNC_LOCAL_CLOSED",
+            event_type=event_type,
             symbol=cfg.symbol,
             setup_id=local.setup_id,
             ticket=ticket,
-            message="runtime sync closed local-only position",
-            payload={"side": local.side, "policy": "mark_closed_missing_on_broker_runtime"},
-            csv_row={
-                "ts": now_utc.isoformat(),
-                "symbol": cfg.symbol,
-                "timeframe": cfg.timeframe,
-                "strategy": "SWEEP_V2",
-                "position": ticket,
-                "side": local.side,
-            },
+            message=message,
+            payload=close_payload,
+            csv_row=csv_row,
         )
 
 

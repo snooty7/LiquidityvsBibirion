@@ -68,6 +68,29 @@ python -m src.engine.orchestrator
 python -m src.tools.state_maintenance --db-path bot_state.sqlite3 --retention-days 30 --archive-dir state_archives --vacuum
 ```
 
+## Push Notifications
+- Optional `ntfy`-style push publishing is supported for:
+  - `TRADE_OK`
+  - `TRADE_FAIL`
+  - `RISK_CLOSE_OK`
+  - `RISK_CLOSE_FAIL`
+  - `POSITION_CLOSED_BROKER`
+- Runtime config:
+  - `push_notifications_enabled`
+  - `push_notification_url`
+  - `push_notification_token`
+  - `push_notification_timeout_sec`
+- Example:
+```json
+{
+  "runtime": {
+    "push_notifications_enabled": true,
+    "push_notification_url": "https://ntfy.sh/your-topic",
+    "push_notification_token": ""
+  }
+}
+```
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.

@@ -80,9 +80,28 @@ class MT5Adapter:
             raise ValueError(f"Unsupported timeframe: {label}")
         return int(getattr(mt5, attr))
 
+    def _reinitialize(self) -> bool:
+        self._ensure_mt5()
+        mt5.shutdown()
+        return bool(mt5.initialize())
+
+    def _symbol_info_once(self, symbol: str):
+        return mt5.symbol_info(symbol)
+
     def symbol_info(self, symbol: str):
         self._ensure_mt5()
-        info = mt5.symbol_info(symbol)
+        info = self._symbol_info_once(symbol)
+        if info is not None:
+            return info
+
+        mt5.symbol_select(symbol, True)
+        info = self._symbol_info_once(symbol)
+        if info is not None:
+            return info
+
+        if self._reinitialize():
+            mt5.symbol_select(symbol, True)
+            info = self._symbol_info_once(symbol)
         if info is None:
             raise RuntimeError(f"Unknown symbol: {symbol}")
         return info
@@ -97,12 +116,18 @@ class MT5Adapter:
         timeframe = self.timeframe_from_label(timeframe_label)
         rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, bars)
         if rates is None:
+            self.ensure_symbol(symbol)
+            rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, bars)
+        if rates is None:
             raise RuntimeError(f"copy_rates_from_pos failed for {symbol}/{timeframe_label}: {mt5.last_error()}")
         return rates
 
     def symbol_tick(self, symbol: str):
         self._ensure_mt5()
         tick = mt5.symbol_info_tick(symbol)
+        if tick is None:
+            self.ensure_symbol(symbol)
+            tick = mt5.symbol_info_tick(symbol)
         if tick is None:
             raise RuntimeError(f"No tick for {symbol}")
         return tick
@@ -334,3 +359,29 @@ class MT5Adapter:
             total += profit + commission + swap + fee
 
         return float(total)
+
+    def latest_close_deal_for_position(
+        self,
+        position_ticket: int,
+        now_utc: datetime,
+        *,
+        lookback_hours: int = 48,
+    ):
+        self._ensure_mt5()
+        start = now_utc.timestamp() - max(1, int(lookback_hours)) * 3600
+        deals = mt5.history_deals_get(datetime.fromtimestamp(start, tz=now_utc.tzinfo), now_utc)
+        if deals is None:
+            return None
+
+        deal_entry_out = getattr(mt5, "DEAL_ENTRY_OUT", 1)
+        deal_entry_out_by = getattr(mt5, "DEAL_ENTRY_OUT_BY", 3)
+        matched = [
+            deal
+            for deal in deals
+            if int(getattr(deal, "position_id", 0) or 0) == int(position_ticket)
+            and getattr(deal, "entry", None) in (deal_entry_out, deal_entry_out_by)
+        ]
+        if not matched:
+            return None
+        matched.sort(key=lambda item: int(getattr(item, "time_msc", 0) or 0), reverse=True)
+        return matched[0]

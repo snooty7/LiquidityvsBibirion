@@ -22,7 +22,11 @@
     "maintenance_interval_sec": 3600,
     "event_retention_days": 30,
     "event_retention_batch_size": 5000,
-    "event_archive_dir": "state_archives"
+    "event_archive_dir": "state_archives",
+    "push_notifications_enabled": false,
+    "push_notification_url": "",
+    "push_notification_token": "",
+    "push_notification_timeout_sec": 5
   },
   "symbols": [
     {

@@ -66,6 +66,10 @@ def _make_config(db_path: Path) -> AppConfig:
         event_retention_days=30,
         event_retention_batch_size=5000,
         event_archive_dir="state_archives",
+        push_notifications_enabled=False,
+        push_notification_url="",
+        push_notification_token="",
+        push_notification_timeout_sec=5,
     )
     symbol = SymbolConfig(
         symbol="EURUSD",
@@ -612,6 +616,10 @@ def test_portfolio_cap_continuity_after_restart(tmp_path: Path) -> None:
         event_retention_days=base.runtime.event_retention_days,
         event_retention_batch_size=base.runtime.event_retention_batch_size,
         event_archive_dir=base.runtime.event_archive_dir,
+        push_notifications_enabled=base.runtime.push_notifications_enabled,
+        push_notification_url=base.runtime.push_notification_url,
+        push_notification_token=base.runtime.push_notification_token,
+        push_notification_timeout_sec=base.runtime.push_notification_timeout_sec,
     )
     app_config = AppConfig(runtime=relaxed_runtime, symbols=base.symbols)
     adapter = CapOnlyAdapter(
@@ -647,6 +655,10 @@ def test_portfolio_cap_continuity_after_restart(tmp_path: Path) -> None:
         event_retention_days=30,
         event_retention_batch_size=5000,
         event_archive_dir="state_archives",
+        push_notifications_enabled=False,
+        push_notification_url="",
+        push_notification_token="",
+        push_notification_timeout_sec=5,
     )
     strict_cfg = AppConfig(runtime=strict_runtime, symbols=app_config.symbols)
     cap_hit = portfolio_caps_message(adapter, strict_cfg, strict_cfg.symbols[0], equity=10_000.0)
@@ -887,6 +899,25 @@ def test_load_config_rejects_invalid_loss_guard_mode(tmp_path: Path) -> None:
         raise AssertionError("Expected ValueError for invalid per_trade_loss_guard_mode")
     except ValueError as exc:
         assert "Unsupported per_trade_loss_guard_mode" in str(exc)
+
+
+def test_load_config_rejects_enabled_push_without_url(tmp_path: Path) -> None:
+    config_path = tmp_path / "bad_push.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "runtime": {"push_notifications_enabled": True},
+                "symbols": [{"symbol": "EURUSD", "magic": 92001}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        load_config(config_path)
+        raise AssertionError("Expected ValueError for missing push_notification_url")
+    except ValueError as exc:
+        assert "push_notification_url is required" in str(exc)
 
 
 def test_compute_r_multiple_trailing_stop_buy_moves_to_break_even_at_one_r() -> None:
