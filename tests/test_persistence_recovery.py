@@ -14,12 +14,14 @@ from src.engine.orchestrator import (
     checkpoint_state_snapshot,
     compute_r_multiple_trailing_stop,
     has_active_pending_setup,
+    is_pending_expired,
     matches_signal_key,
     portfolio_caps_message,
     _revalidate_restored_pending,
     resolve_loss_guard,
     restore_runtime_state,
     semantic_setup_key,
+    sync_open_positions_for_symbol,
 )
 from src.persistence.maintenance import archive_and_prune_events
 from src.persistence.models import (
@@ -34,6 +36,7 @@ from src.persistence.recovery import (
     bootstrap_recovery,
     build_pending_setup_record,
     compute_setup_expiry,
+    latest_closed_bar_time,
     reconcile_broker_positions,
 )
 from src.persistence.repository import SQLiteRepository
@@ -111,6 +114,36 @@ class CapOnlyAdapter:
         return [item for item in items if int(getattr(item, "magic", -1)) == int(magic)]
 
 
+@dataclass
+class RecoveryBarAdapter:
+    positions: dict[str, list[object]]
+    rates: dict[str, list[dict]]
+
+    def positions_get(self, symbol: str, magic: int | None = None) -> list[object]:
+        items = list(self.positions.get(symbol, []))
+        if magic is None:
+            return items
+        return [item for item in items if int(getattr(item, "magic", -1)) == int(magic)]
+
+    def copy_rates(self, symbol: str, timeframe: str, bars: int):
+        return list(self.rates.get(symbol, []))
+
+
+@dataclass
+class SyncAdapter:
+    positions: dict[str, list[object]]
+    close_deal_by_ticket: dict[int, object]
+
+    def positions_get(self, symbol: str, magic: int | None = None) -> list[object]:
+        items = list(self.positions.get(symbol, []))
+        if magic is None:
+            return items
+        return [item for item in items if int(getattr(item, "magic", -1)) == int(magic)]
+
+    def latest_close_deal_for_position(self, ticket: int, now_utc: datetime, *, lookback_hours: int = 48):
+        return self.close_deal_by_ticket.get(int(ticket))
+
+
 def test_pending_setup_dedupe(tmp_path: Path) -> None:
     repo = SQLiteRepository(str(tmp_path / "state.db"))
     try:
@@ -170,6 +203,59 @@ def test_pending_setup_expiry_transition(tmp_path: Path) -> None:
         assert refreshed is not None
         assert refreshed.status == "EXPIRED"
         assert refreshed.closed_reason == "expired"
+    finally:
+        repo.close()
+
+
+def test_is_pending_expired_uses_bar_reference_time() -> None:
+    pending = PendingSetup(
+        setup_id="s1",
+        dedupe_key="d1",
+        signal_key="BUY|1.10000",
+        side="BUY",
+        level=1.1000,
+        candle_time=1_700_000_000,
+        expires_at=1_700_000_900,
+    )
+
+    assert is_pending_expired(pending, 1_700_000_899) is False
+    assert is_pending_expired(pending, 1_700_000_900) is True
+
+
+def test_bootstrap_recovery_expires_pending_by_latest_bar_time(tmp_path: Path) -> None:
+    repo = SQLiteRepository(str(tmp_path / "state.db"))
+    app_config = _make_config(tmp_path / "state.db")
+    try:
+        pending_record = build_pending_setup_record(
+            symbol="EURUSD",
+            timeframe="M5",
+            side="BUY",
+            level=1.1000,
+            candle_time=1_700_000_000,
+            signal_key="BUY|1.10000",
+            expires_at=1_700_000_900,
+            context={},
+            initial_status=PENDING_STATUS_PENDING,
+        )
+        created, _ = repo.create_or_get_pending_setup(pending_record)
+
+        adapter = RecoveryBarAdapter(
+            positions={"EURUSD": []},
+            rates={
+                "EURUSD": [
+                    {"time": 1_700_001_200},
+                    {"time": 1_700_001_500},
+                    {"time": 1_700_001_800},
+                ]
+            },
+        )
+        pending_by_symbol, stats = bootstrap_recovery(adapter, app_config, repo, lambda _: None)
+
+        assert pending_by_symbol == {}
+        assert stats.expired_pending_count == 1
+        refreshed = repo.get_pending_setup_by_id(created.setup_id)
+        assert refreshed is not None
+        assert refreshed.status == "EXPIRED"
     finally:
         repo.close()
 
@@ -261,6 +347,56 @@ def test_reconcile_broker_source_of_truth(tmp_path: Path) -> None:
         assert "RECOVERY_LOCAL_ONLY_CLOSED" in events
         assert "RECOVERY_MISMATCH" in events
         assert "RECOVERY_ORPHAN_BROKER_POSITION" in events
+    finally:
+        repo.close()
+
+
+def test_sync_open_positions_marks_unconfirmed_close_when_broker_missing_without_close_deal(tmp_path: Path) -> None:
+    db_path = tmp_path / "state.db"
+    repo = SQLiteRepository(str(db_path))
+    app_config = _make_config(db_path)
+    log_file = tmp_path / "events.csv"
+    try:
+        pending, _ = repo.create_or_get_pending_setup(
+            build_pending_setup_record(
+                symbol="EURUSD",
+                timeframe="M5",
+                side="BUY",
+                level=1.1000,
+                candle_time=1_700_000_000,
+                signal_key="BUY|1.10000",
+                expires_at=1_900_000_000,
+                context={},
+                initial_status=PENDING_STATUS_PENDING,
+            )
+        )
+        repo.upsert_open_position(
+            OpenPositionRecord(
+                ticket=7001,
+                symbol="EURUSD",
+                magic=92001,
+                setup_id=pending.setup_id,
+                side="BUY",
+                volume=0.10,
+                open_price=1.1000,
+                sl=1.0990,
+                tp=1.1020,
+                comment="SWEEP@1.10000|ab",
+                opened_at=1_700_000_001,
+                status=POSITION_STATUS_OPEN,
+            )
+        )
+        adapter = SyncAdapter(positions={"EURUSD": []}, close_deal_by_ticket={})
+
+        sync_open_positions_for_symbol(adapter, app_config.symbols[0], app_config, repo, log_file)
+
+        closed = repo.get_open_position(7001)
+        assert closed is not None
+        assert closed.status == POSITION_STATUS_CLOSED
+        assert closed.close_reason == "missing_on_broker_runtime_sync_unconfirmed"
+
+        events = repo.list_events(event_type="POSITION_CLOSED_UNCONFIRMED")
+        assert len(events) == 1
     finally:
         repo.close()
 

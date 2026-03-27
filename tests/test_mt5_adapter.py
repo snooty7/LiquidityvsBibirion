@@ -39,6 +39,9 @@ class FakeMT5:
     def symbol_info_tick(self, symbol):
         return SimpleNamespace(bid=1.1000, ask=1.1002)
 
+    def positions_get(self, symbol=None):
+        return []
+
     TIMEFRAME_M5 = 5
 
 
@@ -46,6 +49,18 @@ class FakeMT5Missing(FakeMT5):
     def symbol_info(self, symbol):
         self.symbol_info_calls += 1
         return None
+
+
+class FakeMT5PositionsRetry(FakeMT5):
+    def __init__(self) -> None:
+        super().__init__()
+        self.positions_calls = 0
+
+    def positions_get(self, symbol=None):
+        self.positions_calls += 1
+        if self.positions_calls == 1:
+            return None
+        return [SimpleNamespace(ticket=1, magic=92001)]
 
 
 def test_symbol_info_recovers_after_reinitialize(monkeypatch) -> None:
@@ -73,3 +88,15 @@ def test_symbol_info_raises_if_symbol_still_missing(monkeypatch) -> None:
         raise AssertionError("Expected RuntimeError for missing symbol")
     except RuntimeError as exc:
         assert "Unknown symbol: EURUSD" in str(exc)
+
+
+def test_positions_get_retries_after_none(monkeypatch) -> None:
+    fake = FakeMT5PositionsRetry()
+    monkeypatch.setattr(mt5_adapter, "mt5", fake)
+
+    adapter = mt5_adapter.MT5Adapter()
+    positions = adapter.positions_get("EURUSD", magic=92001)
+
+    assert len(positions) == 1
+    assert fake.positions_calls == 2
+    assert fake.select_calls >= 1

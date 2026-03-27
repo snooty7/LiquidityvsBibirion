@@ -5,7 +5,7 @@ import time
 from typing import Callable, Dict, Iterable, List, Optional, Tuple
 from uuid import uuid4
 
-from src.persistence.models import OpenPositionRecord, PendingSetupRecord, RecoveryStats
+from src.persistence.models import OpenPositionRecord, PendingSetupRecord, RecoveryStats, PENDING_STATUS_EXPIRED
 from src.persistence.repository import SQLiteRepository
 
 
@@ -27,6 +27,16 @@ def build_setup_dedupe_key(
 
 def compute_setup_expiry(candle_time: int, timeframe_seconds: int, expiry_bars: int) -> int:
     return int(candle_time) + max(1, int(expiry_bars)) * max(1, int(timeframe_seconds))
+
+
+def latest_closed_bar_time(adapter, symbol: str, timeframe: str) -> int:
+    try:
+        rates = adapter.copy_rates(symbol, timeframe, 3)
+    except Exception:
+        return int(time.time())
+    if len(rates) < 2:
+        return int(time.time())
+    return int(rates[-2]["time"])
 
 
 def build_pending_setup_record(
@@ -310,11 +320,22 @@ def bootstrap_recovery(
     repo: SQLiteRepository,
     log_event: Callable[[dict], None],
 ) -> Tuple[Dict[str, PendingSetupRecord], RecoveryStats]:
-    now_ts = int(time.time())
-
     with repo.transaction():
-        expired = repo.expire_pending_setups(now_ts)
-        for item in expired:
+        latest_bar_by_symbol = {
+            cfg.symbol: latest_closed_bar_time(adapter, cfg.symbol, cfg.timeframe) for cfg in app_config.symbols
+        }
+        expired = []
+        for item in repo.list_active_pending_setups():
+            latest_bar = int(latest_bar_by_symbol.get(item.symbol, int(time.time())))
+            if int(item.expires_at) > latest_bar:
+                continue
+            repo.transition_pending_setup(
+                item.setup_id,
+                PENDING_STATUS_EXPIRED,
+                last_note="expired_during_startup_recovery",
+                closed_reason="expired_during_startup_recovery",
+            )
+            expired.append(item)
             _emit_recovery_event(
                 repo,
                 log_event,
@@ -325,6 +346,7 @@ def bootstrap_recovery(
                 setup_id=item.setup_id,
                 level=item.level,
                 candle_time=item.candle_time,
+                payload={"latest_closed_bar_time": latest_bar},
             )
 
     local_open_by_ticket = {int(pos.ticket): pos for pos in repo.list_open_positions(status="OPEN")}

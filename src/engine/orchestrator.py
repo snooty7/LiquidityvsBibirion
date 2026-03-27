@@ -514,14 +514,11 @@ def sync_open_positions_for_symbol(
     for ticket, local in local_open.items():
         if ticket in broker_tickets:
             continue
-        repo.mark_open_position_closed(ticket, "missing_on_broker_runtime_sync")
         close_deal = adapter.latest_close_deal_for_position(ticket, now_utc)
-        close_payload = {
-            "side": local.side,
-            "policy": "mark_closed_missing_on_broker_runtime",
-        }
-        event_type = "POSITION_SYNC_LOCAL_CLOSED"
-        message = "runtime sync closed local-only position"
+        close_payload = {"side": local.side}
+        event_type = "POSITION_CLOSED_UNCONFIRMED"
+        close_reason = "missing_on_broker_runtime_sync_unconfirmed"
+        message = "broker no longer reports position; close deal not reconstructed"
         csv_row = {
             "ts": now_utc.isoformat(),
             "symbol": cfg.symbol,
@@ -532,6 +529,7 @@ def sync_open_positions_for_symbol(
         }
         if close_deal is not None:
             event_type = "POSITION_CLOSED_BROKER"
+            close_reason = "broker_side_close_detected"
             profit = float(getattr(close_deal, "profit", 0.0) or 0.0)
             commission = float(getattr(close_deal, "commission", 0.0) or 0.0)
             swap = float(getattr(close_deal, "swap", 0.0) or 0.0)
@@ -544,11 +542,19 @@ def sync_open_positions_for_symbol(
                     "close_price": close_price,
                     "closed_at": closed_at,
                     "realized_pnl": round(realized_pnl, 2),
-                    "close_reason": "broker_side_close_detected",
+                    "close_reason": close_reason,
                 }
             )
             message = f"broker close detected pnl={realized_pnl:.2f}"
             csv_row["price"] = close_price
+        else:
+            close_payload.update(
+                {
+                    "policy": "close_unconfirmed_missing_on_broker_runtime",
+                    "close_reason": close_reason,
+                }
+            )
+        repo.mark_open_position_closed(ticket, close_reason)
         emit_event(
             log_file=log_file,
             repo=repo,
@@ -1033,8 +1039,55 @@ def portfolio_caps_message(adapter: MT5Adapter, app_config: AppConfig, cfg: Symb
     return None
 
 
-def is_pending_expired(pending: PendingSetup) -> bool:
+def is_pending_expired(pending: PendingSetup, reference_bar_time: Optional[int] = None) -> bool:
+    if reference_bar_time is not None:
+        return int(reference_bar_time) >= int(pending.expires_at)
     return time.time() > float(pending.expires_at)
+
+
+def cancel_stale_pending_setup(
+    *,
+    repo: SQLiteRepository,
+    app_config: AppConfig,
+    log_file: Path,
+    cfg: SymbolConfig,
+    pending: PendingSetup,
+    reference_bar_time: int,
+    reason: str,
+) -> None:
+    now_utc = datetime.now(timezone.utc)
+    with repo.transaction():
+        repo.transition_pending_setup(
+            pending.setup_id,
+            PENDING_STATUS_EXPIRED,
+            last_note=reason,
+            closed_reason=reason,
+        )
+        emit_event(
+            log_file=log_file,
+            repo=repo,
+            app_config=app_config,
+            event_type="STALE_PENDING_CANCELED",
+            symbol=cfg.symbol,
+            setup_id=pending.setup_id,
+            message=reason,
+            payload={
+                "side": pending.side,
+                "level": pending.level,
+                "candle_time": pending.candle_time,
+                "expires_at": pending.expires_at,
+                "reference_bar_time": int(reference_bar_time),
+            },
+            csv_row={
+                "ts": now_utc.isoformat(),
+                "symbol": cfg.symbol,
+                "timeframe": cfg.timeframe,
+                "strategy": "SWEEP_V2",
+                "side": pending.side,
+                "level": f"{pending.level:.5f}",
+                "candle_time": pending.candle_time,
+            },
+        )
 
 
 def has_active_pending_setup(state: SymbolState, mode: str) -> bool:
@@ -1195,6 +1248,18 @@ def process_symbol(
         return
     state.last_processed_bar_time = closed_bar_time
 
+    if state.pending_setup is not None and is_pending_expired(state.pending_setup, closed_bar_time):
+        cancel_stale_pending_setup(
+            repo=repo,
+            app_config=app_config,
+            log_file=log_file,
+            cfg=cfg,
+            pending=state.pending_setup,
+            reference_bar_time=closed_bar_time,
+            reason="expired_before_confirmation",
+        )
+        state.pending_setup = None
+
     levels = extract_pivot_levels(rates, cfg.pivot_len, cfg.max_levels)
     signal = detect_sweep_signal(rates, levels, cfg.buffer_pips * pip)
 
@@ -1352,7 +1417,7 @@ def process_symbol(
         ok, note = _revalidate_restored_pending(pending, mode, rates, signal)
         if not ok:
             revalidation_note = note
-        elif is_pending_expired(pending):
+        elif is_pending_expired(pending, closed_bar_time):
             ok = False
             revalidation_note = "expired_on_restart_revalidation"
         elif cfg.one_position_per_symbol and adapter.positions_get(cfg.symbol, magic=cfg.magic):
@@ -1452,26 +1517,15 @@ def process_symbol(
         pending = state.pending_setup
         now_utc = datetime.now(timezone.utc)
 
-        if is_pending_expired(pending):
-            repo.transition_pending_setup(
-                pending.setup_id,
-                PENDING_STATUS_EXPIRED,
-                last_note="expired_before_confirmation",
-                closed_reason="expired_before_confirmation",
-            )
-            log_event(
-                log_file,
-                {
-                    "ts": now_utc.isoformat(),
-                    "symbol": cfg.symbol,
-                    "timeframe": cfg.timeframe,
-                    "strategy": "SWEEP_V2",
-                    "event": "SKIP_CONFIRM_EXPIRED",
-                    "side": pending.side,
-                    "level": f"{pending.level:.5f}",
-                    "candle_time": pending.candle_time,
-                    "message": f"mode={mode} setup_id={pending.setup_id}",
-                },
+        if is_pending_expired(pending, closed_bar_time):
+            cancel_stale_pending_setup(
+                repo=repo,
+                app_config=app_config,
+                log_file=log_file,
+                cfg=cfg,
+                pending=pending,
+                reference_bar_time=closed_bar_time,
+                reason="expired_before_confirmation",
             )
             state.pending_setup = None
             return

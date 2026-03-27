@@ -12,6 +12,7 @@ NOTIFIABLE_EVENTS = {
     "RISK_CLOSE_OK",
     "RISK_CLOSE_FAIL",
     "POSITION_CLOSED_BROKER",
+    "POSITION_CLOSED_UNCONFIRMED",
 }
 
 
@@ -69,7 +70,7 @@ def build_push_message(
                 f"retcode: {data.get('retcode', '-')}",
             ]
         )
-    elif event_type in {"RISK_CLOSE_OK", "POSITION_CLOSED_BROKER"}:
+    elif event_type in {"RISK_CLOSE_OK", "POSITION_CLOSED_BROKER", "POSITION_CLOSED_UNCONFIRMED"}:
         title = f"CLOSE {symbol} {side}"
         tags = "money_with_wings"
         lines.extend(

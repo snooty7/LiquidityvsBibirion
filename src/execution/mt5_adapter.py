@@ -157,7 +157,10 @@ class MT5Adapter:
         self._ensure_mt5()
         positions = mt5.positions_get(symbol=symbol)
         if positions is None:
-            return []
+            self.ensure_symbol(symbol)
+            positions = mt5.positions_get(symbol=symbol)
+        if positions is None:
+            raise RuntimeError(f"positions_get failed for {symbol}: {mt5.last_error()}")
         if magic is None:
             return list(positions)
         return [p for p in positions if int(getattr(p, "magic", -1)) == int(magic)]
