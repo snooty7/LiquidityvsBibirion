@@ -73,9 +73,9 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "sweep_min_penetration_pips": 0.5,
             "range_filter_lookback_bars": 8,
             "range_filter_max_compression_ratio": 2.5,
-            "range_filter_min_overlap_ratio": 0.7,
+            "range_filter_min_overlap_ratio": 0.75,
             "confirmation_displacement_body_ratio_min": 0.6,
-            "confirmation_displacement_range_multiple": 1.5,
+            "confirmation_displacement_range_multiple": 1.7,
         }
     ],
 }
@@ -149,9 +149,9 @@ class SymbolConfig:
     sweep_min_penetration_pips: float = 0.5
     range_filter_lookback_bars: int = 8
     range_filter_max_compression_ratio: float = 2.5
-    range_filter_min_overlap_ratio: float = 0.7
+    range_filter_min_overlap_ratio: float = 0.75
     confirmation_displacement_body_ratio_min: float = 0.6
-    confirmation_displacement_range_multiple: float = 1.5
+    confirmation_displacement_range_multiple: float = 1.7
 
     @property
     def tp_pips(self) -> float:
@@ -252,12 +252,12 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 sweep_min_penetration_pips=float(row.get("sweep_min_penetration_pips", 0.5)),
                 range_filter_lookback_bars=int(row.get("range_filter_lookback_bars", 8)),
                 range_filter_max_compression_ratio=float(row.get("range_filter_max_compression_ratio", 2.5)),
-                range_filter_min_overlap_ratio=float(row.get("range_filter_min_overlap_ratio", 0.7)),
+                range_filter_min_overlap_ratio=float(row.get("range_filter_min_overlap_ratio", 0.75)),
                 confirmation_displacement_body_ratio_min=float(
                     row.get("confirmation_displacement_body_ratio_min", 0.6)
                 ),
                 confirmation_displacement_range_multiple=float(
-                    row.get("confirmation_displacement_range_multiple", 1.5)
+                    row.get("confirmation_displacement_range_multiple", 1.7)
                 ),
             )
         )

@@ -36,6 +36,9 @@ class FakeMT5:
     def copy_rates_from_pos(self, symbol, timeframe, start_pos, bars):
         return [1, 2, 3]
 
+    def copy_rates_range(self, symbol, timeframe, date_from, date_to):
+        return [4, 5, 6]
+
     def symbol_info_tick(self, symbol):
         return SimpleNamespace(bid=1.1000, ask=1.1002)
 
@@ -100,3 +103,13 @@ def test_positions_get_retries_after_none(monkeypatch) -> None:
     assert len(positions) == 1
     assert fake.positions_calls == 2
     assert fake.select_calls >= 1
+
+
+def test_copy_rates_range_returns_data(monkeypatch) -> None:
+    fake = FakeMT5()
+    monkeypatch.setattr(mt5_adapter, "mt5", fake)
+
+    adapter = mt5_adapter.MT5Adapter()
+    rates = adapter.copy_rates_range("EURUSD", "M5", None, None)
+
+    assert rates == [4, 5, 6]

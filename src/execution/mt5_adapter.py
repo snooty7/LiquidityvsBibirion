@@ -122,6 +122,17 @@ class MT5Adapter:
             raise RuntimeError(f"copy_rates_from_pos failed for {symbol}/{timeframe_label}: {mt5.last_error()}")
         return rates
 
+    def copy_rates_range(self, symbol: str, timeframe_label: str, date_from: datetime, date_to: datetime):
+        self._ensure_mt5()
+        timeframe = self.timeframe_from_label(timeframe_label)
+        rates = mt5.copy_rates_range(symbol, timeframe, date_from, date_to)
+        if rates is None:
+            self.ensure_symbol(symbol)
+            rates = mt5.copy_rates_range(symbol, timeframe, date_from, date_to)
+        if rates is None:
+            raise RuntimeError(f"copy_rates_range failed for {symbol}/{timeframe_label}: {mt5.last_error()}")
+        return rates
+
     def symbol_tick(self, symbol: str):
         self._ensure_mt5()
         tick = mt5.symbol_info_tick(symbol)

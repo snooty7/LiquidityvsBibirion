@@ -84,6 +84,7 @@ class ClosedTrade:
 @dataclass
 class BacktestResult:
     symbol: str
+    side_mode: str
     start_utc: str
     end_utc: str
     bars_m1: int
@@ -125,6 +126,13 @@ def _to_utc_datetime(value: str, *, end_of_day: bool = False) -> datetime:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(timezone.utc)
+
+
+def _side_allowed(side_mode: str, side: str) -> bool:
+    mode = side_mode.lower()
+    if mode == "both":
+        return True
+    return side.upper() == mode.upper()
 
 
 def _bar_dict(row: object) -> dict:
@@ -429,6 +437,7 @@ def run_backtest(
     end_utc: datetime,
     *,
     initial_equity: float,
+    side_mode: str = "both",
     trades_csv: Optional[Path] = None,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
     adapter = MT5Adapter(default_deviation=app_config.runtime.default_deviation)
@@ -628,6 +637,8 @@ def run_backtest(
             levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
             signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
             if signal is not None:
+                if not _side_allowed(side_mode, signal.side):
+                    continue
                 prior_closed = m5_rates[:-2]
                 chop_result = evaluate_range_filter(
                     prior_closed,
@@ -699,6 +710,7 @@ def run_backtest(
 
     result = BacktestResult(
         symbol=cfg.symbol,
+        side_mode=side_mode.lower(),
         start_utc=start_utc.isoformat(),
         end_utc=end_utc.isoformat(),
         bars_m1=len(m1),
@@ -744,7 +756,7 @@ def run_backtest(
 
 def _print_summary(result: BacktestResult) -> None:
     print(
-        f"BACKTEST {result.symbol} {result.start_utc} -> {result.end_utc}\n"
+        f"BACKTEST {result.symbol} side={result.side_mode} {result.start_utc} -> {result.end_utc}\n"
         f"bars M1={result.bars_m1} M5={result.bars_m5} bias={result.bars_bias}\n"
         f"trades={result.total_trades} wins={result.wins} losses={result.losses} be={result.breakeven} "
         f"win_rate={result.win_rate_pct:.2f}%\n"
@@ -767,6 +779,7 @@ def main() -> None:
     parser.add_argument("--start", required=True, help="UTC start date/time, e.g. 2026-02-26 or 2026-02-26T00:00:00")
     parser.add_argument("--end", required=True, help="UTC end date/time, e.g. 2026-03-27 or 2026-03-27T23:59:59")
     parser.add_argument("--initial-equity", type=float, default=100000.0, help="Initial equity for lot sizing")
+    parser.add_argument("--side", choices=["both", "buy", "sell"], default="both", help="Trade side filter")
     parser.add_argument("--trades-csv", default="", help="Optional output CSV path for trades")
     args = parser.parse_args()
 
@@ -785,6 +798,7 @@ def main() -> None:
         start_utc=start_utc,
         end_utc=end_utc,
         initial_equity=float(args.initial_equity),
+        side_mode=str(args.side).lower(),
         trades_csv=trades_csv,
     )
     _print_summary(result)

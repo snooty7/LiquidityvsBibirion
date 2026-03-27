@@ -91,6 +91,24 @@ python -m src.tools.state_maintenance --db-path bot_state.sqlite3 --retention-da
 }
 ```
 
+## Historical Backtest
+- A lightweight MT5 history runner is available at `src/tools/backtest_mt5.py`.
+- It reuses the current sweep, displacement/BOS confirmation, bias, order-block, and risk logic for bar-based historical validation.
+- Example:
+```bash
+python -m src.tools.backtest_mt5 --config config\settings.json --symbol EURUSD --start 2025-12-28 --end 2026-03-27 --initial-equity 100000 --trades-csv reports\backtest_eurusd.csv
+```
+- Optional side isolation:
+```bash
+python -m src.tools.backtest_mt5 --config config\settings.json --symbol EURUSD --side sell --start 2025-12-28 --end 2026-03-27 --initial-equity 100000
+```
+- The currently validated EURUSD demo candidate from the 180-day sweep is:
+  - `confirm_expiry_bars = 3`
+  - `range_filter_max_compression_ratio = 2.5`
+  - `range_filter_min_overlap_ratio = 0.75`
+  - `confirmation_displacement_body_ratio_min = 0.60`
+  - `confirmation_displacement_range_multiple = 1.70`
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.

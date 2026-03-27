@@ -1,6 +1,6 @@
 from src.risk.sizing import SymbolTradeInfo
 from src.services.config import RuntimeConfig, SymbolConfig
-from src.tools.backtest_mt5 import OpenTrade, _append_dummy_forming_bar, _apply_open_trade_bar
+from src.tools.backtest_mt5 import OpenTrade, _append_dummy_forming_bar, _apply_open_trade_bar, _side_allowed
 
 
 def _runtime() -> RuntimeConfig:
@@ -107,3 +107,12 @@ def test_apply_open_trade_bar_prefers_stop_when_tp_and_sl_hit_same_bar() -> None
     assert closed is not None
     assert closed.reason == "stop_loss"
     assert closed.exit_price == 1.0990
+
+
+def test_side_allowed_filters_expected_direction() -> None:
+    assert _side_allowed("both", "BUY") is True
+    assert _side_allowed("both", "SELL") is True
+    assert _side_allowed("buy", "BUY") is True
+    assert _side_allowed("buy", "SELL") is False
+    assert _side_allowed("sell", "SELL") is True
+    assert _side_allowed("sell", "BUY") is False
