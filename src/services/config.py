@@ -60,6 +60,8 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "use_order_block_filter": True,
             "order_block_lookback_bars": 20,
             "order_block_max_distance_pips": 8.0,
+            "order_block_strong_override_max_distance_pips": 8.0,
+            "order_block_strong_override_min_impulse_pips": 20.0,
             "order_block_zone_mode": "body",
             "order_block_min_impulse_pips": 3.0,
             "order_block_max_age_bars": 15,
@@ -75,7 +77,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "range_filter_max_compression_ratio": 2.5,
             "range_filter_min_overlap_ratio": 0.75,
             "confirmation_displacement_body_ratio_min": 0.6,
-            "confirmation_displacement_range_multiple": 1.7,
+            "confirmation_displacement_range_multiple": 1.8,
         }
     ],
 }
@@ -136,6 +138,8 @@ class SymbolConfig:
     use_order_block_filter: bool = True
     order_block_lookback_bars: int = 20
     order_block_max_distance_pips: float = 8.0
+    order_block_strong_override_max_distance_pips: float = 8.0
+    order_block_strong_override_min_impulse_pips: float = 20.0
     order_block_zone_mode: str = "body"
     order_block_min_impulse_pips: float = 3.0
     order_block_max_age_bars: int = 15
@@ -151,7 +155,7 @@ class SymbolConfig:
     range_filter_max_compression_ratio: float = 2.5
     range_filter_min_overlap_ratio: float = 0.75
     confirmation_displacement_body_ratio_min: float = 0.6
-    confirmation_displacement_range_multiple: float = 1.7
+    confirmation_displacement_range_multiple: float = 1.8
 
     @property
     def tp_pips(self) -> float:
@@ -239,6 +243,12 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 use_order_block_filter=bool(row.get("use_order_block_filter", True)),
                 order_block_lookback_bars=int(row.get("order_block_lookback_bars", 20)),
                 order_block_max_distance_pips=float(row.get("order_block_max_distance_pips", 8.0)),
+                order_block_strong_override_max_distance_pips=float(
+                    row.get("order_block_strong_override_max_distance_pips", 8.0)
+                ),
+                order_block_strong_override_min_impulse_pips=float(
+                    row.get("order_block_strong_override_min_impulse_pips", 20.0)
+                ),
                 order_block_zone_mode=str(row.get("order_block_zone_mode", "body")).lower(),
                 order_block_min_impulse_pips=float(row.get("order_block_min_impulse_pips", 3.0)),
                 order_block_max_age_bars=int(row.get("order_block_max_age_bars", 15)),
@@ -257,7 +267,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                     row.get("confirmation_displacement_body_ratio_min", 0.6)
                 ),
                 confirmation_displacement_range_multiple=float(
-                    row.get("confirmation_displacement_range_multiple", 1.7)
+                    row.get("confirmation_displacement_range_multiple", 1.8)
                 ),
             )
         )
@@ -291,6 +301,16 @@ def load_config(path: Union[str, Path]) -> AppConfig:
             raise ValueError(f"range_filter_max_compression_ratio must be > 0 for {symbol.symbol}")
         if not 0.0 <= symbol.range_filter_min_overlap_ratio <= 1.0:
             raise ValueError(f"range_filter_min_overlap_ratio must be between 0 and 1 for {symbol.symbol}")
+        if symbol.order_block_max_distance_pips <= 0:
+            raise ValueError(f"order_block_max_distance_pips must be > 0 for {symbol.symbol}")
+        if symbol.order_block_strong_override_max_distance_pips < symbol.order_block_max_distance_pips:
+            raise ValueError(
+                f"order_block_strong_override_max_distance_pips must be >= order_block_max_distance_pips for {symbol.symbol}"
+            )
+        if symbol.order_block_strong_override_min_impulse_pips <= 0:
+            raise ValueError(
+                f"order_block_strong_override_min_impulse_pips must be > 0 for {symbol.symbol}"
+            )
         if not 0.0 < symbol.confirmation_displacement_body_ratio_min <= 1.0:
             raise ValueError(
                 f"confirmation_displacement_body_ratio_min must be in (0, 1] for {symbol.symbol}"

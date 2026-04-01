@@ -129,3 +129,33 @@ def order_block_note(order_block: dict, distance_pips: float) -> str:
         f"ob_dist={distance_pips:.2f}p "
         f"ob_impulse={float(order_block.get('impulse_pips', 0.0)):.2f}p"
     )
+
+
+def resolve_order_block_distance_limit_pips(
+    base_limit_pips: float,
+    order_block: Optional[dict],
+    *,
+    confirmation_mode: str,
+    range_note: str,
+    strong_override_max_distance_pips: float,
+    strong_override_min_impulse_pips: float,
+) -> tuple[float, str]:
+    allowed_limit = float(base_limit_pips)
+    if order_block is None:
+        return allowed_limit, ""
+
+    override_limit = float(strong_override_max_distance_pips)
+    impulse_pips = float(order_block.get("impulse_pips", 0.0) or 0.0)
+    if (
+        confirmation_mode == "sweep_displacement_mss"
+        and range_note == "range_ok"
+        and override_limit > allowed_limit
+        and impulse_pips >= float(strong_override_min_impulse_pips)
+    ):
+        return (
+            override_limit,
+            f"ob_override=sdmss_strong range_note={range_note} "
+            f"ob_impulse={impulse_pips:.2f}p max_ob_dist={override_limit:.2f}p",
+        )
+
+    return allowed_limit, ""

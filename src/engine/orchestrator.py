@@ -37,7 +37,13 @@ from src.strategy.confirmations import (
     evaluate_cisd_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
-from src.strategy.filters import evaluate_bias, find_local_order_block, order_block_distance_pips, order_block_note
+from src.strategy.filters import (
+    evaluate_bias,
+    find_local_order_block,
+    order_block_distance_pips,
+    order_block_note,
+    resolve_order_block_distance_limit_pips,
+)
 from src.strategy.liquidity import (
     detect_sweep_signal,
     evaluate_range_filter,
@@ -1090,6 +1096,43 @@ def cancel_stale_pending_setup(
         )
 
 
+def cancel_entry_setup(
+    *,
+    repo: SQLiteRepository,
+    app_config: AppConfig,
+    log_file: Path,
+    cfg: SymbolConfig,
+    setup: PendingSetup,
+    event_type: str,
+    message: str,
+    csv_row: dict,
+) -> None:
+    reason = f"entry_blocked:{event_type}"
+    with repo.transaction():
+        repo.transition_pending_setup(
+            setup.setup_id,
+            PENDING_STATUS_CANCELED,
+            last_note=reason,
+            closed_reason=reason,
+        )
+        emit_event(
+            log_file=log_file,
+            repo=repo,
+            app_config=app_config,
+            event_type=event_type,
+            symbol=cfg.symbol,
+            setup_id=setup.setup_id,
+            message=message,
+            payload={
+                "side": setup.side,
+                "level": setup.level,
+                "candle_time": setup.candle_time,
+                "skip_event": event_type,
+            },
+            csv_row=csv_row,
+        )
+
+
 def has_active_pending_setup(state: SymbolState, mode: str) -> bool:
     if mode == "none":
         return False
@@ -1532,11 +1575,31 @@ def process_symbol(
 
         confirm_result = evaluate_pending_confirmation(adapter, cfg, pending, rates)
         if confirm_result.confirmed:
-            repo.transition_pending_setup(
-                pending.setup_id,
-                PENDING_STATUS_CONFIRMED,
-                last_note=str(confirm_result.note),
-            )
+            with repo.transaction():
+                repo.transition_pending_setup(
+                    pending.setup_id,
+                    PENDING_STATUS_CONFIRMED,
+                    last_note=str(confirm_result.note),
+                )
+                emit_event(
+                    log_file=log_file,
+                    repo=repo,
+                    app_config=app_config,
+                    event_type="SETUP_CONFIRMED",
+                    symbol=cfg.symbol,
+                    setup_id=pending.setup_id,
+                    message=str(confirm_result.note),
+                    payload={"side": pending.side, "level": pending.level, "candle_time": pending.candle_time},
+                    csv_row={
+                        "ts": now_utc.isoformat(),
+                        "symbol": cfg.symbol,
+                        "timeframe": cfg.timeframe,
+                        "strategy": "SWEEP_V2",
+                        "side": pending.side,
+                        "level": f"{pending.level:.5f}",
+                        "candle_time": pending.candle_time,
+                    },
+                )
             entry_setup = pending
             entry_side = pending.side
             entry_level = float(pending.level)
@@ -1610,20 +1673,72 @@ def process_symbol(
     }
 
     if not session_allowed(cfg, now_utc):
-        log_event(log_file, {**base_row, "event": "SKIP_SESSION", "message": ",".join(cfg.allowed_sessions_utc)})
+        message = ",".join(cfg.allowed_sessions_utc)
+        if entry_setup is not None:
+            cancel_entry_setup(
+                repo=repo,
+                app_config=app_config,
+                log_file=log_file,
+                cfg=cfg,
+                setup=entry_setup,
+                event_type="SKIP_SESSION",
+                message=message,
+                csv_row=base_row,
+            )
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_SESSION", "message": message})
         return
 
     if now_ts < float(state.cooldown_until):
         remaining = float(state.cooldown_until) - now_ts
-        log_event(log_file, {**base_row, "event": "SKIP_COOLDOWN", "message": f"remaining={remaining:.0f}s"})
+        message = f"remaining={remaining:.0f}s"
+        if entry_setup is not None:
+            cancel_entry_setup(
+                repo=repo,
+                app_config=app_config,
+                log_file=log_file,
+                cfg=cfg,
+                setup=entry_setup,
+                event_type="SKIP_COOLDOWN",
+                message=message,
+                csv_row=base_row,
+            )
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_COOLDOWN", "message": message})
         return
 
     if spread > cfg.max_spread_pips:
-        log_event(log_file, {**base_row, "event": "SKIP_SPREAD", "message": f"spread={spread:.2f}>{cfg.max_spread_pips:.2f}"})
+        message = f"spread={spread:.2f}>{cfg.max_spread_pips:.2f}"
+        if entry_setup is not None:
+            cancel_entry_setup(
+                repo=repo,
+                app_config=app_config,
+                log_file=log_file,
+                cfg=cfg,
+                setup=entry_setup,
+                event_type="SKIP_SPREAD",
+                message=message,
+                csv_row=base_row,
+            )
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_SPREAD", "message": message})
         return
 
     if cfg.one_position_per_symbol and adapter.positions_get(cfg.symbol, magic=cfg.magic):
-        log_event(log_file, {**base_row, "event": "SKIP_POSITION_EXISTS", "message": "position already open"})
+        message = "position already open"
+        if entry_setup is not None:
+            cancel_entry_setup(
+                repo=repo,
+                app_config=app_config,
+                log_file=log_file,
+                cfg=cfg,
+                setup=entry_setup,
+                event_type="SKIP_POSITION_EXISTS",
+                message=message,
+                csv_row=base_row,
+            )
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_POSITION_EXISTS", "message": message})
         return
 
     bias_note = ""
@@ -1635,7 +1750,19 @@ def process_symbol(
         bias_ok = bias_info["ok_buy"] if entry_side == "BUY" else bias_info["ok_sell"]
         bias_note = str(bias_info["note"])
         if not bias_ok:
-            log_event(log_file, {**base_row, "event": "SKIP_BIAS", "message": bias_note})
+            if entry_setup is not None:
+                cancel_entry_setup(
+                    repo=repo,
+                    app_config=app_config,
+                    log_file=log_file,
+                    cfg=cfg,
+                    setup=entry_setup,
+                    event_type="SKIP_BIAS",
+                    message=bias_note,
+                    csv_row=base_row,
+                )
+            else:
+                log_event(log_file, {**base_row, "event": "SKIP_BIAS", "message": bias_note})
             return
 
     price, sl, tp = adapter.quote_market_order(cfg.symbol, entry_side, cfg.sl_pips, cfg.tp_pips)
@@ -1655,35 +1782,94 @@ def process_symbol(
         )
 
         if order_block is None:
-            log_event(log_file, {**base_row, "event": "SKIP_ORDER_BLOCK", "message": "no local order block"})
+            message = "no local order block"
+            if entry_setup is not None:
+                cancel_entry_setup(
+                    repo=repo,
+                    app_config=app_config,
+                    log_file=log_file,
+                    cfg=cfg,
+                    setup=entry_setup,
+                    event_type="SKIP_ORDER_BLOCK",
+                    message=message,
+                    csv_row=base_row,
+                )
+            else:
+                log_event(log_file, {**base_row, "event": "SKIP_ORDER_BLOCK", "message": message})
             return
 
         ob_distance = order_block_distance_pips(price, order_block["low"], order_block["high"], pip)
         ob_note = order_block_note(order_block, ob_distance)
-        if ob_distance > cfg.order_block_max_distance_pips:
-            log_event(
-                log_file,
-                {
-                    **base_row,
-                    "event": "SKIP_ORDER_BLOCK",
-                    "message": f"{ob_note} max_ob_dist={cfg.order_block_max_distance_pips:.2f}p",
-                },
-            )
+        range_note = ""
+        if entry_setup is not None:
+            range_note = str(entry_setup.context.get("filters", {}).get("range_note", ""))
+        allowed_ob_distance, ob_override_note = resolve_order_block_distance_limit_pips(
+            cfg.order_block_max_distance_pips,
+            order_block,
+            confirmation_mode=cfg.confirmation_mode,
+            range_note=range_note,
+            strong_override_max_distance_pips=cfg.order_block_strong_override_max_distance_pips,
+            strong_override_min_impulse_pips=cfg.order_block_strong_override_min_impulse_pips,
+        )
+        if ob_override_note:
+            ob_note = f"{ob_note} {ob_override_note}".strip()
+        if ob_distance > allowed_ob_distance:
+            message = f"{ob_note} max_ob_dist={allowed_ob_distance:.2f}p"
+            if entry_setup is not None:
+                cancel_entry_setup(
+                    repo=repo,
+                    app_config=app_config,
+                    log_file=log_file,
+                    cfg=cfg,
+                    setup=entry_setup,
+                    event_type="SKIP_ORDER_BLOCK",
+                    message=message,
+                    csv_row=base_row,
+                )
+            else:
+                log_event(
+                    log_file,
+                    {
+                        **base_row,
+                        "event": "SKIP_ORDER_BLOCK",
+                        "message": message,
+                    },
+                )
             return
 
     equity = adapter.account_equity()
     cap_message = portfolio_caps_message(adapter, app_config, cfg, equity)
     if cap_message:
-        emit_event(
-            log_file=log_file,
-            repo=repo,
-            app_config=app_config,
-            event_type="SKIP_PORTFOLIO_CAP",
-            symbol=cfg.symbol,
-            message=cap_message,
-            payload={"equity": float(equity)},
-            csv_row=base_row,
-        )
+        if entry_setup is not None:
+            with repo.transaction():
+                repo.transition_pending_setup(
+                    entry_setup.setup_id,
+                    PENDING_STATUS_CANCELED,
+                    last_note="entry_blocked:SKIP_PORTFOLIO_CAP",
+                    closed_reason="entry_blocked:SKIP_PORTFOLIO_CAP",
+                )
+                emit_event(
+                    log_file=log_file,
+                    repo=repo,
+                    app_config=app_config,
+                    event_type="SKIP_PORTFOLIO_CAP",
+                    symbol=cfg.symbol,
+                    setup_id=entry_setup.setup_id,
+                    message=cap_message,
+                    payload={"equity": float(equity)},
+                    csv_row=base_row,
+                )
+        else:
+            emit_event(
+                log_file=log_file,
+                repo=repo,
+                app_config=app_config,
+                event_type="SKIP_PORTFOLIO_CAP",
+                symbol=cfg.symbol,
+                message=cap_message,
+                payload={"equity": float(equity)},
+                csv_row=base_row,
+            )
         return
 
     trade_info = SymbolTradeInfo.from_mt5(info)

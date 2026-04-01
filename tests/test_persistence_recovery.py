@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from src.engine.orchestrator import (
+    process_symbol,
     GlobalState,
     PendingSetup,
     SymbolState,
@@ -23,6 +24,7 @@ from src.engine.orchestrator import (
     semantic_setup_key,
     sync_open_positions_for_symbol,
 )
+from src.strategy.confirmations import ConfirmationResult
 from src.persistence.maintenance import archive_and_prune_events
 from src.persistence.models import (
     GuardStateRecord,
@@ -142,6 +144,43 @@ class SyncAdapter:
 
     def latest_close_deal_for_position(self, ticket: int, now_utc: datetime, *, lookback_hours: int = 48):
         return self.close_deal_by_ticket.get(int(ticket))
+
+
+@dataclass
+class ProcessAdapter:
+    rates: list[dict]
+
+    def symbol_info(self, symbol: str):
+        return SimpleNamespace(
+            digits=5,
+            point=0.00001,
+            volume_min=0.01,
+            volume_max=10.0,
+            volume_step=0.01,
+            trade_tick_value=1.0,
+            trade_tick_size=0.00001,
+            visible=True,
+        )
+
+    def pip_size(self, info: object) -> float:
+        return 0.0001
+
+    def copy_rates(self, symbol: str, timeframe: str, bars: int):
+        return list(self.rates)
+
+    def spread_pips(self, symbol: str, symbol_info: object | None = None) -> float:
+        return 0.5
+
+    def positions_get(self, symbol: str, magic: int | None = None) -> list[object]:
+        return []
+
+    def account_equity(self) -> float:
+        return 10_000.0
+
+    def quote_market_order(self, symbol: str, side: str, sl_pips: float, tp_pips: float):
+        if side == "BUY":
+            return 1.1000, 1.0990, 1.1020
+        return 1.1000, 1.1010, 1.0980
 
 
 def test_pending_setup_dedupe(tmp_path: Path) -> None:
@@ -1056,6 +1095,31 @@ def test_load_config_rejects_enabled_push_without_url(tmp_path: Path) -> None:
         assert "push_notification_url is required" in str(exc)
 
 
+def test_load_config_rejects_order_block_override_below_base(tmp_path: Path) -> None:
+    config_path = tmp_path / "bad_ob_override.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "symbols": [
+                    {
+                        "symbol": "EURUSD",
+                        "magic": 92001,
+                        "order_block_max_distance_pips": 8.0,
+                        "order_block_strong_override_max_distance_pips": 7.0,
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        load_config(config_path)
+        raise AssertionError("Expected ValueError for invalid order block override distance")
+    except ValueError as exc:
+        assert "order_block_strong_override_max_distance_pips must be >=" in str(exc)
+
+
 def test_compute_r_multiple_trailing_stop_buy_moves_to_break_even_at_one_r() -> None:
     desired_sl = compute_r_multiple_trailing_stop(
         side="BUY",
@@ -1113,3 +1177,72 @@ def test_has_active_pending_setup_blocks_new_confirmed_modes() -> None:
     assert has_active_pending_setup(state, "sweep_displacement_mss") is True
     assert has_active_pending_setup(state, "c3") is True
     assert has_active_pending_setup(state, "none") is False
+
+
+def test_confirmed_setup_blocked_by_bias_is_canceled_not_left_confirmed(tmp_path: Path, monkeypatch) -> None:
+    import src.engine.orchestrator as orch
+
+    db_path = tmp_path / "state.db"
+    repo = SQLiteRepository(str(db_path))
+    app_config = _make_config(db_path)
+    cfg = app_config.symbols[0]
+    log_file = tmp_path / "events.csv"
+    rates = [
+        {"time": 100, "open": 1.1000, "high": 1.1005, "low": 1.0995, "close": 1.1001},
+        {"time": 400, "open": 1.1001, "high": 1.1004, "low": 1.0997, "close": 1.1000},
+        {"time": 700, "open": 1.1000, "high": 1.1002, "low": 1.0998, "close": 1.1001},
+    ]
+    adapter = ProcessAdapter(rates=rates)
+
+    pending_record = build_pending_setup_record(
+        symbol=cfg.symbol,
+        timeframe=cfg.timeframe,
+        side="SELL",
+        level=1.1000,
+        candle_time=100,
+        signal_key="SELL|1.10000",
+        expires_at=10_000,
+        context={},
+        initial_status=PENDING_STATUS_PENDING,
+    )
+
+    stored, _ = repo.create_or_get_pending_setup(pending_record)
+    state = SymbolState(
+        pending_setup=PendingSetup(
+            setup_id=stored.setup_id,
+            dedupe_key=stored.dedupe_key,
+            signal_key=stored.signal_key,
+            side=stored.side,
+            level=stored.level,
+            candle_time=stored.candle_time,
+            expires_at=stored.expires_at,
+            status=stored.status,
+            context={},
+        )
+    )
+
+    monkeypatch.setattr(
+        orch,
+        "evaluate_pending_confirmation",
+        lambda adapter, cfg, pending, rates: ConfirmationResult(True, False, "sdmss_sell_confirmed"),
+    )
+    monkeypatch.setattr(
+        orch,
+        "evaluate_bias",
+        lambda rates, period: {"ok_buy": False, "ok_sell": False, "note": "bias_blocked"},
+    )
+
+    try:
+        process_symbol(adapter, cfg, app_config, state, log_file, repo)
+
+        refreshed = repo.get_pending_setup_by_id(stored.setup_id)
+        assert refreshed is not None
+        assert refreshed.status == "CANCELED"
+        assert refreshed.closed_reason == "entry_blocked:SKIP_BIAS"
+
+        content = log_file.read_text(encoding="utf-8")
+        assert "SETUP_CONFIRMED" in content
+        assert "SKIP_BIAS" in content
+        assert stored.setup_id in content
+    finally:
+        repo.close()

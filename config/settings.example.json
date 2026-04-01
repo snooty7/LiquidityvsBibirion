@@ -44,7 +44,10 @@
       "magic": 92001,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -52,6 +55,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -59,7 +64,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     },
     {
       "symbol": "GBPUSD",
@@ -76,7 +82,10 @@
       "magic": 92002,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -84,6 +93,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -91,7 +102,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     },
     {
       "symbol": "USDJPY",
@@ -108,7 +120,10 @@
       "magic": 92003,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -116,6 +131,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -123,7 +140,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     },
     {
       "symbol": "USDCHF",
@@ -140,7 +158,10 @@
       "magic": 92004,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -148,6 +169,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -155,7 +178,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     },
     {
       "symbol": "AUDUSD",
@@ -172,7 +196,10 @@
       "magic": 92005,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -180,6 +207,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -187,7 +216,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     },
     {
       "symbol": "USDCAD",
@@ -204,7 +234,10 @@
       "magic": 92006,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -212,6 +245,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -219,7 +254,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     },
     {
       "symbol": "NZDUSD",
@@ -236,7 +272,10 @@
       "magic": 92007,
       "max_levels": 25,
       "one_position_per_symbol": true,
-      "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
+      "allowed_sessions_utc": [
+        "06:00-11:55",
+        "12:00-22:00"
+      ],
       "use_bias_filter": true,
       "bias_timeframe": "M15",
       "bias_ema_period": 20,
@@ -244,6 +283,8 @@
       "use_order_block_filter": true,
       "order_block_lookback_bars": 20,
       "order_block_max_distance_pips": 8.0,
+      "order_block_strong_override_max_distance_pips": 8.0,
+      "order_block_strong_override_min_impulse_pips": 20.0,
       "order_block_zone_mode": "body",
       "order_block_min_impulse_pips": 3.0,
       "order_block_max_age_bars": 15,
@@ -251,8 +292,8 @@
       "confirm_expiry_bars": 3,
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
-      "cisd_structure_bars": 4
+      "cisd_structure_bars": 4,
+      "confirmation_displacement_range_multiple": 1.8
     }
   ]
 }
-

@@ -107,7 +107,12 @@ python -m src.tools.backtest_mt5 --config config\settings.json --symbol EURUSD -
   - `range_filter_max_compression_ratio = 2.5`
   - `range_filter_min_overlap_ratio = 0.75`
   - `confirmation_displacement_body_ratio_min = 0.60`
-  - `confirmation_displacement_range_multiple = 1.70`
+  - `confirmation_displacement_range_multiple = 1.80`
+  - keep `order_block_max_distance_pips = 8.0` as the base cutoff
+  - optional strong-setup override:
+    - `order_block_strong_override_max_distance_pips`
+    - `order_block_strong_override_min_impulse_pips`
+    - applies only to `sweep_displacement_mss` setups that already passed `range_ok`
 
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).

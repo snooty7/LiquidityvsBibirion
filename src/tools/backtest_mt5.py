@@ -26,7 +26,12 @@ from src.strategy.confirmations import (
     evaluate_cisd_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
-from src.strategy.filters import evaluate_bias, find_local_order_block, order_block_distance_pips
+from src.strategy.filters import (
+    evaluate_bias,
+    find_local_order_block,
+    order_block_distance_pips,
+    resolve_order_block_distance_limit_pips,
+)
 from src.strategy.liquidity import (
     SweepSignal,
     detect_sweep_signal,
@@ -608,7 +613,15 @@ def run_backtest(
                         pending = None
                         continue
                     ob_distance = order_block_distance_pips(entry_price, order_block["low"], order_block["high"], pip)
-                    if ob_distance > cfg.order_block_max_distance_pips:
+                    allowed_ob_distance, _ = resolve_order_block_distance_limit_pips(
+                        cfg.order_block_max_distance_pips,
+                        order_block,
+                        confirmation_mode=cfg.confirmation_mode,
+                        range_note="range_ok",
+                        strong_override_max_distance_pips=cfg.order_block_strong_override_max_distance_pips,
+                        strong_override_min_impulse_pips=cfg.order_block_strong_override_min_impulse_pips,
+                    )
+                    if ob_distance > allowed_ob_distance:
                         skip_order_block += 1
                         pending = None
                         continue

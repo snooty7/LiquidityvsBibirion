@@ -6,6 +6,7 @@ from src.strategy.liquidity import (
     evaluate_sweep_significance,
     extract_pivot_levels,
 )
+from src.strategy.filters import resolve_order_block_distance_limit_pips
 
 
 @pytest.mark.xfail(reason="Pre-existing out-of-scope expectation mismatch in pivot ordering semantics.")
@@ -140,3 +141,31 @@ def test_range_filter_allows_expanding_environment() -> None:
 
     assert result.blocked is False
     assert result.note == "range_ok"
+
+
+def test_order_block_distance_override_applies_for_strong_sdmss_setup() -> None:
+    allowed, note = resolve_order_block_distance_limit_pips(
+        8.0,
+        {"impulse_pips": 24.0},
+        confirmation_mode="sweep_displacement_mss",
+        range_note="range_ok",
+        strong_override_max_distance_pips=25.0,
+        strong_override_min_impulse_pips=20.0,
+    )
+
+    assert allowed == 25.0
+    assert "ob_override=sdmss_strong" in note
+
+
+def test_order_block_distance_override_does_not_apply_without_strength() -> None:
+    allowed, note = resolve_order_block_distance_limit_pips(
+        8.0,
+        {"impulse_pips": 18.0},
+        confirmation_mode="sweep_displacement_mss",
+        range_note="range_ok",
+        strong_override_max_distance_pips=25.0,
+        strong_override_min_impulse_pips=20.0,
+    )
+
+    assert allowed == 8.0
+    assert note == ""
