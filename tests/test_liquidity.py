@@ -1,7 +1,9 @@
 import pytest
 
 from src.strategy.liquidity import (
+    detect_session_open_scalp_signal,
     detect_sweep_signal,
+    evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
     extract_pivot_levels,
@@ -169,3 +171,48 @@ def test_order_block_distance_override_does_not_apply_without_strength() -> None
 
     assert allowed == 8.0
     assert note == ""
+
+
+def test_evaluate_compression_window_detects_tight_preopen() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},
+        {"time": 2, "open": 1.1001, "high": 1.1003, "low": 1.1000, "close": 1.1002},
+        {"time": 3, "open": 1.1002, "high": 1.10035, "low": 1.10005, "close": 1.10015},
+        {"time": 4, "open": 1.10015, "high": 1.1003, "low": 1.1000, "close": 1.1001},
+    ]
+
+    result = evaluate_compression_window(rates, lookback_bars=4, max_compression_ratio=2.0)
+
+    assert result.blocked is True
+    assert result.note == "compression_ok"
+
+
+def test_detect_session_open_scalp_signal_buy_reclaim() -> None:
+    rates = [
+        {"time": 1775001600, "open": 1.1000, "high": 1.1001, "low": 1.0999, "close": 1.1000},  # 00:00
+        {"time": 1775001660, "open": 1.1000, "high": 1.1001, "low": 1.09995, "close": 1.10005},  # 00:01
+        {"time": 1775001720, "open": 1.10005, "high": 1.1001, "low": 1.09998, "close": 1.10002},  # 00:02
+        {"time": 1775001780, "open": 1.10002, "high": 1.10015, "low": 1.10000, "close": 1.10010},  # 00:03
+        {"time": 1775001840, "open": 1.10010, "high": 1.10020, "low": 1.10005, "close": 1.10015},  # 00:04
+        {"time": 1775001900, "open": 1.10015, "high": 1.10025, "low": 1.10010, "close": 1.10020},  # 00:05
+        {"time": 1775001960, "open": 1.10020, "high": 1.10022, "low": 1.10008, "close": 1.10012},  # 00:06
+        {"time": 1775002020, "open": 1.10012, "high": 1.10018, "low": 1.10002, "close": 1.10008},  # 00:07
+        {"time": 1775002080, "open": 1.10008, "high": 1.10012, "low": 1.10000, "close": 1.10005},  # 00:08
+        {"time": 1775002140, "open": 1.10005, "high": 1.10010, "low": 1.09980, "close": 1.10012},  # 00:09 reclaim
+        {"time": 1775002200, "open": 1.10012, "high": 1.10018, "low": 1.10008, "close": 1.10014},  # live bar
+    ]
+
+    result = detect_session_open_scalp_signal(
+        rates,
+        session_start_utc="00:03",
+        open_range_minutes=5,
+        watch_minutes=180,
+        buffer_price=0.0001,
+        body_ratio_min=0.2,
+        preopen_lookback_bars=3,
+        preopen_max_compression_ratio=3.0,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "scalp_buy_reclaim"

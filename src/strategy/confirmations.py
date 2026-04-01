@@ -192,3 +192,30 @@ def evaluate_sweep_displacement_mss_confirmation(
     if side == "BUY":
         return ConfirmationResult(True, False, "sdmss_buy_confirmed")
     return ConfirmationResult(True, False, "sdmss_sell_confirmed")
+
+
+def evaluate_session_open_scalp_c1_confirmation(
+    rates: Sequence[object],
+    side: str,
+    since_ts: int,
+) -> ConfirmationResult:
+    signal_index = locate_candle_index_by_time(rates, since_ts)
+    if signal_index is None:
+        return ConfirmationResult(False, False, "scalp_signal_candle_not_found")
+
+    last_closed_idx = len(rates) - 2
+    if signal_index >= last_closed_idx:
+        return ConfirmationResult(False, True, "scalp_wait_c1")
+
+    signal_candle = rates[signal_index]
+    for idx in range(signal_index + 1, last_closed_idx + 1):
+        candle = rates[idx]
+        close_price = _price(candle, "close")
+        if side == "BUY":
+            if close_price > _price(signal_candle, "high"):
+                return ConfirmationResult(True, False, "scalp_c1_buy_confirmed")
+        else:
+            if close_price < _price(signal_candle, "low"):
+                return ConfirmationResult(True, False, "scalp_c1_sell_confirmed")
+
+    return ConfirmationResult(False, True, "scalp_wait_c1")

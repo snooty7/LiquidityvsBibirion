@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Literal, Optional, Sequence
 
 
@@ -28,6 +29,15 @@ class RangeFilterResult:
     overlap_ratio: float = 0.0
 
 
+@dataclass(frozen=True)
+class SessionOpenScalpSignalResult:
+    signal: Optional[SweepSignal]
+    note: str
+    opening_range_high: float = 0.0
+    opening_range_low: float = 0.0
+    compression_ratio: float = 0.0
+
+
 def _price(bar: object, field: str) -> float:
     if isinstance(bar, dict):
         return float(bar[field])
@@ -36,6 +46,10 @@ def _price(bar: object, field: str) -> float:
 
 def candle_range(candle: object) -> float:
     return max(_price(candle, "high") - _price(candle, "low"), 1e-10)
+
+
+def candle_body_ratio(candle: object) -> float:
+    return abs(_price(candle, "close") - _price(candle, "open")) / candle_range(candle)
 
 
 def locate_candle_index_by_time(rates: Sequence[object], candle_time: int) -> Optional[int]:
@@ -177,6 +191,126 @@ def evaluate_range_filter(
         note,
         compression_ratio=compression_ratio,
         overlap_ratio=realized_overlap_ratio,
+    )
+
+
+def _parse_hhmm_to_minutes(value: str) -> int:
+    hour_raw, minute_raw = value.split(":", 1)
+    hour = int(hour_raw)
+    minute = int(minute_raw)
+    return hour * 60 + minute
+
+
+def evaluate_compression_window(
+    rates: Sequence[object],
+    *,
+    lookback_bars: int,
+    max_compression_ratio: float,
+) -> RangeFilterResult:
+    window = list(rates[-max(3, lookback_bars) :])
+    if len(window) < 3:
+        return RangeFilterResult(False, "compression_context_insufficient")
+
+    ranges = [candle_range(item) for item in window]
+    avg_range = sum(ranges) / len(ranges)
+    total_range = max(_price(item, "high") for item in window) - min(_price(item, "low") for item in window)
+    compression_ratio = total_range / max(avg_range, 1e-10)
+    blocked = compression_ratio <= max_compression_ratio
+    return RangeFilterResult(
+        blocked=blocked,
+        note="compression_ok" if blocked else "compression_not_tight",
+        compression_ratio=compression_ratio,
+        overlap_ratio=0.0,
+    )
+
+
+def detect_session_open_scalp_signal(
+    rates: Sequence[object],
+    *,
+    session_start_utc: str,
+    open_range_minutes: int,
+    watch_minutes: int,
+    buffer_price: float,
+    body_ratio_min: float,
+    preopen_lookback_bars: int,
+    preopen_max_compression_ratio: float,
+) -> SessionOpenScalpSignalResult:
+    if len(rates) < max(5, preopen_lookback_bars + 3):
+        return SessionOpenScalpSignalResult(None, "scalp_context_insufficient")
+
+    last_closed = rates[-2]
+    last_dt = datetime.fromtimestamp(int(last_closed["time"]), tz=timezone.utc)
+    session_minutes = _parse_hhmm_to_minutes(session_start_utc)
+    session_start = last_dt.replace(
+        hour=session_minutes // 60,
+        minute=session_minutes % 60,
+        second=0,
+        microsecond=0,
+    )
+    if last_dt < session_start:
+        return SessionOpenScalpSignalResult(None, "scalp_before_session")
+
+    open_range_end = session_start.timestamp() + int(open_range_minutes) * 60
+    watch_end = session_start.timestamp() + int(watch_minutes) * 60
+    last_closed_ts = int(last_closed["time"])
+    if last_closed_ts < int(open_range_end):
+        return SessionOpenScalpSignalResult(None, "scalp_opening_range_incomplete")
+    if last_closed_ts >= int(watch_end):
+        return SessionOpenScalpSignalResult(None, "scalp_outside_watch_window")
+
+    opening_range = [
+        bar
+        for bar in rates[:-1]
+        if int(session_start.timestamp()) <= int(bar["time"]) < int(open_range_end)
+    ]
+    if len(opening_range) < max(2, int(open_range_minutes // 2)):
+        return SessionOpenScalpSignalResult(None, "scalp_opening_range_missing")
+
+    preopen = [
+        bar
+        for bar in rates[:-1]
+        if int(bar["time"]) < int(session_start.timestamp())
+    ]
+    compression = evaluate_compression_window(
+        preopen,
+        lookback_bars=preopen_lookback_bars,
+        max_compression_ratio=preopen_max_compression_ratio,
+    )
+    if not compression.blocked:
+        return SessionOpenScalpSignalResult(None, "scalp_preopen_not_compressed", compression_ratio=compression.compression_ratio)
+
+    or_high = max(_price(bar, "high") for bar in opening_range)
+    or_low = min(_price(bar, "low") for bar in opening_range)
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high = _price(last_closed, "high")
+    low = _price(last_closed, "low")
+    body_ratio = candle_body_ratio(last_closed)
+
+    if low < or_low - buffer_price and close_price > or_low and close_price > open_price and body_ratio >= body_ratio_min:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="BUY", level=float(or_low), candle_time=int(last_closed["time"])),
+            "scalp_buy_reclaim",
+            opening_range_high=or_high,
+            opening_range_low=or_low,
+            compression_ratio=compression.compression_ratio,
+        )
+
+    if high > or_high + buffer_price and close_price < or_high and close_price < open_price and body_ratio >= body_ratio_min:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="SELL", level=float(or_high), candle_time=int(last_closed["time"])),
+            "scalp_sell_reject",
+            opening_range_high=or_high,
+            opening_range_low=or_low,
+            compression_ratio=compression.compression_ratio,
+        )
+
+    return SessionOpenScalpSignalResult(
+        None,
+        "scalp_wait_liquidity_reclaim",
+        opening_range_high=or_high,
+        opening_range_low=or_low,
+        compression_ratio=compression.compression_ratio,
     )
 
 

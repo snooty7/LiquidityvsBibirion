@@ -24,6 +24,7 @@ from src.strategy.confirmations import (
     ConfirmationResult,
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
+    evaluate_session_open_scalp_c1_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
@@ -34,7 +35,9 @@ from src.strategy.filters import (
 )
 from src.strategy.liquidity import (
     SweepSignal,
+    detect_session_open_scalp_signal,
     detect_sweep_signal,
+    evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
     extract_pivot_levels,
@@ -251,6 +254,8 @@ def _evaluate_confirmation(
             displacement_body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
             displacement_range_multiple=cfg.confirmation_displacement_range_multiple,
         )
+    if mode == "session_open_scalp_c1":
+        return evaluate_session_open_scalp_c1_confirmation(rates, pending.side, pending.candle_time)
     return ConfirmationResult(False, False, f"unknown_confirmation_mode={mode}")
 
 
@@ -647,32 +652,56 @@ def run_backtest(
 
         if pending is None:
             m5_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
-            levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
-            signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
+            levels: list[float] = []
+            if cfg.strategy_mode == "session_open_scalp":
+                scalp_result = detect_session_open_scalp_signal(
+                    m5_rates,
+                    session_start_utc=cfg.scalp_session_start_utc,
+                    open_range_minutes=cfg.scalp_open_range_minutes,
+                    watch_minutes=cfg.scalp_watch_minutes,
+                    buffer_price=cfg.buffer_pips * pip,
+                    body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+                    preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
+                    preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+                )
+                signal = scalp_result.signal
+            else:
+                levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
+                signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
             if signal is not None:
                 if not _side_allowed(side_mode, signal.side):
                     continue
-                prior_closed = m5_rates[:-2]
-                chop_result = evaluate_range_filter(
-                    prior_closed,
-                    lookback_bars=cfg.range_filter_lookback_bars,
-                    max_compression_ratio=cfg.range_filter_max_compression_ratio,
-                    min_overlap_ratio=cfg.range_filter_min_overlap_ratio,
-                )
-                if chop_result.blocked:
-                    skip_range_chop += 1
-                    continue
+                if cfg.strategy_mode == "session_open_scalp":
+                    compression = evaluate_compression_window(
+                        m5_rates[:-2],
+                        lookback_bars=cfg.scalp_preopen_lookback_bars,
+                        max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+                    )
+                    if not compression.blocked:
+                        skip_range_chop += 1
+                        continue
+                else:
+                    prior_closed = m5_rates[:-2]
+                    chop_result = evaluate_range_filter(
+                        prior_closed,
+                        lookback_bars=cfg.range_filter_lookback_bars,
+                        max_compression_ratio=cfg.range_filter_max_compression_ratio,
+                        min_overlap_ratio=cfg.range_filter_min_overlap_ratio,
+                    )
+                    if chop_result.blocked:
+                        skip_range_chop += 1
+                        continue
 
-                sweep_quality = evaluate_sweep_significance(
-                    m5_rates,
-                    signal,
-                    lookback_bars=cfg.sweep_significance_lookback_bars,
-                    min_range_multiple=cfg.sweep_significance_range_multiple,
-                    min_penetration_price=cfg.sweep_min_penetration_pips * pip,
-                )
-                if not sweep_quality.valid:
-                    skip_sweep_weak += 1
-                    continue
+                    sweep_quality = evaluate_sweep_significance(
+                        m5_rates,
+                        signal,
+                        lookback_bars=cfg.sweep_significance_lookback_bars,
+                        min_range_multiple=cfg.sweep_significance_range_multiple,
+                        min_penetration_price=cfg.sweep_min_penetration_pips * pip,
+                    )
+                    if not sweep_quality.valid:
+                        skip_sweep_weak += 1
+                        continue
 
                 signal_key = semantic_setup_key(signal.candle_time, signal.side, signal.level)
                 if signal_key == last_signal_key:
@@ -694,8 +723,20 @@ def run_backtest(
                 )
         else:
             m5_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
-            levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
-            signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
+            if cfg.strategy_mode == "session_open_scalp":
+                signal = detect_session_open_scalp_signal(
+                    m5_rates,
+                    session_start_utc=cfg.scalp_session_start_utc,
+                    open_range_minutes=cfg.scalp_open_range_minutes,
+                    watch_minutes=cfg.scalp_watch_minutes,
+                    buffer_price=cfg.buffer_pips * pip,
+                    body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+                    preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
+                    preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+                ).signal
+            else:
+                levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
+                signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
             if signal is not None:
                 skip_pending_exists += 1
 

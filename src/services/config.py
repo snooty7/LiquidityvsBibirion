@@ -52,6 +52,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "magic": 92001,
             "max_levels": 25,
             "one_position_per_symbol": True,
+            "strategy_mode": "liquidity_sweep",
             "allowed_sessions_utc": ["06:00-11:55", "12:00-22:00"],
             "use_bias_filter": True,
             "bias_timeframe": "M15",
@@ -70,6 +71,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "cisd_timeframe": "M1",
             "cisd_lookback_bars": 120,
             "cisd_structure_bars": 4,
+            "scalp_session_start_utc": "06:00",
+            "scalp_open_range_minutes": 15,
+            "scalp_watch_minutes": 180,
+            "scalp_preopen_lookback_bars": 12,
+            "scalp_preopen_max_compression_ratio": 2.0,
             "sweep_significance_lookback_bars": 12,
             "sweep_significance_range_multiple": 1.25,
             "sweep_min_penetration_pips": 0.5,
@@ -130,6 +136,7 @@ class SymbolConfig:
     magic: int
     max_levels: int = 25
     one_position_per_symbol: bool = True
+    strategy_mode: str = "liquidity_sweep"
     allowed_sessions_utc: tuple[str, ...] = ()
     use_bias_filter: bool = True
     bias_timeframe: str = "M15"
@@ -148,6 +155,11 @@ class SymbolConfig:
     cisd_timeframe: str = "M1"
     cisd_lookback_bars: int = 120
     cisd_structure_bars: int = 4
+    scalp_session_start_utc: str = "06:00"
+    scalp_open_range_minutes: int = 15
+    scalp_watch_minutes: int = 180
+    scalp_preopen_lookback_bars: int = 12
+    scalp_preopen_max_compression_ratio: float = 2.0
     sweep_significance_lookback_bars: int = 12
     sweep_significance_range_multiple: float = 1.25
     sweep_min_penetration_pips: float = 0.5
@@ -235,6 +247,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 magic=int(row.get("magic", 92000)),
                 max_levels=int(row.get("max_levels", 25)),
                 one_position_per_symbol=bool(row.get("one_position_per_symbol", True)),
+                strategy_mode=str(row.get("strategy_mode", "liquidity_sweep")).lower(),
                 allowed_sessions_utc=tuple(row.get("allowed_sessions_utc", [])),
                 use_bias_filter=bool(row.get("use_bias_filter", True)),
                 bias_timeframe=str(row.get("bias_timeframe", "M15")).upper(),
@@ -257,6 +270,11 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 cisd_timeframe=str(row.get("cisd_timeframe", "M1")).upper(),
                 cisd_lookback_bars=int(row.get("cisd_lookback_bars", 120)),
                 cisd_structure_bars=int(row.get("cisd_structure_bars", 4)),
+                scalp_session_start_utc=str(row.get("scalp_session_start_utc", "06:00")),
+                scalp_open_range_minutes=int(row.get("scalp_open_range_minutes", 15)),
+                scalp_watch_minutes=int(row.get("scalp_watch_minutes", 180)),
+                scalp_preopen_lookback_bars=int(row.get("scalp_preopen_lookback_bars", 12)),
+                scalp_preopen_max_compression_ratio=float(row.get("scalp_preopen_max_compression_ratio", 2.0)),
                 sweep_significance_lookback_bars=int(row.get("sweep_significance_lookback_bars", 12)),
                 sweep_significance_range_multiple=float(row.get("sweep_significance_range_multiple", 1.25)),
                 sweep_min_penetration_pips=float(row.get("sweep_min_penetration_pips", 0.5)),
@@ -285,8 +303,11 @@ def load_config(path: Union[str, Path]) -> AppConfig:
     if runtime.push_notifications_enabled and not runtime.push_notification_url:
         raise ValueError("push_notification_url is required when push_notifications_enabled=true")
 
-    valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss"}
+    valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"}
+    valid_strategy_modes = {"liquidity_sweep", "session_open_scalp"}
     for symbol in symbols:
+        if symbol.strategy_mode not in valid_strategy_modes:
+            raise ValueError(f"Unsupported strategy_mode={symbol.strategy_mode} for {symbol.symbol}")
         if symbol.confirmation_mode not in valid_confirmation_modes:
             raise ValueError(f"Unsupported confirmation_mode={symbol.confirmation_mode} for {symbol.symbol}")
         if symbol.sweep_significance_lookback_bars < 2:
@@ -295,6 +316,14 @@ def load_config(path: Union[str, Path]) -> AppConfig:
             raise ValueError(f"sweep_significance_range_multiple must be > 0 for {symbol.symbol}")
         if symbol.sweep_min_penetration_pips <= 0:
             raise ValueError(f"sweep_min_penetration_pips must be > 0 for {symbol.symbol}")
+        if symbol.scalp_open_range_minutes <= 0:
+            raise ValueError(f"scalp_open_range_minutes must be > 0 for {symbol.symbol}")
+        if symbol.scalp_watch_minutes <= symbol.scalp_open_range_minutes:
+            raise ValueError(f"scalp_watch_minutes must be > scalp_open_range_minutes for {symbol.symbol}")
+        if symbol.scalp_preopen_lookback_bars < 3:
+            raise ValueError(f"scalp_preopen_lookback_bars must be >= 3 for {symbol.symbol}")
+        if symbol.scalp_preopen_max_compression_ratio <= 0:
+            raise ValueError(f"scalp_preopen_max_compression_ratio must be > 0 for {symbol.symbol}")
         if symbol.range_filter_lookback_bars < 3:
             raise ValueError(f"range_filter_lookback_bars must be >= 3 for {symbol.symbol}")
         if symbol.range_filter_max_compression_ratio <= 0:

@@ -1,6 +1,7 @@
 from src.strategy.confirmations import (
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
+    evaluate_session_open_scalp_c1_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
 
@@ -154,3 +155,32 @@ def test_sweep_displacement_mss_confirmation_sell_success() -> None:
     assert result.confirmed is True
     assert result.pending is False
     assert result.note == "sdmss_sell_confirmed"
+
+
+def test_session_open_scalp_c1_confirmation_buy_success() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1006, "low": 1.0994, "close": 1.1003},
+        {"time": 2, "open": 1.1003, "high": 1.1008, "low": 1.1001, "close": 1.1007},
+        {"time": 3, "open": 1.1007, "high": 1.10075, "low": 1.1004, "close": 1.1005},
+        {"time": 4, "open": 1.1005, "high": 1.10055, "low": 1.1003, "close": 1.1004},
+    ]
+
+    result = evaluate_session_open_scalp_c1_confirmation(rates, side="BUY", since_ts=1)
+
+    assert result.confirmed is True
+    assert result.pending is False
+    assert result.note == "scalp_c1_buy_confirmed"
+
+
+def test_session_open_scalp_c1_confirmation_waits_when_no_follow_through() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1006, "low": 1.0994, "close": 1.1003},
+        {"time": 2, "open": 1.1003, "high": 1.1005, "low": 1.1001, "close": 1.1004},
+        {"time": 3, "open": 1.1004, "high": 1.10045, "low": 1.1002, "close": 1.1003},
+    ]
+
+    result = evaluate_session_open_scalp_c1_confirmation(rates, side="BUY", since_ts=1)
+
+    assert result.confirmed is False
+    assert result.pending is True
+    assert result.note == "scalp_wait_c1"

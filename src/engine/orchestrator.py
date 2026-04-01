@@ -35,6 +35,7 @@ from src.strategy.confirmations import (
     ConfirmationResult,
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
+    evaluate_session_open_scalp_c1_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
@@ -45,7 +46,9 @@ from src.strategy.filters import (
     resolve_order_block_distance_limit_pips,
 )
 from src.strategy.liquidity import (
+    detect_session_open_scalp_signal,
     detect_sweep_signal,
+    evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
     extract_pivot_levels,
@@ -1165,6 +1168,9 @@ def evaluate_pending_confirmation(
             displacement_body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
             displacement_range_multiple=cfg.confirmation_displacement_range_multiple,
         )
+    if mode == "session_open_scalp_c1":
+        confirm_rates = adapter.copy_rates(cfg.symbol, cfg.cisd_timeframe, cfg.cisd_lookback_bars)
+        return evaluate_session_open_scalp_c1_confirmation(confirm_rates, pending.side, pending.candle_time)
 
     return ConfirmationResult(False, False, f"unknown_confirmation_mode={mode}")
 
@@ -1184,6 +1190,7 @@ def _build_setup_context(
     return {
         "symbol": cfg.symbol,
         "timeframe": cfg.timeframe,
+        "strategy_mode": cfg.strategy_mode,
         "confirmation_mode": mode,
         "confirm_expiry_bars": int(cfg.confirm_expiry_bars),
         "signal_key": signal_key,
@@ -1277,7 +1284,7 @@ def process_symbol(
     repo: SQLiteRepository,
 ) -> None:
     mode = cfg.confirmation_mode.lower()
-    if mode not in ("none", "c3", "c4", "cisd", "sweep_displacement_mss"):
+    if mode not in ("none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"):
         raise ValueError(f"Unsupported confirmation_mode={cfg.confirmation_mode}")
 
     info = adapter.symbol_info(cfg.symbol)
@@ -1303,8 +1310,24 @@ def process_symbol(
         )
         state.pending_setup = None
 
-    levels = extract_pivot_levels(rates, cfg.pivot_len, cfg.max_levels)
-    signal = detect_sweep_signal(rates, levels, cfg.buffer_pips * pip)
+    levels: list[float] = []
+    signal = None
+    scalp_result = None
+    if cfg.strategy_mode == "session_open_scalp":
+        scalp_result = detect_session_open_scalp_signal(
+            rates,
+            session_start_utc=cfg.scalp_session_start_utc,
+            open_range_minutes=cfg.scalp_open_range_minutes,
+            watch_minutes=cfg.scalp_watch_minutes,
+            buffer_price=cfg.buffer_pips * pip,
+            body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+            preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
+            preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+        )
+        signal = scalp_result.signal
+    else:
+        levels = extract_pivot_levels(rates, cfg.pivot_len, cfg.max_levels)
+        signal = detect_sweep_signal(rates, levels, cfg.buffer_pips * pip)
 
     entry_setup: Optional[PendingSetup] = None
     entry_side: Optional[str] = None
@@ -1314,61 +1337,70 @@ def process_symbol(
 
     if signal is not None and not has_active_pending_setup(state, mode):
         signal_key = semantic_setup_key(signal.candle_time, signal.side, signal.level)
-        prior_closed = rates[:-2]
-        chop_result = evaluate_range_filter(
-            prior_closed,
-            lookback_bars=cfg.range_filter_lookback_bars,
-            max_compression_ratio=cfg.range_filter_max_compression_ratio,
-            min_overlap_ratio=cfg.range_filter_min_overlap_ratio,
-        )
-        if chop_result.blocked:
-            now_utc = datetime.now(timezone.utc)
-            log_event(
-                log_file,
-                {
-                    "ts": now_utc.isoformat(),
-                    "symbol": cfg.symbol,
-                    "timeframe": cfg.timeframe,
-                    "strategy": "SWEEP_V2",
-                    "event": "SKIP_RANGE_CHOP",
-                    "side": signal.side,
-                    "level": f"{signal.level:.5f}",
-                    "candle_time": int(signal.candle_time),
-                    "message": (
-                        f"{chop_result.note} compression={chop_result.compression_ratio:.2f} "
-                        f"overlap={chop_result.overlap_ratio:.2f}"
-                    ),
-                },
+        if cfg.strategy_mode == "session_open_scalp":
+            chop_result = evaluate_compression_window(
+                rates[:-2],
+                lookback_bars=cfg.scalp_preopen_lookback_bars,
+                max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
             )
-            return
+            sweep_note = scalp_result.note if scalp_result is not None else "scalp_signal"
+        else:
+            prior_closed = rates[:-2]
+            chop_result = evaluate_range_filter(
+                prior_closed,
+                lookback_bars=cfg.range_filter_lookback_bars,
+                max_compression_ratio=cfg.range_filter_max_compression_ratio,
+                min_overlap_ratio=cfg.range_filter_min_overlap_ratio,
+            )
+            if chop_result.blocked:
+                now_utc = datetime.now(timezone.utc)
+                log_event(
+                    log_file,
+                    {
+                        "ts": now_utc.isoformat(),
+                        "symbol": cfg.symbol,
+                        "timeframe": cfg.timeframe,
+                        "strategy": "SWEEP_V2",
+                        "event": "SKIP_RANGE_CHOP",
+                        "side": signal.side,
+                        "level": f"{signal.level:.5f}",
+                        "candle_time": int(signal.candle_time),
+                        "message": (
+                            f"{chop_result.note} compression={chop_result.compression_ratio:.2f} "
+                            f"overlap={chop_result.overlap_ratio:.2f}"
+                        ),
+                    },
+                )
+                return
 
-        sweep_quality = evaluate_sweep_significance(
-            rates,
-            signal,
-            lookback_bars=cfg.sweep_significance_lookback_bars,
-            min_range_multiple=cfg.sweep_significance_range_multiple,
-            min_penetration_price=cfg.sweep_min_penetration_pips * pip,
-        )
-        if not sweep_quality.valid:
-            now_utc = datetime.now(timezone.utc)
-            log_event(
-                log_file,
-                {
-                    "ts": now_utc.isoformat(),
-                    "symbol": cfg.symbol,
-                    "timeframe": cfg.timeframe,
-                    "strategy": "SWEEP_V2",
-                    "event": "SKIP_SWEEP_WEAK",
-                    "side": signal.side,
-                    "level": f"{signal.level:.5f}",
-                    "candle_time": int(signal.candle_time),
-                    "message": (
-                        f"{sweep_quality.note} sweep_range={sweep_quality.sweep_range:.5f} "
-                        f"avg_range={sweep_quality.avg_range:.5f} penetration={sweep_quality.penetration_price:.5f}"
-                    ),
-                },
+            sweep_quality = evaluate_sweep_significance(
+                rates,
+                signal,
+                lookback_bars=cfg.sweep_significance_lookback_bars,
+                min_range_multiple=cfg.sweep_significance_range_multiple,
+                min_penetration_price=cfg.sweep_min_penetration_pips * pip,
             )
-            return
+            if not sweep_quality.valid:
+                now_utc = datetime.now(timezone.utc)
+                log_event(
+                    log_file,
+                    {
+                        "ts": now_utc.isoformat(),
+                        "symbol": cfg.symbol,
+                        "timeframe": cfg.timeframe,
+                        "strategy": "SWEEP_V2",
+                        "event": "SKIP_SWEEP_WEAK",
+                        "side": signal.side,
+                        "level": f"{signal.level:.5f}",
+                        "candle_time": int(signal.candle_time),
+                        "message": (
+                            f"{sweep_quality.note} sweep_range={sweep_quality.sweep_range:.5f} "
+                            f"avg_range={sweep_quality.avg_range:.5f} penetration={sweep_quality.penetration_price:.5f}"
+                        ),
+                    },
+                )
+                return
+            sweep_note = sweep_quality.note
 
         if not matches_signal_key(state.last_signal_key, signal.candle_time, signal.side, signal.level):
             state.last_signal_key = signal_key
@@ -1392,7 +1424,7 @@ def process_symbol(
                     signal_level=float(signal.level),
                     signal_candle_time=int(signal.candle_time),
                     signal_key=signal_key,
-                    sweep_note=sweep_quality.note,
+                    sweep_note=sweep_note,
                     range_note=chop_result.note,
                 ),
                 initial_status=initial_status,
