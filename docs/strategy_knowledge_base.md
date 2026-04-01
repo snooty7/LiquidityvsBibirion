@@ -131,3 +131,57 @@ Result:
 - `reports/backtest_audusd_180d.csv`
 - `reports/backtest_nzdusd_180d.csv`
 - `reports/backtest_usdchf_180d.csv`
+
+## Future Branch Roadmap
+### 1. `eurusd_m30_liquidity_branch`
+Status:
+- Enabled locally in demo as a low-risk secondary branch.
+- Still under-validated because the usable historical sample is small.
+
+Purpose:
+- Capture slower, cleaner liquidity/structure moves than `EURUSD M5`.
+- Accept lower trade frequency in exchange for potentially higher per-trade quality.
+
+Current profile:
+- `timeframe = M30`
+- `bias_timeframe = H1`
+- `confirmation timeframe = M5`
+- `sl_pips = 20`
+- `risk_pct = 0.05`
+- `max_lot = 0.03`
+
+Decision rule:
+- Keep it live only on demo until meaningful sample size is collected.
+- Do not promote it to the primary branch yet.
+
+### 2. `usdjpy_liquidity_branch`
+Status:
+- Research only.
+
+Purpose:
+- Explore whether a JPY-specific liquidity model can become a second production branch.
+
+Current evidence:
+- Best tested branch is roughly flat, not convincingly profitable.
+- It is not ready for live deployment.
+
+Next research direction:
+- Separate thresholds from `EURUSD`.
+- Focus on spread handling, session timing, and confirmation strength.
+
+### 3. `session_open_scalp_branch`
+Status:
+- Design stage only.
+
+Purpose:
+- Add a high-frequency, session-driven branch that still respects the core liquidity philosophy.
+- This branch must not become an indicator-noise bot.
+
+Core idea:
+- Opening range liquidity event
+- Followed by `C1`-style micro confirmation
+- Fast management, fast invalidation, and session-bound exits
+
+Research requirement:
+- Build and backtest it as a separate branch, not as a patch on the current `M5` liquidity model.
+
