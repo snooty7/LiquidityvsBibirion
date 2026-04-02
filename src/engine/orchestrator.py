@@ -179,6 +179,68 @@ def log_event(log_file: Path, row: dict) -> None:
         writer.writerow({field: row.get(field, "") for field in LOG_FIELDS})
 
 
+def _setup_wait_stage(note: str) -> str:
+    raw = str(note or "").strip().lower()
+    if "wait_displacement" in raw:
+        return "displacement"
+    if "wait_bos" in raw or "wait_buy_mss" in raw or "wait_sell_mss" in raw:
+        return "bos"
+    if "wait_reclaim" in raw:
+        return "reclaim"
+    if "await_next_closed_candle" in raw:
+        return "next_close"
+    if raw.startswith("confirm="):
+        return "confirmed"
+    return raw or "unknown"
+
+
+def _setup_short_id(setup_id: Optional[str]) -> str:
+    return str(setup_id or "")[:8]
+
+
+def _setup_context_filters(pending: PendingSetup) -> str:
+    filters = dict(pending.context.get("filters") or {})
+    sweep_note = str(filters.get("sweep_note") or "")
+    range_note = str(filters.get("range_note") or "")
+    parts = []
+    if sweep_note:
+        parts.append(f"sweep={sweep_note}")
+    if range_note:
+        parts.append(f"range={range_note}")
+    return " ".join(parts)
+
+
+def print_setup_visual(
+    *,
+    cfg: SymbolConfig,
+    pending: PendingSetup,
+    state_label: str,
+    detail: str = "",
+    stage_note: str = "",
+    reason: str = "",
+) -> None:
+    now_utc = datetime.now(timezone.utc).isoformat()
+    header = (
+        f"[{now_utc}] SETUP {cfg.symbol} {cfg.timeframe} #{_setup_short_id(pending.setup_id)} "
+        f"{pending.side} level={pending.level:.5f} {state_label}"
+    )
+    meta_parts = [
+        f"mode={cfg.confirmation_mode}",
+        f"key={pending.signal_key}",
+        f"created_bar={pending.candle_time}",
+    ]
+    filters_text = _setup_context_filters(pending)
+    if filters_text:
+        meta_parts.append(filters_text)
+    print(header)
+    print(f"    stages: pending -> {_setup_wait_stage(stage_note or pending.last_note)}")
+    if detail:
+        print(f"    detail: {detail}")
+    if reason:
+        print(f"    reason: {reason}")
+    print(f"    meta: {' | '.join(meta_parts)}")
+
+
 def emit_event(
     log_file: Path,
     repo: SQLiteRepository,
@@ -1170,6 +1232,14 @@ def cancel_stale_pending_setup(
                 "candle_time": pending.candle_time,
             },
         )
+    print_setup_visual(
+        cfg=cfg,
+        pending=pending,
+        state_label="DROP",
+        stage_note=pending.last_note,
+        reason=reason,
+        detail=f"expired_at_bar={pending.expires_at} reference_bar={int(reference_bar_time)}",
+    )
 
 
 def cancel_entry_setup(
@@ -1207,6 +1277,14 @@ def cancel_entry_setup(
             },
             csv_row=csv_row,
         )
+    print_setup_visual(
+        cfg=cfg,
+        pending=setup,
+        state_label="DROP",
+        stage_note=setup.last_note,
+        reason=reason,
+        detail=message,
+    )
 
 
 def has_active_pending_setup(state: SymbolState, mode: str) -> bool:
@@ -1603,6 +1681,14 @@ def process_symbol(
                             "message": f"setup_id={stored_setup.setup_id} confirmation_mode={mode}",
                         },
                     )
+                    if state.pending_setup is not None:
+                        print_setup_visual(
+                            cfg=cfg,
+                            pending=state.pending_setup,
+                            state_label="PENDING" if mode != "none" else "CONFIRMED",
+                            stage_note="confirmed" if mode == "none" else "pending",
+                            detail=f"confirmation_mode={mode}",
+                        )
         else:
             now_utc = datetime.now(timezone.utc)
             log_event(
@@ -1786,6 +1872,14 @@ def process_symbol(
                         "candle_time": pending.candle_time,
                     },
                 )
+            pending.last_note = str(confirm_result.note)
+            print_setup_visual(
+                cfg=cfg,
+                pending=pending,
+                state_label="CONFIRMED",
+                stage_note=str(confirm_result.note),
+                detail=f"confirm_note={confirm_result.note}",
+            )
             entry_setup = pending
             entry_side = pending.side
             entry_level = float(pending.level)
@@ -1810,6 +1904,13 @@ def process_symbol(
                         "message": f"mode={mode} {confirm_result.note} setup_id={pending.setup_id}",
                     },
                 )
+                print_setup_visual(
+                    cfg=cfg,
+                    pending=pending,
+                    state_label="WAIT",
+                    stage_note=str(confirm_result.note),
+                    detail=f"confirm_note={confirm_result.note}",
+                )
             state.pending_setup = pending
             return
         else:
@@ -1833,6 +1934,14 @@ def process_symbol(
                     "candle_time": pending.candle_time,
                     "message": f"mode={mode} {confirm_result.note} setup_id={pending.setup_id}",
                 },
+            )
+            print_setup_visual(
+                cfg=cfg,
+                pending=pending,
+                state_label="DROP",
+                stage_note=pending.last_note,
+                reason=reject_note,
+                detail=f"confirm_rejected mode={mode}",
             )
             state.pending_setup = None
             return

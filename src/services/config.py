@@ -82,7 +82,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "range_filter_lookback_bars": 8,
             "range_filter_max_compression_ratio": 2.5,
             "range_filter_min_overlap_ratio": 0.75,
-            "confirmation_displacement_body_ratio_min": 0.6,
+            "confirmation_displacement_body_ratio_min": 0.55,
             "confirmation_displacement_range_multiple": 1.8,
             "micro_burst_pullback_bars": 2,
             "micro_burst_body_ratio_min": 0.45,
@@ -174,7 +174,7 @@ class SymbolConfig:
     range_filter_lookback_bars: int = 8
     range_filter_max_compression_ratio: float = 2.5
     range_filter_min_overlap_ratio: float = 0.75
-    confirmation_displacement_body_ratio_min: float = 0.6
+    confirmation_displacement_body_ratio_min: float = 0.55
     confirmation_displacement_range_multiple: float = 1.8
     micro_burst_pullback_bars: int = 2
     micro_burst_body_ratio_min: float = 0.45
@@ -298,7 +298,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 range_filter_max_compression_ratio=float(row.get("range_filter_max_compression_ratio", 2.5)),
                 range_filter_min_overlap_ratio=float(row.get("range_filter_min_overlap_ratio", 0.75)),
                 confirmation_displacement_body_ratio_min=float(
-                    row.get("confirmation_displacement_body_ratio_min", 0.6)
+                    row.get("confirmation_displacement_body_ratio_min", 0.55)
                 ),
                 confirmation_displacement_range_multiple=float(
                     row.get("confirmation_displacement_range_multiple", 1.8)

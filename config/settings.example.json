@@ -65,7 +65,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     },
     {
       "symbol": "GBPUSD",
@@ -103,7 +104,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     },
     {
       "symbol": "USDJPY",
@@ -141,7 +143,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     },
     {
       "symbol": "USDCHF",
@@ -179,7 +182,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     },
     {
       "symbol": "AUDUSD",
@@ -217,7 +221,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     },
     {
       "symbol": "USDCAD",
@@ -255,7 +260,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     },
     {
       "symbol": "NZDUSD",
@@ -293,7 +299,8 @@
       "cisd_timeframe": "M1",
       "cisd_lookback_bars": 120,
       "cisd_structure_bars": 4,
-      "confirmation_displacement_range_multiple": 1.8
+      "confirmation_displacement_range_multiple": 1.8,
+      "confirmation_displacement_body_ratio_min": 0.55
     }
   ]
 }

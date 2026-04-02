@@ -8,7 +8,7 @@
 - Use `confirm_expiry_bars = 3`.
 - Use `range_filter_max_compression_ratio = 2.5`.
 - Use `range_filter_min_overlap_ratio = 0.75`.
-- Use `confirmation_displacement_body_ratio_min = 0.60`.
+- Use `confirmation_displacement_body_ratio_min = 0.55`.
 - Use `confirmation_displacement_range_multiple = 1.80`.
 - Keep base `order_block_max_distance_pips = 8.0`.
 - Do not enable the conditional order-block override in live config yet.
@@ -39,6 +39,29 @@ Interpretation:
 - Better profit factor and expectancy.
 - Slightly lower drawdown.
 - This is a meaningful improvement, not just a trade-count artifact.
+
+## Displacement strictness adjustment
+Observed live behavior on `2026-04-02`:
+- several `EURUSD M5` setups reached `SETUP_PENDING`
+- they stayed at `sdmss_wait_displacement`
+- they expired before confirmation
+
+Action taken:
+- keep `confirmation_displacement_range_multiple = 1.80`
+- loosen only `confirmation_displacement_body_ratio_min` from `0.60` to `0.55`
+
+Reasoning:
+- this is a smaller and safer relaxation than cutting the range multiple
+- it accepts slightly less perfect displacement candles without fully opening the gate
+
+Quick comparison on a moderate validation pass:
+- baseline `0.60 / 1.80`: `78 trades`, net `-3.13`, PF `0.989`
+- loosened `0.55 / 1.80`: `82 trades`, net `+6.86`, PF `1.023`
+
+Interpretation:
+- the loosened body-ratio gate is still weakly edged, not a dramatic improvement
+- but it is the best result among the tested small relaxations
+- therefore it is a reasonable tactical change for ongoing demo observation
 
 ## Multi-symbol expansion results
 All tests used the same strategy family on a 180-day window.
