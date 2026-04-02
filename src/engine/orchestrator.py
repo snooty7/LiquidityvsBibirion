@@ -33,6 +33,7 @@ from src.risk.sizing import SymbolTradeInfo, calc_lot_by_risk, calc_position_ris
 from src.services.config import AppConfig, SymbolConfig, load_config
 from src.strategy.confirmations import (
     ConfirmationResult,
+    evaluate_none_confirmation,
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
     evaluate_session_open_scalp_c1_confirmation,
@@ -46,8 +47,11 @@ from src.strategy.filters import (
     resolve_order_block_distance_limit_pips,
 )
 from src.strategy.liquidity import (
+    RangeFilterResult,
+    detect_h4_bias_micro_burst_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
@@ -114,6 +118,7 @@ class SymbolState:
     last_signal_key: Optional[str] = None
     pending_setup: Optional[PendingSetup] = None
     risk_close_retry_after: dict[int, float] = field(default_factory=dict)
+    last_observation_note: Optional[str] = None
 
 
 @dataclass
@@ -127,6 +132,10 @@ class GlobalState:
 def trading_day_key(now_utc: datetime) -> str:
     # Trading-day boundary is UTC midnight for deterministic daily continuity.
     return now_utc.strftime("%Y-%m-%d")
+
+
+def branch_id(cfg: SymbolConfig) -> str:
+    return f"{cfg.symbol}|{cfg.timeframe}|{int(cfg.magic)}"
 
 
 def parse_hhmm(value: str) -> int:
@@ -315,7 +324,7 @@ def save_guard_state(repo: SQLiteRepository, global_state: GlobalState) -> None:
 def save_symbol_state(repo: SQLiteRepository, cfg: SymbolConfig, state: SymbolState) -> None:
     repo.save_symbol_runtime_state(
         SymbolRuntimeStateRecord(
-            symbol=cfg.symbol,
+            symbol=branch_id(cfg),
             timeframe=cfg.timeframe,
             last_trade_ts=float(state.last_trade_ts),
             cooldown_until=float(state.cooldown_until),
@@ -327,12 +336,28 @@ def save_symbol_state(repo: SQLiteRepository, cfg: SymbolConfig, state: SymbolSt
     )
 
 
+def effective_trailing_settings(cfg: SymbolConfig, runtime: RuntimeConfig) -> tuple[str, float, float, bool]:
+    mode = str(cfg.trailing_stop_mode or runtime.trailing_stop_mode or "off").lower()
+    activation_r = (
+        float(cfg.trailing_activation_r)
+        if cfg.trailing_activation_r is not None
+        else float(runtime.trailing_activation_r)
+    )
+    gap_r = float(cfg.trailing_gap_r) if cfg.trailing_gap_r is not None else float(runtime.trailing_gap_r)
+    remove_tp = (
+        bool(cfg.trailing_remove_tp_on_activation)
+        if cfg.trailing_remove_tp_on_activation is not None
+        else bool(runtime.trailing_remove_tp_on_activation)
+    )
+    return mode, activation_r, gap_r, remove_tp
+
+
 def restore_runtime_state(
     repo: SQLiteRepository,
     app_config: AppConfig,
     states: dict[str, SymbolState],
     global_state: GlobalState,
-    pending_by_symbol: dict[str, PendingSetupRecord],
+    pending_by_branch: dict[str, PendingSetupRecord],
 ) -> None:
     today_key = trading_day_key(datetime.now(timezone.utc))
     guard = repo.get_guard_state()
@@ -348,8 +373,8 @@ def restore_runtime_state(
         global_state.daily_loss_announced = False
 
     for cfg in app_config.symbols:
-        state = states[cfg.symbol]
-        persisted = repo.get_symbol_runtime_state(cfg.symbol)
+        state = states[branch_id(cfg)]
+        persisted = repo.get_symbol_runtime_state(branch_id(cfg))
         if persisted is not None:
             state.last_trade_ts = float(persisted.last_trade_ts)
             state.cooldown_until = float(persisted.cooldown_until)
@@ -364,7 +389,7 @@ def restore_runtime_state(
             int(item.ticket): float(item.retry_after) for item in repo.list_risk_retries(cfg.symbol)
         }
 
-        pending_record = pending_by_symbol.get(cfg.symbol)
+        pending_record = pending_by_branch.get(branch_id(cfg))
         if pending_record is not None and pending_record.status not in PENDING_TERMINAL_STATUSES:
             state.pending_setup = pending_from_record(pending_record, requires_revalidation=True)
 
@@ -379,7 +404,7 @@ def cleanup_stale_retry_state(
     now_utc = datetime.now(timezone.utc).isoformat()
 
     for cfg in app_config.symbols:
-        state = states[cfg.symbol]
+        state = states[branch_id(cfg)]
         for ticket in list(state.risk_close_retry_after.keys()):
             if ticket in active_open_tickets:
                 continue
@@ -415,7 +440,7 @@ def checkpoint_state_snapshot(
     with repo.transaction():
         save_guard_state(repo, global_state)
         for cfg in app_config.symbols:
-            save_symbol_state(repo, cfg, states[cfg.symbol])
+            save_symbol_state(repo, cfg, states[branch_id(cfg)])
         emit_event(
             log_file=log_file,
             repo=repo,
@@ -491,7 +516,10 @@ def sync_open_positions_for_symbol(
 ) -> None:
     now_utc = datetime.now(timezone.utc)
     broker_positions = adapter.positions_get(cfg.symbol, magic=cfg.magic)
-    local_open = {int(pos.ticket): pos for pos in repo.list_open_positions(symbol=cfg.symbol, status=POSITION_STATUS_OPEN)}
+    local_open = {
+        int(pos.ticket): pos
+        for pos in repo.list_open_positions(symbol=cfg.symbol, magic=cfg.magic, status=POSITION_STATUS_OPEN)
+    }
 
     broker_tickets: set[int] = set()
     for position in broker_positions:
@@ -739,6 +767,7 @@ def manage_symbol_positions(
     info = SymbolTradeInfo.from_mt5(adapter.symbol_info(cfg.symbol))
     point = float(info.point)
     stops_level_price = float((getattr(adapter.symbol_info(cfg.symbol), "trade_stops_level", 0) or 0) * point)
+    trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(cfg, runtime)
 
     for position in positions:
         ticket = int(position.ticket)
@@ -748,15 +777,15 @@ def manage_symbol_positions(
         current_sl = float(getattr(position, "sl", 0.0) or 0.0)
         current_tp = float(getattr(position, "tp", 0.0) or 0.0)
 
-        if runtime.trailing_stop_mode == "r_multiple":
+        if trailing_mode == "r_multiple":
             desired_sl = compute_r_multiple_trailing_stop(
                 side=side,
                 open_price=float(getattr(position, "price_open", 0.0) or 0.0),
                 current_exit_price_value=current_price,
                 current_sl=current_sl,
                 risk_distance_price=position_risk_distance_price(cfg, info),
-                activation_r=float(runtime.trailing_activation_r),
-                gap_r=float(runtime.trailing_gap_r),
+                activation_r=float(trailing_activation_r),
+                gap_r=float(trailing_gap_r),
             )
             if desired_sl is not None:
                 if side == "BUY":
@@ -767,7 +796,7 @@ def manage_symbol_positions(
                     valid_trail = (current_sl <= 0 or desired_sl < current_sl - point) and desired_sl > current_price
 
                 if valid_trail:
-                    target_tp = 0.0 if runtime.trailing_remove_tp_on_activation else current_tp
+                    target_tp = 0.0 if trailing_remove_tp else current_tp
                     modify = adapter.modify_position_protection(
                         cfg.symbol,
                         position,
@@ -784,7 +813,7 @@ def manage_symbol_positions(
                             ticket=ticket,
                             message=(
                                 f"trail sl->{desired_sl:.5f} tp->{target_tp:.5f} "
-                                f"mode=r_multiple"
+                                f"mode={trailing_mode}"
                             ),
                             payload={
                                 "side": side,
@@ -793,8 +822,8 @@ def manage_symbol_positions(
                                 "from_tp": current_tp,
                                 "to_tp": target_tp,
                                 "current_price": current_price,
-                                "activation_r": float(runtime.trailing_activation_r),
-                                "gap_r": float(runtime.trailing_gap_r),
+                                "activation_r": float(trailing_activation_r),
+                                "gap_r": float(trailing_gap_r),
                                 "retcode": modify.retcode,
                             },
                             csv_row={
@@ -817,10 +846,14 @@ def manage_symbol_positions(
         loss_limit_money: Optional[float] = None
         loss_guard_mode: Optional[str] = None
 
+        early_exit_reason = resolve_early_exit_reason(adapter, cfg, position, info)
+        if early_exit_reason is not None:
+            reason = early_exit_reason
+
         loss_limit_money, loss_reason, loss_guard_mode = resolve_loss_guard(runtime, position, info)
-        if loss_limit_money is not None and pnl_money <= -loss_limit_money:
+        if reason is None and loss_limit_money is not None and pnl_money <= -loss_limit_money:
             reason = loss_reason
-        if runtime.max_profit_per_trade_usd > 0 and pnl_money >= runtime.max_profit_per_trade_usd:
+        if reason is None and runtime.max_profit_per_trade_usd > 0 and pnl_money >= runtime.max_profit_per_trade_usd:
             reason = f"max_profit ${runtime.max_profit_per_trade_usd:.2f}"
 
         if reason is None:
@@ -979,6 +1012,46 @@ def current_exit_price(position: object, tick: object) -> float:
     if int(position.type) == 0:
         return float(getattr(tick, "bid", 0.0) or 0.0)
     return float(getattr(tick, "ask", 0.0) or 0.0)
+
+
+def resolve_early_exit_reason(
+    adapter: MT5Adapter,
+    cfg: SymbolConfig,
+    position: object,
+    symbol_info: SymbolTradeInfo,
+) -> Optional[str]:
+    adverse_limit = int(getattr(cfg, "early_exit_consecutive_adverse_closes", 0) or 0)
+    large_adverse_r = float(getattr(cfg, "early_exit_large_adverse_body_r", 0.0) or 0.0)
+    if adverse_limit <= 0 and large_adverse_r <= 0:
+        return None
+
+    bars_needed = max(3, adverse_limit + 2)
+    rates = adapter.copy_rates(cfg.symbol, cfg.timeframe, bars_needed)
+    if len(rates) < 3:
+        return None
+
+    closed = list(rates[:-1])
+    if not closed:
+        return None
+
+    side = "BUY" if int(position.type) == 0 else "SELL"
+    risk_distance = abs(float(getattr(position, "price_open", 0.0) or 0.0) - float(getattr(position, "sl", 0.0) or 0.0))
+    adverse_count = 0
+    for candle in reversed(closed):
+        open_price = float(candle["open"])
+        close_price = float(candle["close"])
+        adverse = close_price < open_price if side == "BUY" else close_price > open_price
+        if not adverse:
+            break
+        adverse_count += 1
+        if large_adverse_r > 0 and risk_distance > 0:
+            body_size = abs(close_price - open_price)
+            if body_size >= risk_distance * large_adverse_r:
+                return f"large_adverse_bar_exit x{large_adverse_r:.2f}R"
+        if adverse_limit > 0 and adverse_count >= adverse_limit:
+            return f"adverse_close_exit {adverse_limit}bars"
+
+    return None
 
 
 def compute_r_multiple_trailing_stop(
@@ -1151,6 +1224,8 @@ def evaluate_pending_confirmation(
     rates,
 ) -> ConfirmationResult:
     mode = cfg.confirmation_mode.lower()
+    if mode == "none":
+        return evaluate_none_confirmation(rates, pending.candle_time)
     if mode in ("c3", "c4"):
         return evaluate_c3_c4_confirmation(rates, pending.side, pending.candle_time, mode)
 
@@ -1190,6 +1265,8 @@ def _build_setup_context(
     return {
         "symbol": cfg.symbol,
         "timeframe": cfg.timeframe,
+        "magic": int(cfg.magic),
+        "branch_id": branch_id(cfg),
         "strategy_mode": cfg.strategy_mode,
         "confirmation_mode": mode,
         "confirm_expiry_bars": int(cfg.confirm_expiry_bars),
@@ -1218,6 +1295,47 @@ def semantic_setup_key(candle_time: int, side: str, level: float) -> str:
 
 def legacy_semantic_setup_key(candle_time: int, side: str, level: float) -> str:
     return f"{int(candle_time)}|{side}|{float(level):.5f}"
+
+
+def scalp_observation_event(note: str) -> str:
+    mapping = {
+        "scalp_before_session": "SCALP_OUTSIDE_WINDOW",
+        "scalp_outside_watch_window": "SCALP_OUTSIDE_WINDOW",
+        "scalp_opening_range_incomplete": "SCALP_WAIT_OPENING_RANGE",
+        "scalp_opening_range_missing": "SCALP_WAIT_OPENING_RANGE",
+        "scalp_preopen_not_compressed": "SCALP_PREOPEN_NOT_COMPRESSED",
+        "scalp_context_insufficient": "SCALP_CONTEXT_INSUFFICIENT",
+        "scalp_wait_liquidity_reclaim": "SCALP_WAIT_RECLAIM",
+    }
+    return mapping.get(note, "SCALP_STATUS")
+
+
+def emit_scalp_observation_once(
+    *,
+    state: SymbolState,
+    log_file: Path,
+    cfg: SymbolConfig,
+    note: str,
+    message: str,
+    candle_time: int,
+) -> None:
+    observation_key = f"{int(candle_time)}|{note}"
+    if state.last_observation_note == observation_key:
+        return
+    state.last_observation_note = observation_key
+    now_utc = datetime.now(timezone.utc)
+    log_event(
+        log_file,
+        {
+            "ts": now_utc.isoformat(),
+            "symbol": cfg.symbol,
+            "timeframe": cfg.timeframe,
+            "strategy": "SWEEP_V2",
+            "event": scalp_observation_event(note),
+            "candle_time": int(candle_time),
+            "message": message,
+        },
+    )
 
 
 def signal_key_variants(candle_time: int, side: str, level: float) -> set[str]:
@@ -1313,6 +1431,7 @@ def process_symbol(
     levels: list[float] = []
     signal = None
     scalp_result = None
+    micro_burst_result = None
     if cfg.strategy_mode == "session_open_scalp":
         scalp_result = detect_session_open_scalp_signal(
             rates,
@@ -1325,6 +1444,38 @@ def process_symbol(
             preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
         )
         signal = scalp_result.signal
+        if scalp_result.signal is None:
+            emit_scalp_observation_once(
+                state=state,
+                log_file=log_file,
+                cfg=cfg,
+                note=scalp_result.note,
+                candle_time=closed_bar_time,
+                message=(
+                    f"{scalp_result.note} or_high={scalp_result.opening_range_high:.5f} "
+                    f"or_low={scalp_result.opening_range_low:.5f} "
+                    f"compression={scalp_result.compression_ratio:.2f}"
+                ),
+            )
+        else:
+            state.last_observation_note = None
+    elif cfg.strategy_mode == "h4_bias_micro_burst":
+        micro_burst_result = detect_h4_bias_micro_burst_signal(
+            rates,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            buffer_price=cfg.buffer_pips * pip,
+        )
+        signal = micro_burst_result.signal
+    elif cfg.strategy_mode == "trend_micro_burst_v2":
+        micro_burst_result = detect_trend_micro_burst_v2_signal(
+            rates,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            range_multiple=cfg.confirmation_displacement_range_multiple,
+            buffer_price=cfg.buffer_pips * pip,
+        )
+        signal = micro_burst_result.signal
     else:
         levels = extract_pivot_levels(rates, cfg.pivot_len, cfg.max_levels)
         signal = detect_sweep_signal(rates, levels, cfg.buffer_pips * pip)
@@ -1344,6 +1495,9 @@ def process_symbol(
                 max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
             )
             sweep_note = scalp_result.note if scalp_result is not None else "scalp_signal"
+        elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2"):
+            chop_result = RangeFilterResult(False, "micro_burst_ok", 0.0, 0.0)
+            sweep_note = micro_burst_result.note if micro_burst_result is not None else "micro_burst_signal"
         else:
             prior_closed = rates[:-2]
             chop_result = evaluate_range_filter(
@@ -2057,7 +2211,7 @@ def run(config_path: str = "config/settings.json") -> None:
     bot_instance_id = uuid4().hex
     repo.set_bot_instance_id(bot_instance_id)
 
-    states = {cfg.symbol: SymbolState() for cfg in app_config.symbols}
+    states = {branch_id(cfg): SymbolState() for cfg in app_config.symbols}
     global_state = GlobalState()
 
     try:
@@ -2090,7 +2244,7 @@ def run(config_path: str = "config/settings.json") -> None:
             message="2_load_broker_snapshot_and_reconcile",
             payload={"phase": 2},
         )
-        pending_by_symbol, recovery_stats = bootstrap_recovery(adapter, app_config, repo, recovery_logger)
+        pending_by_branch, recovery_stats = bootstrap_recovery(adapter, app_config, repo, recovery_logger)
         emit_event(
             log_file=log_file,
             repo=repo,
@@ -2100,7 +2254,7 @@ def run(config_path: str = "config/settings.json") -> None:
             message="3_rebuild_memory_state",
             payload={"phase": 3},
         )
-        restore_runtime_state(repo, app_config, states, global_state, pending_by_symbol)
+        restore_runtime_state(repo, app_config, states, global_state, pending_by_branch)
         cleanup_stale_retry_state(repo, app_config, states, log_file)
         emit_event(
             log_file=log_file,
@@ -2151,12 +2305,18 @@ def run(config_path: str = "config/settings.json") -> None:
         )
 
         for cfg in app_config.symbols:
+            trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(
+                cfg,
+                app_config.runtime,
+            )
             print(
                 f"{cfg.symbol} tf={cfg.timeframe} confirm={cfg.confirmation_mode}/{cfg.confirm_expiry_bars} "
                 f"cisd={cfg.cisd_timeframe}/{cfg.cisd_structure_bars}/{cfg.cisd_lookback_bars} "
                 f"bias={cfg.use_bias_filter}/{cfg.bias_timeframe}/{cfg.bias_ema_period} "
                 f"ob={cfg.use_order_block_filter}/{cfg.order_block_zone_mode}/{cfg.order_block_lookback_bars}/"
-                f"{cfg.order_block_max_distance_pips}/{cfg.order_block_min_impulse_pips}/{cfg.order_block_max_age_bars}"
+                f"{cfg.order_block_max_distance_pips}/{cfg.order_block_min_impulse_pips}/{cfg.order_block_max_age_bars} "
+                f"trail={trailing_mode}/{trailing_activation_r:.2f}R/{trailing_gap_r:.2f}R/"
+                f"remove_tp={trailing_remove_tp}"
             )
 
         checkpoint_interval_sec = max(1, int(getattr(app_config.runtime, "checkpoint_interval_sec", 5)))
@@ -2167,7 +2327,7 @@ def run(config_path: str = "config/settings.json") -> None:
         while True:
             daily_loss_reached = apply_daily_loss_guard(adapter, app_config, global_state, log_file, repo)
             for cfg in app_config.symbols:
-                state = states[cfg.symbol]
+                state = states[branch_id(cfg)]
                 try:
                     sync_open_positions_for_symbol(adapter, cfg, app_config, repo, log_file)
                     manage_symbol_positions(adapter, cfg, app_config, state, log_file, repo)

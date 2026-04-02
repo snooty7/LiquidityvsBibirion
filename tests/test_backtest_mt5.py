@@ -109,6 +109,46 @@ def test_apply_open_trade_bar_prefers_stop_when_tp_and_sl_hit_same_bar() -> None
     assert closed.exit_price == 1.0990
 
 
+def test_apply_open_trade_bar_uses_symbol_trailing_override_and_keeps_tp() -> None:
+    cfg = SymbolConfig(
+        **{
+            **_cfg().__dict__,
+            "timeframe": "M1",
+            "rr": 1.0,
+            "trailing_stop_mode": "r_multiple",
+            "trailing_activation_r": 0.5,
+            "trailing_gap_r": 0.5,
+            "trailing_remove_tp_on_activation": False,
+        }
+    )
+    trade = OpenTrade(
+        side="BUY",
+        entry_time=0,
+        entry_price=1.1000,
+        sl=1.0995,
+        tp=1.1005,
+        volume=0.02,
+        risk_money=1.0,
+        signal_key="BUY|1.10000",
+        confirm_note="session_open_scalp_buy_confirmed",
+        initial_sl=1.0995,
+        initial_tp=1.1005,
+    )
+
+    updated, closed = _apply_open_trade_bar(
+        cfg,
+        _runtime(),
+        trade,
+        {"time": 60, "open": 1.1000, "high": 1.1004, "low": 1.0999, "close": 1.1003},
+        _info(),
+    )
+
+    assert closed is None
+    assert updated is trade
+    assert updated.sl == 1.10005
+    assert updated.tp == 1.1005
+
+
 def test_side_allowed_filters_expected_direction() -> None:
     assert _side_allowed("both", "BUY") is True
     assert _side_allowed("both", "SELL") is True
@@ -116,3 +156,48 @@ def test_side_allowed_filters_expected_direction() -> None:
     assert _side_allowed("buy", "SELL") is False
     assert _side_allowed("sell", "SELL") is True
     assert _side_allowed("sell", "BUY") is False
+
+
+def test_apply_open_trade_bar_exits_after_two_adverse_closes() -> None:
+    cfg = SymbolConfig(
+        **{
+            **_cfg().__dict__,
+            "timeframe": "M1",
+            "strategy_mode": "h4_bias_micro_burst",
+            "early_exit_consecutive_adverse_closes": 2,
+            "trailing_stop_mode": "off",
+        }
+    )
+    trade = OpenTrade(
+        side="BUY",
+        entry_time=0,
+        entry_price=1.1000,
+        sl=1.0995,
+        tp=1.1008,
+        volume=0.02,
+        risk_money=1.0,
+        signal_key="BUY|1.10000",
+        confirm_note="micro_burst_buy_break",
+        initial_sl=1.0995,
+        initial_tp=1.1008,
+    )
+
+    updated, closed = _apply_open_trade_bar(
+        cfg,
+        _runtime(),
+        trade,
+        {"time": 60, "open": 1.1002, "high": 1.10025, "low": 1.1000, "close": 1.1001},
+        _info(),
+    )
+    assert closed is None
+    assert updated.adverse_close_count == 1
+
+    updated, closed = _apply_open_trade_bar(
+        cfg,
+        _runtime(),
+        trade,
+        {"time": 120, "open": 1.1001, "high": 1.10015, "low": 1.0999, "close": 1.1000},
+        _info(),
+    )
+    assert closed is not None
+    assert closed.reason == "adverse_close_exit"

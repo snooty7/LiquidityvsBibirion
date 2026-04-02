@@ -12,6 +12,7 @@ from typing import Optional, Sequence
 from src.engine.orchestrator import (
     TIMEFRAME_SECONDS,
     compute_r_multiple_trailing_stop,
+    effective_trailing_settings,
     resolve_loss_guard,
     semantic_setup_key,
     session_allowed,
@@ -22,6 +23,7 @@ from src.risk.sizing import SymbolTradeInfo, calc_lot_by_risk, calc_position_ris
 from src.services.config import AppConfig, RuntimeConfig, SymbolConfig, load_config
 from src.strategy.confirmations import (
     ConfirmationResult,
+    evaluate_none_confirmation,
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
     evaluate_session_open_scalp_c1_confirmation,
@@ -35,8 +37,10 @@ from src.strategy.filters import (
 )
 from src.strategy.liquidity import (
     SweepSignal,
+    detect_h4_bias_micro_burst_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
@@ -67,6 +71,7 @@ class OpenTrade:
     confirm_note: str
     initial_sl: float
     initial_tp: float
+    adverse_close_count: int = 0
 
 
 @dataclass
@@ -241,6 +246,8 @@ def _evaluate_confirmation(
 ) -> ConfirmationResult:
     rates = _append_dummy_forming_bar(closed_m1, TIMEFRAME_SECONDS.get(cfg.cisd_timeframe, 60))
     mode = cfg.confirmation_mode.lower()
+    if mode == "none":
+        return evaluate_none_confirmation(rates, pending.candle_time)
     if mode in ("c3", "c4"):
         return evaluate_c3_c4_confirmation(rates, pending.side, pending.candle_time, mode)
     if mode == "cisd":
@@ -345,27 +352,43 @@ def _apply_open_trade_bar(
         if hit_tp:
             return trade, _close_trade(cfg, trade, close_time, float(trade.tp), "take_profit", symbol_info)
 
-    if runtime.trailing_stop_mode == "r_multiple":
+    trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(cfg, runtime)
+    if trailing_mode == "r_multiple":
         desired_sl = compute_r_multiple_trailing_stop(
             side=trade.side,
             open_price=trade.entry_price,
             current_exit_price_value=close_price,
             current_sl=trade.sl,
             risk_distance_price=abs(trade.entry_price - trade.initial_sl),
-            activation_r=float(runtime.trailing_activation_r),
-            gap_r=float(runtime.trailing_gap_r),
+            activation_r=float(trailing_activation_r),
+            gap_r=float(trailing_gap_r),
         )
         if desired_sl is not None:
             if trade.side == "BUY":
                 if desired_sl > trade.sl:
                     trade.sl = float(desired_sl)
-                    if runtime.trailing_remove_tp_on_activation:
+                    if trailing_remove_tp:
                         trade.tp = 0.0
             else:
                 if trade.sl <= 0 or desired_sl < trade.sl:
                     trade.sl = float(desired_sl)
-                    if runtime.trailing_remove_tp_on_activation:
+                    if trailing_remove_tp:
                         trade.tp = 0.0
+
+    adverse_limit = int(getattr(cfg, "early_exit_consecutive_adverse_closes", 0) or 0)
+    large_adverse_r = float(getattr(cfg, "early_exit_large_adverse_body_r", 0.0) or 0.0)
+    if adverse_limit > 0 or large_adverse_r > 0:
+        adverse_bar = close_price < float(bar["open"]) if trade.side == "BUY" else close_price > float(bar["open"])
+        if adverse_bar:
+            trade.adverse_close_count += 1
+            body_size = abs(close_price - float(bar["open"]))
+            risk_distance = abs(trade.entry_price - trade.initial_sl)
+            if large_adverse_r > 0 and risk_distance > 0 and body_size >= risk_distance * large_adverse_r:
+                return trade, _close_trade(cfg, trade, close_time, close_price, "large_adverse_bar_exit", symbol_info)
+            if adverse_limit > 0 and trade.adverse_close_count >= adverse_limit:
+                return trade, _close_trade(cfg, trade, close_time, close_price, "adverse_close_exit", symbol_info)
+        else:
+            trade.adverse_close_count = 0
 
     position = _position_like(trade)
     loss_limit_money, loss_reason, _ = resolve_loss_guard(runtime, position, symbol_info)
@@ -409,7 +432,8 @@ def _build_entry_trade(
         volume=volume,
         symbol_info=symbol_info,
     )
-    if runtime.max_profit_per_trade_usd <= 0 and runtime.trailing_stop_mode == "r_multiple":
+    trailing_mode, _, _, _ = effective_trailing_settings(cfg, runtime)
+    if runtime.max_profit_per_trade_usd <= 0 and trailing_mode == "r_multiple":
         # Matches live config where TP is removed after trailing activation, but not at entry.
         initial_tp = tp
     else:
@@ -665,6 +689,21 @@ def run_backtest(
                     preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
                 )
                 signal = scalp_result.signal
+            elif cfg.strategy_mode == "h4_bias_micro_burst":
+                signal = detect_h4_bias_micro_burst_signal(
+                    m5_rates,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    buffer_price=cfg.buffer_pips * pip,
+                ).signal
+            elif cfg.strategy_mode == "trend_micro_burst_v2":
+                signal = detect_trend_micro_burst_v2_signal(
+                    m5_rates,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    range_multiple=cfg.confirmation_displacement_range_multiple,
+                    buffer_price=cfg.buffer_pips * pip,
+                ).signal
             else:
                 levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
                 signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
@@ -680,6 +719,8 @@ def run_backtest(
                     if not compression.blocked:
                         skip_range_chop += 1
                         continue
+                elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2"):
+                    pass
                 else:
                     prior_closed = m5_rates[:-2]
                     chop_result = evaluate_range_filter(
@@ -733,6 +774,21 @@ def run_backtest(
                     body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
                     preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
                     preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+                ).signal
+            elif cfg.strategy_mode == "h4_bias_micro_burst":
+                signal = detect_h4_bias_micro_burst_signal(
+                    m5_rates,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    buffer_price=cfg.buffer_pips * pip,
+                ).signal
+            elif cfg.strategy_mode == "trend_micro_burst_v2":
+                signal = detect_trend_micro_burst_v2_signal(
+                    m5_rates,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    range_multiple=cfg.confirmation_displacement_range_multiple,
+                    buffer_price=cfg.buffer_pips * pip,
                 ).signal
             else:
                 levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)

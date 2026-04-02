@@ -29,6 +29,29 @@ def compute_setup_expiry(candle_time: int, timeframe_seconds: int, expiry_bars: 
     return int(candle_time) + max(1, int(expiry_bars)) * max(1, int(timeframe_seconds))
 
 
+def branch_id(symbol: str, timeframe: str, magic: int) -> str:
+    return f"{symbol}|{timeframe}|{int(magic)}"
+
+
+def pending_branch_id(record: PendingSetupRecord, app_config) -> Optional[str]:
+    context = dict(record.context or {})
+    hinted_branch = str(context.get("branch_id") or "").strip()
+    if hinted_branch:
+        return hinted_branch
+
+    magic_raw = context.get("magic")
+    if magic_raw is not None:
+        try:
+            return branch_id(record.symbol, record.timeframe, int(magic_raw))
+        except (TypeError, ValueError):
+            pass
+
+    matches = [cfg for cfg in app_config.symbols if cfg.symbol == record.symbol and cfg.timeframe == record.timeframe]
+    if len(matches) == 1:
+        return branch_id(matches[0].symbol, matches[0].timeframe, matches[0].magic)
+    return None
+
+
 def latest_closed_bar_time(adapter, symbol: str, timeframe: str) -> int:
     try:
         rates = adapter.copy_rates(symbol, timeframe, 3)
@@ -321,12 +344,14 @@ def bootstrap_recovery(
     log_event: Callable[[dict], None],
 ) -> Tuple[Dict[str, PendingSetupRecord], RecoveryStats]:
     with repo.transaction():
-        latest_bar_by_symbol = {
-            cfg.symbol: latest_closed_bar_time(adapter, cfg.symbol, cfg.timeframe) for cfg in app_config.symbols
+        latest_bar_by_branch = {
+            branch_id(cfg.symbol, cfg.timeframe, cfg.magic): latest_closed_bar_time(adapter, cfg.symbol, cfg.timeframe)
+            for cfg in app_config.symbols
         }
         expired = []
         for item in repo.list_active_pending_setups():
-            latest_bar = int(latest_bar_by_symbol.get(item.symbol, int(time.time())))
+            item_branch = pending_branch_id(item, app_config)
+            latest_bar = int(latest_bar_by_branch.get(item_branch, int(time.time())))
             if int(item.expires_at) > latest_bar:
                 continue
             repo.transition_pending_setup(
@@ -426,17 +451,19 @@ def bootstrap_recovery(
         expired_pending_count=len(expired),
     )
 
-    pending_by_symbol: Dict[str, PendingSetupRecord] = {}
-    for cfg in app_config.symbols:
-        pending = repo.get_latest_active_pending_setup(cfg.symbol)
-        if pending is None:
+    pending_by_branch: Dict[str, PendingSetupRecord] = {}
+    for pending in repo.list_active_pending_setups():
+        item_branch = pending_branch_id(pending, app_config)
+        if item_branch is None:
             continue
-        pending_by_symbol[cfg.symbol] = pending
+        if item_branch in pending_by_branch:
+            continue
+        pending_by_branch[item_branch] = pending
         _emit_recovery_event(
             repo,
             log_event,
             "RECOVERY_PENDING_RESTORED",
-            cfg.symbol,
+            pending.symbol,
             "pending setup restored into restart revalidation queue",
             side=pending.side,
             setup_id=pending.setup_id,
@@ -464,4 +491,4 @@ def bootstrap_recovery(
         },
     )
 
-    return pending_by_symbol, stats
+    return pending_by_branch, stats

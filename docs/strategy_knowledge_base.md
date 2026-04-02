@@ -98,6 +98,47 @@ Interpretation:
 - `M30` is interesting, but the sample is too small (`12` trades in 180 days).
 - `M30` should stay in research only until it is validated on a longer window.
 
+## EURUSD trend micro-burst research
+`Trend Micro-Burst v1` was tested as:
+- `H4` trend context
+- `M1` pullback + micro breakout entry
+- fast exits via:
+  - `1-2` adverse closes
+  - or `1` large adverse `M1` bar
+
+Test window:
+- `2025-12-23` to `2026-03-31`
+
+Best `London` cases:
+- `SL=4`, `RR=2`, `pullback=2`, `2 adverse closes`
+  - trades: `579`
+  - net: `-0.49`
+  - PF: `0.994`
+  - avg R: `-0.001`
+- `SL=4`, `RR=2`, `pullback=3`, `2 adverse closes`
+  - trades: `597`
+  - net: `-0.61`
+  - PF: `0.993`
+  - avg R: `-0.001`
+
+Best `New York` case:
+- trades: `674`
+- net: `-7.18`
+- PF: `0.945`
+- avg R: `-0.015`
+
+Interpretation:
+- The branch generates the desired trade frequency.
+- `London` is close to breakeven.
+- `New York` is not acceptable.
+- `v1` is not good enough for live deployment.
+- The problem is no longer signal scarcity; the problem is expectancy.
+
+Decision:
+- Mark `Trend Micro-Burst v1` as `rejected-for-live / near-breakeven`.
+- Do not add it to demo or production as-is.
+- Continue only with a `London-only v2` branch and a different exit architecture.
+
 ## Order-block distance findings
 Recent `SKIP_ORDER_BLOCK` cases were split into:
 - `no local order block`
@@ -184,4 +225,51 @@ Core idea:
 
 Research requirement:
 - Build and backtest it as a separate branch, not as a patch on the current `M5` liquidity model.
+
+### 4. `trend_micro_burst_v2_branch`
+Status:
+- Specification only.
+
+Purpose:
+- Build a fast, trend-following micro branch with many trades, but without falling into `next pip` noise.
+- Keep the model aligned with the current philosophy:
+  - higher-timeframe context
+  - lower-timeframe trigger
+  - fast invalidation
+
+What was learned from `v1`:
+- H4 context is useful.
+- Fixed-RR exits are too rigid for this branch.
+- London session is materially better than New York.
+
+Research direction:
+- `London-only`
+- `H4` trend filter
+- `M1` breakout-pullback-reacceleration entry
+- no symmetric fixed-RR as the primary exit
+- favor:
+  - quick partial
+  - fail-fast momentum exit
+  - trend-decay exit
+
+Preliminary implementation result:
+- `London-only` does show a positive pocket.
+- Best tested `v2` case so far:
+  - `pullback_bars = 3`
+  - `body_ratio = 0.45`
+  - `range_multiple = 1.4`
+  - `SL = 4 pips`
+  - `RR = 1.5`
+  - `2 adverse closes`
+  - `large_adverse_body_r = 0.6`
+  - trades: `114`
+  - net: `+4.61`
+  - PF: `1.352`
+  - avg R: `0.058`
+  - max DD: `$3.50`
+
+Interpretation:
+- Better than `v1`.
+- Still modest, but now positive and testable.
+- This is a research candidate for demo, not a production branch yet.
 

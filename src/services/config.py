@@ -84,6 +84,14 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "range_filter_min_overlap_ratio": 0.75,
             "confirmation_displacement_body_ratio_min": 0.6,
             "confirmation_displacement_range_multiple": 1.8,
+            "micro_burst_pullback_bars": 2,
+            "micro_burst_body_ratio_min": 0.45,
+            "early_exit_consecutive_adverse_closes": 0,
+            "early_exit_large_adverse_body_r": 0.0,
+            "trailing_stop_mode": "",
+            "trailing_activation_r": None,
+            "trailing_gap_r": None,
+            "trailing_remove_tp_on_activation": None,
         }
     ],
 }
@@ -168,6 +176,14 @@ class SymbolConfig:
     range_filter_min_overlap_ratio: float = 0.75
     confirmation_displacement_body_ratio_min: float = 0.6
     confirmation_displacement_range_multiple: float = 1.8
+    micro_burst_pullback_bars: int = 2
+    micro_burst_body_ratio_min: float = 0.45
+    early_exit_consecutive_adverse_closes: int = 0
+    early_exit_large_adverse_body_r: float = 0.0
+    trailing_stop_mode: str = ""
+    trailing_activation_r: float | None = None
+    trailing_gap_r: float | None = None
+    trailing_remove_tp_on_activation: bool | None = None
 
     @property
     def tp_pips(self) -> float:
@@ -287,6 +303,22 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 confirmation_displacement_range_multiple=float(
                     row.get("confirmation_displacement_range_multiple", 1.8)
                 ),
+                micro_burst_pullback_bars=int(row.get("micro_burst_pullback_bars", 2)),
+                micro_burst_body_ratio_min=float(row.get("micro_burst_body_ratio_min", 0.45)),
+                early_exit_consecutive_adverse_closes=int(row.get("early_exit_consecutive_adverse_closes", 0)),
+                early_exit_large_adverse_body_r=float(row.get("early_exit_large_adverse_body_r", 0.0)),
+                trailing_stop_mode=str(row.get("trailing_stop_mode", "") or "").lower(),
+                trailing_activation_r=(
+                    float(row["trailing_activation_r"]) if row.get("trailing_activation_r") is not None else None
+                ),
+                trailing_gap_r=(
+                    float(row["trailing_gap_r"]) if row.get("trailing_gap_r") is not None else None
+                ),
+                trailing_remove_tp_on_activation=(
+                    bool(row["trailing_remove_tp_on_activation"])
+                    if row.get("trailing_remove_tp_on_activation") is not None
+                    else None
+                ),
             )
         )
 
@@ -304,7 +336,8 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         raise ValueError("push_notification_url is required when push_notifications_enabled=true")
 
     valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"}
-    valid_strategy_modes = {"liquidity_sweep", "session_open_scalp"}
+    valid_strategy_modes = {"liquidity_sweep", "session_open_scalp", "h4_bias_micro_burst", "trend_micro_burst_v2"}
+    valid_trailing_modes = {"", "off", "r_multiple"}
     for symbol in symbols:
         if symbol.strategy_mode not in valid_strategy_modes:
             raise ValueError(f"Unsupported strategy_mode={symbol.strategy_mode} for {symbol.symbol}")
@@ -346,5 +379,19 @@ def load_config(path: Union[str, Path]) -> AppConfig:
             )
         if symbol.confirmation_displacement_range_multiple <= 0:
             raise ValueError(f"confirmation_displacement_range_multiple must be > 0 for {symbol.symbol}")
+        if symbol.micro_burst_pullback_bars < 1:
+            raise ValueError(f"micro_burst_pullback_bars must be >= 1 for {symbol.symbol}")
+        if not 0.0 < symbol.micro_burst_body_ratio_min <= 1.0:
+            raise ValueError(f"micro_burst_body_ratio_min must be in (0, 1] for {symbol.symbol}")
+        if symbol.early_exit_consecutive_adverse_closes < 0:
+            raise ValueError(f"early_exit_consecutive_adverse_closes must be >= 0 for {symbol.symbol}")
+        if symbol.early_exit_large_adverse_body_r < 0:
+            raise ValueError(f"early_exit_large_adverse_body_r must be >= 0 for {symbol.symbol}")
+        if symbol.trailing_stop_mode not in valid_trailing_modes:
+            raise ValueError(f"Unsupported trailing_stop_mode={symbol.trailing_stop_mode} for {symbol.symbol}")
+        if symbol.trailing_activation_r is not None and symbol.trailing_activation_r <= 0:
+            raise ValueError(f"trailing_activation_r must be > 0 for {symbol.symbol}")
+        if symbol.trailing_gap_r is not None and symbol.trailing_gap_r < 0:
+            raise ValueError(f"trailing_gap_r must be >= 0 for {symbol.symbol}")
 
     return AppConfig(runtime=runtime, symbols=tuple(symbols))

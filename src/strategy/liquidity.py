@@ -38,6 +38,12 @@ class SessionOpenScalpSignalResult:
     compression_ratio: float = 0.0
 
 
+@dataclass(frozen=True)
+class MicroBurstSignalResult:
+    signal: Optional[SweepSignal]
+    note: str
+
+
 def _price(bar: object, field: str) -> float:
     if isinstance(bar, dict):
         return float(bar[field])
@@ -312,5 +318,117 @@ def detect_session_open_scalp_signal(
         opening_range_low=or_low,
         compression_ratio=compression.compression_ratio,
     )
+
+
+def detect_h4_bias_micro_burst_signal(
+    rates: Sequence[object],
+    *,
+    pullback_bars: int,
+    body_ratio_min: float,
+    buffer_price: float,
+) -> MicroBurstSignalResult:
+    needed = max(3, int(pullback_bars) + 2)
+    if len(rates) < needed:
+        return MicroBurstSignalResult(None, "micro_burst_context_insufficient")
+
+    last_closed = rates[-2]
+    prior = list(rates[-(int(pullback_bars) + 2) : -2])
+    if len(prior) < int(pullback_bars):
+        return MicroBurstSignalResult(None, "micro_burst_context_insufficient")
+
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    body_ok = candle_body_ratio(last_closed) >= body_ratio_min
+    prior_high = max(_price(item, "high") for item in prior)
+    prior_low = min(_price(item, "low") for item in prior)
+    bearish_prior = sum(1 for item in prior if _price(item, "close") < _price(item, "open"))
+    bullish_prior = sum(1 for item in prior if _price(item, "close") > _price(item, "open"))
+
+    if (
+        close_price > open_price
+        and body_ok
+        and bearish_prior >= max(1, len(prior) // 2)
+        and close_price > prior_high + buffer_price
+    ):
+        return MicroBurstSignalResult(
+            SweepSignal(side="BUY", level=float(prior_high), candle_time=int(last_closed["time"])),
+            "micro_burst_buy_break",
+        )
+
+    if (
+        close_price < open_price
+        and body_ok
+        and bullish_prior >= max(1, len(prior) // 2)
+        and close_price < prior_low - buffer_price
+    ):
+        return MicroBurstSignalResult(
+            SweepSignal(side="SELL", level=float(prior_low), candle_time=int(last_closed["time"])),
+            "micro_burst_sell_break",
+        )
+
+    return MicroBurstSignalResult(None, "micro_burst_wait_break")
+
+
+def detect_trend_micro_burst_v2_signal(
+    rates: Sequence[object],
+    *,
+    pullback_bars: int,
+    body_ratio_min: float,
+    range_multiple: float,
+    buffer_price: float,
+) -> MicroBurstSignalResult:
+    needed = max(4, int(pullback_bars) + 3)
+    if len(rates) < needed:
+        return MicroBurstSignalResult(None, "trend_micro_burst_context_insufficient")
+
+    signal_idx = len(rates) - 2
+    pullback_start = signal_idx - int(pullback_bars)
+    if pullback_start - 1 < 0:
+        return MicroBurstSignalResult(None, "trend_micro_burst_context_insufficient")
+
+    impulse_anchor = rates[pullback_start - 1]
+    pullback = list(rates[pullback_start:signal_idx])
+    last_closed = rates[signal_idx]
+    if len(pullback) < int(pullback_bars):
+        return MicroBurstSignalResult(None, "trend_micro_burst_context_insufficient")
+
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    body_ok = candle_body_ratio(last_closed) >= body_ratio_min
+    avg_pullback_range = sum(candle_range(item) for item in pullback) / max(len(pullback), 1)
+    range_ok = candle_range(last_closed) >= max(avg_pullback_range * range_multiple, 1e-10)
+
+    pullback_high = max(_price(item, "high") for item in pullback)
+    pullback_low = min(_price(item, "low") for item in pullback)
+    anchor_open = _price(impulse_anchor, "open")
+    anchor_close = _price(impulse_anchor, "close")
+    anchor_high = _price(impulse_anchor, "high")
+    anchor_low = _price(impulse_anchor, "low")
+    bearish_pullback = sum(1 for item in pullback if _price(item, "close") < _price(item, "open"))
+    bullish_pullback = sum(1 for item in pullback if _price(item, "close") > _price(item, "open"))
+
+    buy_anchor_ok = anchor_close > anchor_open
+    buy_pullback_ok = bearish_pullback >= max(1, len(pullback) // 2) and pullback_low >= anchor_open - buffer_price
+    buy_break_ok = close_price > pullback_high + buffer_price and high_price > anchor_high + buffer_price
+
+    if buy_anchor_ok and buy_pullback_ok and body_ok and range_ok and close_price > open_price and buy_break_ok:
+        return MicroBurstSignalResult(
+            SweepSignal(side="BUY", level=float(pullback_high), candle_time=int(last_closed["time"])),
+            "trend_micro_burst_v2_buy_break",
+        )
+
+    sell_anchor_ok = anchor_close < anchor_open
+    sell_pullback_ok = bullish_pullback >= max(1, len(pullback) // 2) and pullback_high <= anchor_open + buffer_price
+    sell_break_ok = close_price < pullback_low - buffer_price and low_price < anchor_low - buffer_price
+
+    if sell_anchor_ok and sell_pullback_ok and body_ok and range_ok and close_price < open_price and sell_break_ok:
+        return MicroBurstSignalResult(
+            SweepSignal(side="SELL", level=float(pullback_low), candle_time=int(last_closed["time"])),
+            "trend_micro_burst_v2_sell_break",
+        )
+
+    return MicroBurstSignalResult(None, "trend_micro_burst_v2_wait_break")
 
 

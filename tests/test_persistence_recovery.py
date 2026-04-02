@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from src.engine.orchestrator import (
+    branch_id,
     process_symbol,
     GlobalState,
     PendingSetup,
@@ -457,9 +458,11 @@ def test_restart_continuity_hydration(tmp_path: Path) -> None:
                 updated_at=datetime.now(timezone.utc).isoformat(),
             )
         )
+        cfg = app_config.symbols[0]
+        runtime_key = branch_id(cfg)
         repo.save_symbol_runtime_state(
             SymbolRuntimeStateRecord(
-                symbol="EURUSD",
+                symbol=runtime_key,
                 timeframe="M5",
                 last_trade_ts=1234.0,
                 cooldown_until=1567.0,
@@ -485,7 +488,7 @@ def test_restart_continuity_hydration(tmp_path: Path) -> None:
             candle_time=1_700_000_050,
             signal_key="1700000050|BUY|1.10050",
             expires_at=1_900_000_000,
-            context={"ctx": "value"},
+            context={"ctx": "value", "magic": 92001, "branch_id": runtime_key},
             initial_status=PENDING_STATUS_PENDING,
         )
         saved_pending, _ = repo.create_or_get_pending_setup(pending_record)
@@ -504,14 +507,14 @@ def test_restart_continuity_hydration(tmp_path: Path) -> None:
         )
         adapter = FakeAdapter(positions={"EURUSD": [broker_pos]})
 
-        pending_by_symbol, stats = bootstrap_recovery(adapter, app_config, repo, logs.append)
+        pending_by_branch, stats = bootstrap_recovery(adapter, app_config, repo, logs.append)
         assert stats.broker_only_count == 1
 
-        states = {"EURUSD": SymbolState()}
+        states = {runtime_key: SymbolState()}
         global_state = GlobalState()
-        restore_runtime_state(repo, app_config, states, global_state, pending_by_symbol)
+        restore_runtime_state(repo, app_config, states, global_state, pending_by_branch)
 
-        restored = states["EURUSD"]
+        restored = states[runtime_key]
         assert global_state.day_key == today
         assert global_state.daily_realized_pnl == -12.34
         assert restored.last_trade_ts == 1234.0
@@ -523,6 +526,64 @@ def test_restart_continuity_hydration(tmp_path: Path) -> None:
         assert restored.pending_setup is not None
         assert restored.pending_setup.setup_id == saved_pending.setup_id
         assert restored.pending_setup.requires_revalidation is True
+    finally:
+        repo.close()
+
+
+def test_sync_open_positions_ignores_other_magic_same_symbol(tmp_path: Path) -> None:
+    db_path = tmp_path / "state.db"
+    repo = SQLiteRepository(str(db_path))
+    app_config = AppConfig(
+        runtime=_make_config(db_path).runtime,
+        symbols=(
+            SymbolConfig(
+                **{**_make_config(db_path).symbols[0].__dict__},
+            ),
+            SymbolConfig(
+                **{**_make_config(db_path).symbols[0].__dict__, "timeframe": "M30", "magic": 92008},
+            ),
+        ),
+    )
+    log_file = tmp_path / "events.csv"
+
+    try:
+        pending, _ = repo.create_or_get_pending_setup(
+            build_pending_setup_record(
+                symbol="EURUSD",
+                timeframe="M5",
+                side="BUY",
+                level=1.1000,
+                candle_time=1_700_000_000,
+                signal_key="BUY|1.10000",
+                expires_at=1_900_000_000,
+                context={"magic": 92001},
+                initial_status=PENDING_STATUS_PENDING,
+            )
+        )
+        repo.upsert_open_position(
+            OpenPositionRecord(
+                ticket=7001,
+                symbol="EURUSD",
+                magic=92001,
+                setup_id=pending.setup_id,
+                side="BUY",
+                volume=0.10,
+                open_price=1.1000,
+                sl=1.0990,
+                tp=1.1020,
+                comment="SWEEP@1.10000|ab",
+                opened_at=1_700_000_001,
+                status=POSITION_STATUS_OPEN,
+            )
+        )
+        adapter = SyncAdapter(positions={"EURUSD": []}, close_deal_by_ticket={})
+
+        sync_open_positions_for_symbol(adapter, app_config.symbols[1], app_config, repo, log_file)
+
+        still_open = repo.get_open_position(7001)
+        assert still_open is not None
+        assert still_open.status == POSITION_STATUS_OPEN
+        assert repo.list_events(event_type="POSITION_CLOSED_UNCONFIRMED") == []
     finally:
         repo.close()
 
@@ -956,8 +1017,10 @@ def test_checkpoint_snapshot_persists_guard_and_runtime(tmp_path: Path) -> None:
     app_config = _make_config(db_path)
     repo = SQLiteRepository(str(db_path))
     try:
+        cfg = app_config.symbols[0]
+        runtime_key = branch_id(cfg)
         states = {
-            "EURUSD": SymbolState(
+            runtime_key: SymbolState(
                 last_trade_ts=100.0,
                 cooldown_until=200.0,
                 entry_count=4,
@@ -982,7 +1045,7 @@ def test_checkpoint_snapshot_persists_guard_and_runtime(tmp_path: Path) -> None:
 
         guard = repo.get_guard_state()
         assert guard.daily_realized_pnl == -9.5
-        sym = repo.get_symbol_runtime_state("EURUSD")
+        sym = repo.get_symbol_runtime_state(runtime_key)
         assert sym is not None
         assert sym.entry_count == 4
         assert sym.last_processed_bar_time == 123456
@@ -1016,6 +1079,143 @@ def test_resolve_loss_guard_uses_position_risk_when_configured() -> None:
     assert math.isclose(limit_money, 10.0, rel_tol=0.0, abs_tol=1e-9)
     assert reason == "max_loss risk x1.00 ($10.00)"
     assert mode == "position_risk"
+
+
+def test_restore_runtime_state_separates_branches_for_same_symbol(tmp_path: Path) -> None:
+    db_path = tmp_path / "state.db"
+    repo = SQLiteRepository(str(db_path))
+    app_config = AppConfig(
+        runtime=RuntimeConfig(
+            poll_seconds=5,
+            dry_run=False,
+            default_deviation=20,
+            db_path=str(db_path),
+            log_file="bot_events.csv",
+            daily_loss_limit_usd=50.0,
+            close_positions_on_daily_loss=True,
+            max_loss_per_trade_usd=5.0,
+            per_trade_loss_guard_mode="position_risk",
+            per_trade_loss_risk_multiple=1.0,
+            max_profit_per_trade_usd=0.0,
+            trailing_stop_mode="off",
+            trailing_activation_r=1.0,
+            trailing_gap_r=1.0,
+            trailing_remove_tp_on_activation=True,
+            risk_close_retry_sec=20,
+            max_open_positions_total=5,
+            max_total_open_risk_pct=0.5,
+            checkpoint_interval_sec=5,
+            maintenance_interval_sec=3600,
+            event_retention_days=30,
+            event_retention_batch_size=5000,
+            event_archive_dir="state_archives",
+            push_notifications_enabled=False,
+            push_notification_url="",
+            push_notification_token="",
+            push_notification_timeout_sec=5,
+        ),
+        symbols=(
+            SymbolConfig(
+                symbol="EURUSD",
+                timeframe="M5",
+                bars=500,
+                pivot_len=5,
+                buffer_pips=0.3,
+                sl_pips=10.0,
+                rr=2.0,
+                risk_pct=0.1,
+                max_lot=0.1,
+                max_spread_pips=1.8,
+                cooldown_sec=300,
+                magic=92001,
+                confirmation_mode="sweep_displacement_mss",
+            ),
+            SymbolConfig(
+                symbol="EURUSD",
+                timeframe="M1",
+                bars=500,
+                pivot_len=5,
+                buffer_pips=0.3,
+                sl_pips=5.0,
+                rr=1.5,
+                risk_pct=0.03,
+                max_lot=0.02,
+                max_spread_pips=1.2,
+                cooldown_sec=1800,
+                magic=92009,
+                confirmation_mode="session_open_scalp_c1",
+                strategy_mode="session_open_scalp",
+                use_bias_filter=False,
+                use_order_block_filter=False,
+            ),
+        ),
+    )
+
+    try:
+        primary = app_config.symbols[0]
+        scalp = app_config.symbols[1]
+        primary_key = branch_id(primary)
+        scalp_key = branch_id(scalp)
+
+        repo.save_symbol_runtime_state(
+            SymbolRuntimeStateRecord(
+                symbol=primary_key,
+                timeframe=primary.timeframe,
+                last_trade_ts=111.0,
+                cooldown_until=222.0,
+                entry_count=1,
+                last_processed_bar_time=1_700_000_100,
+                last_signal_key="primary-key",
+                updated_at=datetime.now(timezone.utc).isoformat(),
+            )
+        )
+        repo.save_symbol_runtime_state(
+            SymbolRuntimeStateRecord(
+                symbol=scalp_key,
+                timeframe=scalp.timeframe,
+                last_trade_ts=333.0,
+                cooldown_until=444.0,
+                entry_count=7,
+                last_processed_bar_time=1_700_000_200,
+                last_signal_key="scalp-key",
+                updated_at=datetime.now(timezone.utc).isoformat(),
+            )
+        )
+
+        pending_record = build_pending_setup_record(
+            symbol=scalp.symbol,
+            timeframe=scalp.timeframe,
+            side="BUY",
+            level=1.1050,
+            candle_time=1_700_000_200,
+            signal_key="1700000200|BUY|1.10500",
+            expires_at=1_900_000_000,
+            context={"magic": int(scalp.magic), "branch_id": scalp_key},
+            initial_status=PENDING_STATUS_PENDING,
+        )
+        repo.create_or_get_pending_setup(pending_record)
+
+        states = {primary_key: SymbolState(), scalp_key: SymbolState()}
+        global_state = GlobalState()
+
+        restore_runtime_state(
+            repo=repo,
+            app_config=app_config,
+            states=states,
+            global_state=global_state,
+            pending_by_branch={scalp_key: repo.get_latest_active_pending_setup("EURUSD")},
+        )
+
+        assert states[primary_key].last_trade_ts == 111.0
+        assert states[primary_key].entry_count == 1
+        assert states[primary_key].pending_setup is None
+
+        assert states[scalp_key].last_trade_ts == 333.0
+        assert states[scalp_key].entry_count == 7
+        assert states[scalp_key].pending_setup is not None
+        assert states[scalp_key].pending_setup.requires_revalidation is True
+    finally:
+        repo.close()
 
 
 def test_resolve_loss_guard_falls_back_to_fixed_usd_without_usable_sl() -> None:

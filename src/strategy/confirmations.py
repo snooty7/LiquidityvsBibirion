@@ -114,6 +114,21 @@ def evaluate_c3_c4_confirmation(
     return ConfirmationResult(True, False, "c4_confirmed")
 
 
+def evaluate_none_confirmation(
+    rates: Sequence[object],
+    since_ts: int,
+) -> ConfirmationResult:
+    signal_index = locate_candle_index_by_time(rates, since_ts)
+    if signal_index is None:
+        return ConfirmationResult(False, False, "signal_candle_not_found")
+
+    last_closed_idx = len(rates) - 2
+    if signal_index >= last_closed_idx:
+        return ConfirmationResult(False, True, "await_next_closed_candle")
+
+    return ConfirmationResult(True, False, "none_confirmed")
+
+
 def evaluate_cisd_confirmation(
     rates: Sequence[object],
     side: str,

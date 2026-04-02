@@ -355,6 +355,7 @@ class SQLiteRepository:
     def list_open_positions(
         self,
         symbol: Optional[str] = None,
+        magic: Optional[int] = None,
         status: Optional[str] = POSITION_STATUS_OPEN,
     ) -> List[OpenPositionRecord]:
         params = []
@@ -362,6 +363,9 @@ class SQLiteRepository:
         if symbol is not None:
             where_parts.append("symbol = ?")
             params.append(symbol)
+        if magic is not None:
+            where_parts.append("magic = ?")
+            params.append(int(magic))
         if status is not None:
             where_parts.append("status = ?")
             params.append(status)

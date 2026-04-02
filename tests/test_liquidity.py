@@ -1,13 +1,16 @@
 import pytest
 
 from src.strategy.liquidity import (
+    detect_h4_bias_micro_burst_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
     extract_pivot_levels,
 )
+from src.strategy.confirmations import evaluate_none_confirmation
 from src.strategy.filters import resolve_order_block_distance_limit_pips
 
 
@@ -216,3 +219,64 @@ def test_detect_session_open_scalp_signal_buy_reclaim() -> None:
     assert result.signal is not None
     assert result.signal.side == "BUY"
     assert result.note == "scalp_buy_reclaim"
+
+
+def test_detect_h4_bias_micro_burst_signal_buy_break() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1002, "low": 1.0998, "close": 1.1001},
+        {"time": 2, "open": 1.1001, "high": 1.10015, "low": 1.0999, "close": 1.09995},
+        {"time": 3, "open": 1.09995, "high": 1.1000, "low": 1.09975, "close": 1.09985},
+        {"time": 4, "open": 1.09985, "high": 1.1004, "low": 1.09980, "close": 1.10035},
+        {"time": 5, "open": 1.10035, "high": 1.10045, "low": 1.10030, "close": 1.10040},
+    ]
+
+    result = detect_h4_bias_micro_burst_signal(
+        rates,
+        pullback_bars=2,
+        body_ratio_min=0.45,
+        buffer_price=0.00005,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "micro_burst_buy_break"
+
+
+def test_detect_trend_micro_burst_v2_signal_buy_break() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1006, "low": 1.0999, "close": 1.1005},
+        {"time": 2, "open": 1.1005, "high": 1.10055, "low": 1.10020, "close": 1.10030},
+        {"time": 3, "open": 1.10030, "high": 1.10035, "low": 1.10010, "close": 1.10015},
+        {"time": 4, "open": 1.10015, "high": 1.10090, "low": 1.10010, "close": 1.10085},
+        {"time": 5, "open": 1.10085, "high": 1.10095, "low": 1.10080, "close": 1.10090},
+    ]
+
+    result = detect_trend_micro_burst_v2_signal(
+        rates,
+        pullback_bars=2,
+        body_ratio_min=0.45,
+        range_multiple=1.1,
+        buffer_price=0.00001,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "trend_micro_burst_v2_buy_break"
+
+
+def test_evaluate_none_confirmation_confirms_on_next_closed_candle() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1002, "low": 1.0998, "close": 1.1001},
+        {"time": 2, "open": 1.1001, "high": 1.1004, "low": 1.1000, "close": 1.1003},
+        {"time": 3, "open": 1.1003, "high": 1.1005, "low": 1.1002, "close": 1.1004},
+    ]
+
+    pending = evaluate_none_confirmation(rates, since_ts=2)
+
+    assert pending.confirmed is False
+    assert pending.pending is True
+
+    confirmed = evaluate_none_confirmation(rates + [{"time": 4, "open": 1.1004, "high": 1.1006, "low": 1.1003, "close": 1.1005}], since_ts=2)
+
+    assert confirmed.confirmed is True
+    assert confirmed.note == "none_confirmed"
