@@ -1320,6 +1320,30 @@ def test_load_config_rejects_order_block_override_below_base(tmp_path: Path) -> 
         assert "order_block_strong_override_max_distance_pips must be >=" in str(exc)
 
 
+def test_load_config_rejects_invalid_trade_side_filter(tmp_path: Path) -> None:
+    config_path = tmp_path / "bad_side_filter.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "symbols": [
+                    {
+                        "symbol": "EURUSD",
+                        "magic": 92001,
+                        "trade_side_filter": "maybe",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        load_config(config_path)
+        raise AssertionError("Expected ValueError for invalid trade_side_filter")
+    except ValueError as exc:
+        assert "Unsupported trade_side_filter" in str(exc)
+
+
 def test_compute_r_multiple_trailing_stop_buy_moves_to_break_even_at_one_r() -> None:
     desired_sl = compute_r_multiple_trailing_stop(
         side="BUY",

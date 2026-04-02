@@ -174,6 +174,83 @@ Result:
 - The override degraded both the 90-day and 180-day EURUSD results.
 - Therefore the override must remain disabled in live config.
 
+## LIQUIDITY_ALERT branch research
+Question tested:
+- what happens if the bot trades directly from the `LIQUIDITY_ALERT` stage
+- meaning:
+  - liquidity level found
+  - sweep detected
+  - sweep judged significant
+  - entry allowed immediately, without waiting for displacement/BOS
+
+Test window:
+- `2025-09-29` to `2026-03-27`
+- `EURUSD M5`
+
+Variants tested:
+
+### 1. Alert-only
+- `confirmation_mode = none`
+- no bias filter
+- no order-block filter
+
+Result:
+- trades: `683`
+- net: `-139.96`
+- PF: `0.948`
+
+Verdict:
+- rejected
+
+### 2. Alert + bias
+- `confirmation_mode = none`
+- bias filter on
+- order-block filter off
+
+Result:
+- trades: `480`
+- net: `-71.41`
+- PF: `0.962`
+
+Verdict:
+- rejected
+
+### 3. Alert + bias + order block
+- `confirmation_mode = none`
+- bias filter on
+- order-block filter on
+
+Result:
+- trades: `277`
+- net: `-54.84`
+- PF: `0.950`
+
+Verdict:
+- rejected as a two-sided branch
+
+### 4. Alert + bias + order block, SELL-only
+- same as variant 3
+- but only `SELL` trades are allowed
+
+Result:
+- trades: `170`
+- wins: `102`
+- losses: `68`
+- win rate: `60.00%`
+- net: `+102.82`
+- PF: `1.174`
+- avg R: `0.070`
+- max DD: `$68.11`
+
+Interpretation:
+- the raw `LIQUIDITY_ALERT` idea is not robust enough as a two-sided strategy
+- but it does show a usable `SELL-only` pocket on `EURUSD M5`
+- this is a research/demo branch candidate, not a production recommendation yet
+
+Decision:
+- do not run a two-sided `LIQUIDITY_ALERT` branch
+- if experimenting live, only test the `SELL-only` branch with small risk
+
 ## Operational rules going forward
 - Do not expand symbols unless a candidate is positive on at least 180 days with acceptable PF.
 - Prefer improving `EURUSD` expectancy before adding breadth.

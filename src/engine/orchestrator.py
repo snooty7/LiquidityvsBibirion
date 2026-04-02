@@ -166,6 +166,13 @@ def session_allowed(cfg: SymbolConfig, now_utc: datetime) -> bool:
     return any(session_match(item, now_utc) for item in cfg.allowed_sessions_utc)
 
 
+def trade_side_allowed(cfg: SymbolConfig, side: str) -> bool:
+    mode = str(cfg.trade_side_filter or "both").lower()
+    if mode == "both":
+        return True
+    return str(side or "").upper() == mode.upper()
+
+
 def bot_magics(app_config: AppConfig) -> set[int]:
     return {cfg.magic for cfg in app_config.symbols}
 
@@ -1565,6 +1572,23 @@ def process_symbol(
     confirm_note: str = ""
 
     if signal is not None and not has_active_pending_setup(state, mode):
+        if not trade_side_allowed(cfg, signal.side):
+            now_utc = datetime.now(timezone.utc)
+            log_event(
+                log_file,
+                {
+                    "ts": now_utc.isoformat(),
+                    "symbol": cfg.symbol,
+                    "timeframe": cfg.timeframe,
+                    "strategy": "SWEEP_V2",
+                    "event": "SKIP_SIDE_FILTER",
+                    "side": signal.side,
+                    "level": f"{signal.level:.5f}",
+                    "candle_time": int(signal.candle_time),
+                    "message": f"trade_side_filter={cfg.trade_side_filter}",
+                },
+            )
+            return
         signal_key = semantic_setup_key(signal.candle_time, signal.side, signal.level)
         if cfg.strategy_mode == "session_open_scalp":
             chop_result = evaluate_compression_window(

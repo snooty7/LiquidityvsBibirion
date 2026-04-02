@@ -50,6 +50,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "max_spread_pips": 1.8,
             "cooldown_sec": 300,
             "magic": 92001,
+            "trade_side_filter": "both",
             "max_levels": 25,
             "one_position_per_symbol": True,
             "strategy_mode": "liquidity_sweep",
@@ -142,6 +143,7 @@ class SymbolConfig:
     max_spread_pips: float
     cooldown_sec: int
     magic: int
+    trade_side_filter: str = "both"
     max_levels: int = 25
     one_position_per_symbol: bool = True
     strategy_mode: str = "liquidity_sweep"
@@ -261,6 +263,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 max_spread_pips=float(row.get("max_spread_pips", 1.8)),
                 cooldown_sec=int(row.get("cooldown_sec", 300)),
                 magic=int(row.get("magic", 92000)),
+                trade_side_filter=str(row.get("trade_side_filter", "both")).lower(),
                 max_levels=int(row.get("max_levels", 25)),
                 one_position_per_symbol=bool(row.get("one_position_per_symbol", True)),
                 strategy_mode=str(row.get("strategy_mode", "liquidity_sweep")).lower(),
@@ -337,12 +340,15 @@ def load_config(path: Union[str, Path]) -> AppConfig:
 
     valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"}
     valid_strategy_modes = {"liquidity_sweep", "session_open_scalp", "h4_bias_micro_burst", "trend_micro_burst_v2"}
+    valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}
     for symbol in symbols:
         if symbol.strategy_mode not in valid_strategy_modes:
             raise ValueError(f"Unsupported strategy_mode={symbol.strategy_mode} for {symbol.symbol}")
         if symbol.confirmation_mode not in valid_confirmation_modes:
             raise ValueError(f"Unsupported confirmation_mode={symbol.confirmation_mode} for {symbol.symbol}")
+        if symbol.trade_side_filter not in valid_trade_side_filters:
+            raise ValueError(f"Unsupported trade_side_filter={symbol.trade_side_filter} for {symbol.symbol}")
         if symbol.sweep_significance_lookback_bars < 2:
             raise ValueError(f"sweep_significance_lookback_bars must be >= 2 for {symbol.symbol}")
         if symbol.sweep_significance_range_multiple <= 0:
