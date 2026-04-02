@@ -47,7 +47,32 @@ def test_build_push_message_for_close() -> None:
     assert "close: 1.15674" in body
     assert "pnl: -4.32" in body
     assert "reason: broker_side_close_detected" in body
-    assert "money_with_wings" in tags
+
+
+def test_build_push_message_for_liquidity_alert() -> None:
+    title, body, tags = build_push_message(
+        event_type="LIQUIDITY_ALERT",
+        symbol="EURUSD",
+        ticket=None,
+        setup_id="abc12345",
+        created_at_utc="2026-04-02T07:00:00+00:00",
+        payload={
+            "side": "BUY",
+            "level": 1.15314,
+            "stage": "post_sweep_pre_confirmation",
+            "what_next": "wait for displacement, then structure confirmation",
+            "plan": "observe displacement -> BOS -> final filters -> possible entry",
+            "sweep_note": "sweep_significant",
+            "range_note": "range_ok",
+        },
+    )
+
+    assert title == "ALERT EURUSD BUY"
+    assert "stage: post_sweep_pre_confirmation" in body
+    assert "what_next: wait for displacement, then structure confirmation" in body
+    assert "sweep_note: sweep_significant" in body
+    assert "range_note: range_ok" in body
+    assert "rotating_light" in tags
 
 
 def test_send_push_notification_posts_message(monkeypatch) -> None:

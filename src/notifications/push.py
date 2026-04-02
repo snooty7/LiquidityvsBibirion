@@ -7,6 +7,7 @@ import urllib.request
 
 
 NOTIFIABLE_EVENTS = {
+    "LIQUIDITY_ALERT",
     "TRADE_OK",
     "TRADE_FAIL",
     "RISK_CLOSE_OK",
@@ -68,6 +69,19 @@ def build_push_message(
                 f"sl: {_fmt_price(_payload_value(data, 'sl'))}",
                 f"tp: {_fmt_price(_payload_value(data, 'tp'))}",
                 f"retcode: {data.get('retcode', '-')}",
+            ]
+        )
+    elif event_type == "LIQUIDITY_ALERT":
+        title = f"ALERT {symbol} {side}"
+        tags = "rotating_light,chart_with_upwards_trend"
+        lines.extend(
+            [
+                f"level: {_fmt_price(_payload_value(data, 'level'))}",
+                f"stage: {data.get('stage', '-')}",
+                f"what_next: {data.get('what_next', '-')}",
+                f"plan: {data.get('plan', '-')}",
+                f"sweep_note: {data.get('sweep_note', '-')}",
+                f"range_note: {data.get('range_note', '-')}",
             ]
         )
     elif event_type in {"RISK_CLOSE_OK", "POSITION_CLOSED_BROKER", "POSITION_CLOSED_UNCONFIRMED"}:

@@ -1681,7 +1681,41 @@ def process_symbol(
                             "message": f"setup_id={stored_setup.setup_id} confirmation_mode={mode}",
                         },
                     )
+                    emit_event(
+                        log_file=log_file,
+                        repo=repo,
+                        app_config=app_config,
+                        event_type="LIQUIDITY_ALERT",
+                        symbol=cfg.symbol,
+                        setup_id=stored_setup.setup_id,
+                        message="significant liquidity sweep detected; no entry yet",
+                        payload={
+                            "side": signal.side,
+                            "level": float(signal.level),
+                            "candle_time": int(signal.candle_time),
+                            "stage": "post_sweep_pre_confirmation",
+                            "what_next": "wait for displacement, then structure confirmation",
+                            "plan": "observe displacement -> BOS -> final filters -> possible entry",
+                            "sweep_note": sweep_note,
+                            "range_note": chop_result.note,
+                            "confirmation_mode": mode,
+                        },
+                        csv_row={
+                            "ts": now_utc.isoformat(),
+                            "symbol": cfg.symbol,
+                            "timeframe": cfg.timeframe,
+                            "strategy": "SWEEP_V2",
+                            "side": signal.side,
+                            "level": f"{signal.level:.5f}",
+                            "candle_time": int(signal.candle_time),
+                        },
+                    )
                     if state.pending_setup is not None:
+                        print(
+                            f"[{now_utc.isoformat()}] ALERT {cfg.symbol} {cfg.timeframe} "
+                            f"{signal.side} level={signal.level:.5f} setup_id={stored_setup.setup_id[:8]} "
+                            f"step=significant_sweep next=displacement->BOS->entry"
+                        )
                         print_setup_visual(
                             cfg=cfg,
                             pending=state.pending_setup,
