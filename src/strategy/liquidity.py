@@ -44,6 +44,14 @@ class MicroBurstSignalResult:
     note: str
 
 
+@dataclass(frozen=True)
+class M1PatternSignalResult:
+    signal: Optional[SweepSignal]
+    note: str
+    reference_high: float = 0.0
+    reference_low: float = 0.0
+
+
 def _price(bar: object, field: str) -> float:
     if isinstance(bar, dict):
         return float(bar[field])
@@ -430,5 +438,356 @@ def detect_trend_micro_burst_v2_signal(
         )
 
     return MicroBurstSignalResult(None, "trend_micro_burst_v2_wait_break")
+
+
+def detect_two_candle_momentum_signal(
+    rates: Sequence[object],
+    *,
+    body_ratio_min: float,
+    buffer_price: float,
+) -> M1PatternSignalResult:
+    if len(rates) < 4:
+        return M1PatternSignalResult(None, "two_candle_context_insufficient")
+
+    first = rates[-3]
+    second = rates[-2]
+    first_open = _price(first, "open")
+    first_close = _price(first, "close")
+    first_high = _price(first, "high")
+    first_low = _price(first, "low")
+    second_open = _price(second, "open")
+    second_close = _price(second, "close")
+
+    first_bull = first_close > first_open and candle_body_ratio(first) >= body_ratio_min
+    second_bull = second_close > second_open and candle_body_ratio(second) >= body_ratio_min
+    if first_bull and second_bull and second_close > first_high + buffer_price:
+        return M1PatternSignalResult(
+            SweepSignal(side="BUY", level=float(first_high), candle_time=int(second["time"])),
+            "two_candle_momentum_buy",
+            reference_high=float(first_high),
+            reference_low=float(first_low),
+        )
+
+    first_bear = first_close < first_open and candle_body_ratio(first) >= body_ratio_min
+    second_bear = second_close < second_open and candle_body_ratio(second) >= body_ratio_min
+    if first_bear and second_bear and second_close < first_low - buffer_price:
+        return M1PatternSignalResult(
+            SweepSignal(side="SELL", level=float(first_low), candle_time=int(second["time"])),
+            "two_candle_momentum_sell",
+            reference_high=float(first_high),
+            reference_low=float(first_low),
+        )
+
+    return M1PatternSignalResult(
+        None,
+        "two_candle_momentum_wait",
+        reference_high=float(first_high),
+        reference_low=float(first_low),
+    )
+
+
+def detect_opening_range_breakout_signal(
+    rates: Sequence[object],
+    *,
+    session_start_utc: str,
+    open_range_minutes: int,
+    watch_minutes: int,
+    buffer_price: float,
+    body_ratio_min: float,
+) -> SessionOpenScalpSignalResult:
+    if len(rates) < 5:
+        return SessionOpenScalpSignalResult(None, "orb_context_insufficient")
+
+    last_closed = rates[-2]
+    last_dt = datetime.fromtimestamp(int(last_closed["time"]), tz=timezone.utc)
+    session_minutes = _parse_hhmm_to_minutes(session_start_utc)
+    session_start = last_dt.replace(
+        hour=session_minutes // 60,
+        minute=session_minutes % 60,
+        second=0,
+        microsecond=0,
+    )
+    if last_dt < session_start:
+        return SessionOpenScalpSignalResult(None, "orb_before_session")
+
+    open_range_end = session_start.timestamp() + int(open_range_minutes) * 60
+    watch_end = session_start.timestamp() + int(watch_minutes) * 60
+    last_closed_ts = int(last_closed["time"])
+    if last_closed_ts < int(open_range_end):
+        return SessionOpenScalpSignalResult(None, "orb_opening_range_incomplete")
+    if last_closed_ts >= int(watch_end):
+        return SessionOpenScalpSignalResult(None, "orb_outside_watch_window")
+
+    opening_range = [
+        bar for bar in rates[:-1] if int(session_start.timestamp()) <= int(bar["time"]) < int(open_range_end)
+    ]
+    if len(opening_range) < max(2, int(open_range_minutes // 2)):
+        return SessionOpenScalpSignalResult(None, "orb_opening_range_missing")
+
+    or_high = max(_price(bar, "high") for bar in opening_range)
+    or_low = min(_price(bar, "low") for bar in opening_range)
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    body_ratio = candle_body_ratio(last_closed)
+
+    if close_price > or_high + buffer_price and close_price > open_price and body_ratio >= body_ratio_min:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="BUY", level=float(or_high), candle_time=int(last_closed["time"])),
+            "orb_buy_breakout",
+            opening_range_high=float(or_high),
+            opening_range_low=float(or_low),
+        )
+
+    if close_price < or_low - buffer_price and close_price < open_price and body_ratio >= body_ratio_min:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="SELL", level=float(or_low), candle_time=int(last_closed["time"])),
+            "orb_sell_breakout",
+            opening_range_high=float(or_high),
+            opening_range_low=float(or_low),
+        )
+
+    return SessionOpenScalpSignalResult(
+        None,
+        "orb_wait_breakout",
+        opening_range_high=float(or_high),
+        opening_range_low=float(or_low),
+    )
+
+
+def detect_opening_range_breakout_v2_signal(
+    rates: Sequence[object],
+    *,
+    session_start_utc: str,
+    open_range_minutes: int,
+    watch_minutes: int,
+    buffer_price: float,
+    body_ratio_min: float,
+    pullback_bars: int,
+    range_multiple: float,
+) -> SessionOpenScalpSignalResult:
+    needed = max(6, int(pullback_bars) + 5)
+    if len(rates) < needed:
+        return SessionOpenScalpSignalResult(None, "orb_v2_context_insufficient")
+
+    signal_idx = len(rates) - 2
+    last_closed = rates[signal_idx]
+    last_dt = datetime.fromtimestamp(int(last_closed["time"]), tz=timezone.utc)
+    session_minutes = _parse_hhmm_to_minutes(session_start_utc)
+    session_start = last_dt.replace(
+        hour=session_minutes // 60,
+        minute=session_minutes % 60,
+        second=0,
+        microsecond=0,
+    )
+    if last_dt < session_start:
+        return SessionOpenScalpSignalResult(None, "orb_v2_before_session")
+
+    open_range_end = session_start.timestamp() + int(open_range_minutes) * 60
+    watch_end = session_start.timestamp() + int(watch_minutes) * 60
+    last_closed_ts = int(last_closed["time"])
+    if last_closed_ts < int(open_range_end):
+        return SessionOpenScalpSignalResult(None, "orb_v2_opening_range_incomplete")
+    if last_closed_ts >= int(watch_end):
+        return SessionOpenScalpSignalResult(None, "orb_v2_outside_watch_window")
+
+    opening_range = [
+        bar for bar in rates[:-1] if int(session_start.timestamp()) <= int(bar["time"]) < int(open_range_end)
+    ]
+    if len(opening_range) < max(2, int(open_range_minutes // 2)):
+        return SessionOpenScalpSignalResult(None, "orb_v2_opening_range_missing")
+
+    or_high = max(_price(bar, "high") for bar in opening_range)
+    or_low = min(_price(bar, "low") for bar in opening_range)
+
+    pullback_start = signal_idx - int(pullback_bars)
+    breakout_idx = pullback_start - 1
+    if breakout_idx < 0:
+        return SessionOpenScalpSignalResult(None, "orb_v2_context_insufficient")
+
+    breakout_anchor = rates[breakout_idx]
+    pullback = list(rates[pullback_start:signal_idx])
+    if len(pullback) < int(pullback_bars):
+        return SessionOpenScalpSignalResult(None, "orb_v2_context_insufficient")
+
+    breakout_close = _price(breakout_anchor, "close")
+    breakout_open = _price(breakout_anchor, "open")
+    breakout_high = _price(breakout_anchor, "high")
+    breakout_low = _price(breakout_anchor, "low")
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    body_ok = candle_body_ratio(last_closed) >= body_ratio_min
+    avg_pullback_range = sum(candle_range(item) for item in pullback) / max(len(pullback), 1)
+    range_ok = candle_range(last_closed) >= max(avg_pullback_range * range_multiple, 1e-10)
+
+    pullback_high = max(_price(item, "high") for item in pullback)
+    pullback_low = min(_price(item, "low") for item in pullback)
+    bearish_pullback = sum(1 for item in pullback if _price(item, "close") < _price(item, "open"))
+    bullish_pullback = sum(1 for item in pullback if _price(item, "close") > _price(item, "open"))
+
+    buy_anchor_ok = breakout_close > breakout_open and breakout_close > or_high + buffer_price
+    buy_pullback_ok = bearish_pullback >= max(1, len(pullback) // 2) and pullback_low >= or_high - buffer_price
+    buy_break_ok = close_price > pullback_high + buffer_price and high_price > breakout_high + buffer_price
+    if buy_anchor_ok and buy_pullback_ok and body_ok and range_ok and close_price > open_price and buy_break_ok:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="BUY", level=float(or_high), candle_time=int(last_closed["time"])),
+            "orb_v2_buy_reacceleration",
+            opening_range_high=float(or_high),
+            opening_range_low=float(or_low),
+        )
+
+    sell_anchor_ok = breakout_close < breakout_open and breakout_close < or_low - buffer_price
+    sell_pullback_ok = bullish_pullback >= max(1, len(pullback) // 2) and pullback_high <= or_low + buffer_price
+    sell_break_ok = close_price < pullback_low - buffer_price and low_price < breakout_low - buffer_price
+    if sell_anchor_ok and sell_pullback_ok and body_ok and range_ok and close_price < open_price and sell_break_ok:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="SELL", level=float(or_low), candle_time=int(last_closed["time"])),
+            "orb_v2_sell_reacceleration",
+            opening_range_high=float(or_high),
+            opening_range_low=float(or_low),
+        )
+
+    return SessionOpenScalpSignalResult(
+        None,
+        "orb_v2_wait_reacceleration",
+        opening_range_high=float(or_high),
+        opening_range_low=float(or_low),
+    )
+
+
+def detect_overreaction_fade_signal(
+    rates: Sequence[object],
+    *,
+    lookback_bars: int,
+    range_multiple: float,
+    body_ratio_min: float,
+    buffer_price: float,
+) -> M1PatternSignalResult:
+    if len(rates) < max(5, lookback_bars + 3):
+        return M1PatternSignalResult(None, "overreaction_context_insufficient")
+
+    last_closed = rates[-2]
+    prior = list(rates[-(int(lookback_bars) + 2) : -2])
+    if len(prior) < int(lookback_bars):
+        return M1PatternSignalResult(None, "overreaction_context_insufficient")
+
+    avg_range = sum(candle_range(item) for item in prior) / max(len(prior), 1)
+    last_range = candle_range(last_closed)
+    if last_range < max(avg_range * range_multiple, 1e-10):
+        return M1PatternSignalResult(None, "overreaction_wait_range")
+
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    prior_high = max(_price(item, "high") for item in prior)
+    prior_low = min(_price(item, "low") for item in prior)
+    body_ratio = candle_body_ratio(last_closed)
+    if body_ratio < body_ratio_min:
+        return M1PatternSignalResult(
+            None,
+            "overreaction_wait_body",
+            reference_high=float(prior_high),
+            reference_low=float(prior_low),
+        )
+
+    if close_price > open_price and high_price > prior_high + buffer_price:
+        return M1PatternSignalResult(
+            SweepSignal(side="SELL", level=float(prior_high), candle_time=int(last_closed["time"])),
+            "overreaction_fade_sell",
+            reference_high=float(prior_high),
+            reference_low=float(prior_low),
+        )
+
+    if close_price < open_price and low_price < prior_low - buffer_price:
+        return M1PatternSignalResult(
+            SweepSignal(side="BUY", level=float(prior_low), candle_time=int(last_closed["time"])),
+            "overreaction_fade_buy",
+            reference_high=float(prior_high),
+            reference_low=float(prior_low),
+        )
+
+    return M1PatternSignalResult(
+        None,
+        "overreaction_wait_extreme",
+        reference_high=float(prior_high),
+        reference_low=float(prior_low),
+    )
+
+
+def detect_ny_micro_pullback_drift_signal(
+    rates: Sequence[object],
+    *,
+    pullback_bars: int,
+    drift_lookback_bars: int,
+    body_ratio_min: float,
+    buffer_price: float,
+) -> M1PatternSignalResult:
+    needed = max(8, int(drift_lookback_bars) + int(pullback_bars) + 2)
+    if len(rates) < needed:
+        return M1PatternSignalResult(None, "micro_pullback_drift_context_insufficient")
+
+    signal_idx = len(rates) - 2
+    last_closed = rates[signal_idx]
+    drift_slice = list(rates[signal_idx - int(drift_lookback_bars) : signal_idx])
+    if len(drift_slice) < int(drift_lookback_bars):
+        return M1PatternSignalResult(None, "micro_pullback_drift_context_insufficient")
+
+    drift_up = sum(1 for item in drift_slice if _price(item, "close") > _price(item, "open"))
+    drift_down = sum(1 for item in drift_slice if _price(item, "close") < _price(item, "open"))
+    drift_high = max(_price(item, "high") for item in drift_slice)
+    drift_low = min(_price(item, "low") for item in drift_slice)
+
+    pullback = list(rates[signal_idx - int(pullback_bars) : signal_idx])
+    if len(pullback) < int(pullback_bars):
+        return M1PatternSignalResult(None, "micro_pullback_drift_context_insufficient")
+
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    body_ok = candle_body_ratio(last_closed) >= body_ratio_min
+    pullback_high = max(_price(item, "high") for item in pullback)
+    pullback_low = min(_price(item, "low") for item in pullback)
+    bearish_pullback = sum(1 for item in pullback if _price(item, "close") < _price(item, "open"))
+    bullish_pullback = sum(1 for item in pullback if _price(item, "close") > _price(item, "open"))
+
+    if (
+        drift_up >= max(2, len(drift_slice) // 2)
+        and bearish_pullback >= max(1, len(pullback) // 2)
+        and body_ok
+        and close_price > open_price
+        and close_price > pullback_high + buffer_price
+        and high_price >= drift_high - buffer_price
+    ):
+        return M1PatternSignalResult(
+            SweepSignal(side="BUY", level=float(pullback_high), candle_time=int(last_closed["time"])),
+            "micro_pullback_drift_buy",
+            reference_high=float(drift_high),
+            reference_low=float(drift_low),
+        )
+
+    if (
+        drift_down >= max(2, len(drift_slice) // 2)
+        and bullish_pullback >= max(1, len(pullback) // 2)
+        and body_ok
+        and close_price < open_price
+        and close_price < pullback_low - buffer_price
+        and low_price <= drift_low + buffer_price
+    ):
+        return M1PatternSignalResult(
+            SweepSignal(side="SELL", level=float(pullback_low), candle_time=int(last_closed["time"])),
+            "micro_pullback_drift_sell",
+            reference_high=float(drift_high),
+            reference_low=float(drift_low),
+        )
+
+    return M1PatternSignalResult(
+        None,
+        "micro_pullback_drift_wait",
+        reference_high=float(drift_high),
+        reference_low=float(drift_low),
+    )
 
 

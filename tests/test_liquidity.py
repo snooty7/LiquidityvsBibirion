@@ -2,8 +2,13 @@ import pytest
 
 from src.strategy.liquidity import (
     detect_h4_bias_micro_burst_signal,
+    detect_ny_micro_pullback_drift_signal,
+    detect_opening_range_breakout_signal,
+    detect_opening_range_breakout_v2_signal,
+    detect_overreaction_fade_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_two_candle_momentum_signal,
     detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
     evaluate_range_filter,
@@ -219,6 +224,129 @@ def test_detect_session_open_scalp_signal_buy_reclaim() -> None:
     assert result.signal is not None
     assert result.signal.side == "BUY"
     assert result.note == "scalp_buy_reclaim"
+
+
+def test_detect_two_candle_momentum_signal_buy_break() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},
+        {"time": 2, "open": 1.1001, "high": 1.1004, "low": 1.1000, "close": 1.10035},
+        {"time": 3, "open": 1.10035, "high": 1.10075, "low": 1.10030, "close": 1.10070},
+        {"time": 4, "open": 1.10070, "high": 1.10080, "low": 1.10060, "close": 1.10075},
+    ]
+
+    result = detect_two_candle_momentum_signal(
+        rates,
+        body_ratio_min=0.45,
+        buffer_price=0.00001,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "two_candle_momentum_buy"
+
+
+def test_detect_opening_range_breakout_signal_buy_break() -> None:
+    rates = [
+        {"time": 1775001780, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},  # 00:03
+        {"time": 1775001840, "open": 1.1001, "high": 1.1003, "low": 1.1000, "close": 1.1002},  # 00:04
+        {"time": 1775001900, "open": 1.1002, "high": 1.10035, "low": 1.1001, "close": 1.10025},  # 00:05
+        {"time": 1775001960, "open": 1.10025, "high": 1.10040, "low": 1.1002, "close": 1.10030},  # 00:06
+        {"time": 1775002020, "open": 1.10030, "high": 1.10045, "low": 1.1002, "close": 1.10040},  # 00:07
+        {"time": 1775002080, "open": 1.10040, "high": 1.10090, "low": 1.10035, "close": 1.10085},  # 00:08 breakout
+        {"time": 1775002140, "open": 1.10085, "high": 1.10095, "low": 1.10080, "close": 1.10090},  # live bar
+    ]
+
+    result = detect_opening_range_breakout_signal(
+        rates,
+        session_start_utc="00:03",
+        open_range_minutes=5,
+        watch_minutes=60,
+        buffer_price=0.00001,
+        body_ratio_min=0.45,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "orb_buy_breakout"
+
+
+def test_detect_opening_range_breakout_v2_signal_buy_reacceleration() -> None:
+    rates = [
+        {"time": 1775001780, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},  # 00:03
+        {"time": 1775001840, "open": 1.1001, "high": 1.1003, "low": 1.1000, "close": 1.1002},  # 00:04
+        {"time": 1775001900, "open": 1.1002, "high": 1.10035, "low": 1.1001, "close": 1.10025},  # 00:05
+        {"time": 1775001960, "open": 1.10025, "high": 1.10040, "low": 1.1002, "close": 1.10030},  # 00:06
+        {"time": 1775002020, "open": 1.10030, "high": 1.10045, "low": 1.1002, "close": 1.10040},  # 00:07 OR end
+        {"time": 1775002080, "open": 1.10040, "high": 1.10090, "low": 1.10035, "close": 1.10085},  # 00:08 breakout anchor
+        {"time": 1775002140, "open": 1.10085, "high": 1.10088, "low": 1.10058, "close": 1.10062},  # 00:09 pullback
+        {"time": 1775002200, "open": 1.10062, "high": 1.10065, "low": 1.10048, "close": 1.10052},  # 00:10 pullback
+        {"time": 1775002260, "open": 1.10052, "high": 1.10105, "low": 1.10050, "close": 1.10100},  # 00:11 reacceleration
+        {"time": 1775002320, "open": 1.10100, "high": 1.10105, "low": 1.10095, "close": 1.10102},  # live
+    ]
+
+    result = detect_opening_range_breakout_v2_signal(
+        rates,
+        session_start_utc="00:03",
+        open_range_minutes=5,
+        watch_minutes=60,
+        buffer_price=0.00001,
+        body_ratio_min=0.45,
+        pullback_bars=2,
+        range_multiple=1.2,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "orb_v2_buy_reacceleration"
+
+
+def test_detect_overreaction_fade_signal_sell() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1001, "low": 1.0999, "close": 1.10002},
+        {"time": 2, "open": 1.10002, "high": 1.10012, "low": 1.09995, "close": 1.10005},
+        {"time": 3, "open": 1.10005, "high": 1.10015, "low": 1.10000, "close": 1.10010},
+        {"time": 4, "open": 1.10010, "high": 1.10020, "low": 1.10002, "close": 1.10012},
+        {"time": 5, "open": 1.10012, "high": 1.10024, "low": 1.10006, "close": 1.10018},
+        {"time": 6, "open": 1.10018, "high": 1.10090, "low": 1.10015, "close": 1.10085},
+        {"time": 7, "open": 1.10085, "high": 1.10088, "low": 1.10070, "close": 1.10078},
+    ]
+
+    result = detect_overreaction_fade_signal(
+        rates,
+        lookback_bars=4,
+        range_multiple=2.0,
+        body_ratio_min=0.60,
+        buffer_price=0.00001,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "SELL"
+    assert result.note == "overreaction_fade_sell"
+
+
+def test_detect_ny_micro_pullback_drift_signal_buy() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1003, "low": 1.0999, "close": 1.1002},
+        {"time": 2, "open": 1.1002, "high": 1.1005, "low": 1.1001, "close": 1.1004},
+        {"time": 3, "open": 1.1004, "high": 1.1007, "low": 1.1003, "close": 1.1006},
+        {"time": 4, "open": 1.1006, "high": 1.1008, "low": 1.1005, "close": 1.1007},
+        {"time": 5, "open": 1.1007, "high": 1.10075, "low": 1.10045, "close": 1.10050},
+        {"time": 6, "open": 1.10050, "high": 1.10055, "low": 1.10035, "close": 1.10040},
+        {"time": 7, "open": 1.10040, "high": 1.10090, "low": 1.10038, "close": 1.10088},
+        {"time": 8, "open": 1.10088, "high": 1.10092, "low": 1.10080, "close": 1.10090},
+    ]
+
+    result = detect_ny_micro_pullback_drift_signal(
+        rates,
+        pullback_bars=2,
+        drift_lookback_bars=4,
+        body_ratio_min=0.45,
+        buffer_price=0.00001,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "micro_pullback_drift_buy"
 
 
 def test_detect_h4_bias_micro_burst_signal_buy_break() -> None:

@@ -201,3 +201,49 @@ def test_apply_open_trade_bar_exits_after_two_adverse_closes() -> None:
     )
     assert closed is not None
     assert closed.reason == "adverse_close_exit"
+
+
+def test_apply_open_trade_bar_exits_on_max_hold_bars() -> None:
+    cfg = SymbolConfig(
+        **{
+            **_cfg().__dict__,
+            "timeframe": "M1",
+            "strategy_mode": "opening_range_breakout_v2",
+            "max_hold_bars": 2,
+            "trailing_stop_mode": "off",
+            "early_exit_consecutive_adverse_closes": 0,
+        }
+    )
+    trade = OpenTrade(
+        side="BUY",
+        entry_time=0,
+        entry_price=1.1000,
+        sl=1.0996,
+        tp=1.1004,
+        volume=0.02,
+        risk_money=0.8,
+        signal_key="BUY|1.10000",
+        confirm_note="confirm=none",
+        initial_sl=1.0996,
+        initial_tp=1.1004,
+    )
+
+    updated, closed = _apply_open_trade_bar(
+        cfg,
+        _runtime(),
+        trade,
+        {"time": 60, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},
+        _info(),
+    )
+    assert closed is None
+    assert updated.hold_bars == 1
+
+    updated, closed = _apply_open_trade_bar(
+        cfg,
+        _runtime(),
+        trade,
+        {"time": 120, "open": 1.1001, "high": 1.1002, "low": 1.1000, "close": 1.10015},
+        _info(),
+    )
+    assert closed is not None
+    assert closed.reason == "time_exit"

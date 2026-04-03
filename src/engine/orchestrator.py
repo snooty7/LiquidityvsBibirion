@@ -49,6 +49,7 @@ from src.strategy.filters import (
 from src.strategy.liquidity import (
     RangeFilterResult,
     detect_h4_bias_micro_burst_signal,
+    detect_opening_range_breakout_v2_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
     detect_trend_micro_burst_v2_signal,
@@ -919,6 +920,10 @@ def manage_symbol_positions(
         if early_exit_reason is not None:
             reason = early_exit_reason
 
+        time_exit_reason = resolve_time_exit_reason(adapter, cfg, position)
+        if reason is None and time_exit_reason is not None:
+            reason = time_exit_reason
+
         loss_limit_money, loss_reason, loss_guard_mode = resolve_loss_guard(runtime, position, info)
         if reason is None and loss_limit_money is not None and pnl_money <= -loss_limit_money:
             reason = loss_reason
@@ -1120,6 +1125,30 @@ def resolve_early_exit_reason(
         if adverse_limit > 0 and adverse_count >= adverse_limit:
             return f"adverse_close_exit {adverse_limit}bars"
 
+    return None
+
+
+def resolve_time_exit_reason(
+    adapter: MT5Adapter,
+    cfg: SymbolConfig,
+    position: object,
+) -> Optional[str]:
+    max_hold_bars = int(getattr(cfg, "max_hold_bars", 0) or 0)
+    if max_hold_bars <= 0:
+        return None
+
+    opened_at = int(getattr(position, "time", 0) or 0)
+    if opened_at <= 0:
+        return None
+
+    rates = adapter.copy_rates(cfg.symbol, cfg.timeframe, max_hold_bars + 3)
+    if len(rates) < 3:
+        return None
+
+    closed = list(rates[:-1])
+    held_closed_bars = sum(1 for candle in closed if int(candle["time"]) > opened_at)
+    if held_closed_bars >= max_hold_bars:
+        return f"time_exit {max_hold_bars}bars"
     return None
 
 
@@ -1391,6 +1420,12 @@ def scalp_observation_event(note: str) -> str:
         "scalp_preopen_not_compressed": "SCALP_PREOPEN_NOT_COMPRESSED",
         "scalp_context_insufficient": "SCALP_CONTEXT_INSUFFICIENT",
         "scalp_wait_liquidity_reclaim": "SCALP_WAIT_RECLAIM",
+        "orb_v2_before_session": "SCALP_OUTSIDE_WINDOW",
+        "orb_v2_outside_watch_window": "SCALP_OUTSIDE_WINDOW",
+        "orb_v2_opening_range_incomplete": "SCALP_WAIT_OPENING_RANGE",
+        "orb_v2_opening_range_missing": "SCALP_WAIT_OPENING_RANGE",
+        "orb_v2_context_insufficient": "SCALP_CONTEXT_INSUFFICIENT",
+        "orb_v2_wait_reacceleration": "SCALP_WAIT_RECLAIM",
     }
     return mapping.get(note, "SCALP_STATUS")
 
@@ -1544,6 +1579,32 @@ def process_symbol(
             )
         else:
             state.last_observation_note = None
+    elif cfg.strategy_mode == "opening_range_breakout_v2":
+        scalp_result = detect_opening_range_breakout_v2_signal(
+            rates,
+            session_start_utc=cfg.scalp_session_start_utc,
+            open_range_minutes=cfg.scalp_open_range_minutes,
+            watch_minutes=cfg.scalp_watch_minutes,
+            buffer_price=cfg.buffer_pips * pip,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            range_multiple=cfg.confirmation_displacement_range_multiple,
+        )
+        signal = scalp_result.signal
+        if scalp_result.signal is None:
+            emit_scalp_observation_once(
+                state=state,
+                log_file=log_file,
+                cfg=cfg,
+                note=scalp_result.note,
+                candle_time=closed_bar_time,
+                message=(
+                    f"{scalp_result.note} or_high={scalp_result.opening_range_high:.5f} "
+                    f"or_low={scalp_result.opening_range_low:.5f}"
+                ),
+            )
+        else:
+            state.last_observation_note = None
     elif cfg.strategy_mode == "h4_bias_micro_burst":
         micro_burst_result = detect_h4_bias_micro_burst_signal(
             rates,
@@ -1596,7 +1657,10 @@ def process_symbol(
                 lookback_bars=cfg.scalp_preopen_lookback_bars,
                 max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
             )
-            sweep_note = scalp_result.note if scalp_result is not None else "scalp_signal"
+            sweep_note = scalp_result.note if scalp_result is not None else "pattern_signal"
+        elif cfg.strategy_mode == "opening_range_breakout_v2":
+            chop_result = RangeFilterResult(False, "orb_v2_ok", 0.0, 0.0)
+            sweep_note = scalp_result.note if scalp_result is not None else "orb_v2_signal"
         elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2"):
             chop_result = RangeFilterResult(False, "micro_burst_ok", 0.0, 0.0)
             sweep_note = micro_burst_result.note if micro_burst_result is not None else "micro_burst_signal"
@@ -2482,6 +2546,7 @@ def run(config_path: str = "config/settings.json") -> None:
                 f"bias={cfg.use_bias_filter}/{cfg.bias_timeframe}/{cfg.bias_ema_period} "
                 f"ob={cfg.use_order_block_filter}/{cfg.order_block_zone_mode}/{cfg.order_block_lookback_bars}/"
                 f"{cfg.order_block_max_distance_pips}/{cfg.order_block_min_impulse_pips}/{cfg.order_block_max_age_bars} "
+                f"hold={cfg.max_hold_bars} "
                 f"trail={trailing_mode}/{trailing_activation_r:.2f}R/{trailing_gap_r:.2f}R/"
                 f"remove_tp={trailing_remove_tp}"
             )

@@ -38,6 +38,7 @@ from src.strategy.filters import (
 from src.strategy.liquidity import (
     SweepSignal,
     detect_h4_bias_micro_burst_signal,
+    detect_opening_range_breakout_v2_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
     detect_trend_micro_burst_v2_signal,
@@ -71,6 +72,7 @@ class OpenTrade:
     confirm_note: str
     initial_sl: float
     initial_tp: float
+    hold_bars: int = 0
     adverse_close_count: int = 0
 
 
@@ -390,6 +392,12 @@ def _apply_open_trade_bar(
         else:
             trade.adverse_close_count = 0
 
+    max_hold_bars = int(getattr(cfg, "max_hold_bars", 0) or 0)
+    if max_hold_bars > 0:
+        trade.hold_bars += 1
+        if trade.hold_bars >= max_hold_bars:
+            return trade, _close_trade(cfg, trade, close_time, close_price, "time_exit", symbol_info)
+
     position = _position_like(trade)
     loss_limit_money, loss_reason, _ = resolve_loss_guard(runtime, position, symbol_info)
     if loss_limit_money is not None:
@@ -689,6 +697,17 @@ def run_backtest(
                     preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
                 )
                 signal = scalp_result.signal
+            elif cfg.strategy_mode == "opening_range_breakout_v2":
+                signal = detect_opening_range_breakout_v2_signal(
+                    m5_rates,
+                    session_start_utc=cfg.scalp_session_start_utc,
+                    open_range_minutes=cfg.scalp_open_range_minutes,
+                    watch_minutes=cfg.scalp_watch_minutes,
+                    buffer_price=cfg.buffer_pips * pip,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    range_multiple=cfg.confirmation_displacement_range_multiple,
+                ).signal
             elif cfg.strategy_mode == "h4_bias_micro_burst":
                 signal = detect_h4_bias_micro_burst_signal(
                     m5_rates,
@@ -719,7 +738,7 @@ def run_backtest(
                     if not compression.blocked:
                         skip_range_chop += 1
                         continue
-                elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2"):
+                elif cfg.strategy_mode in ("opening_range_breakout_v2", "h4_bias_micro_burst", "trend_micro_burst_v2"):
                     pass
                 else:
                     prior_closed = m5_rates[:-2]
@@ -750,7 +769,7 @@ def run_backtest(
                     continue
 
                 last_signal_key = signal_key
-                pending = PendingSetupLite(
+                pending_candidate = PendingSetupLite(
                     signal_key=signal_key,
                     side=signal.side,
                     level=float(signal.level),
@@ -762,6 +781,77 @@ def run_backtest(
                     ),
                     last_note="created",
                 )
+                if cfg.confirmation_mode.lower() == "none":
+                    entry_time = decision_time
+                    entry_price = _latest_close_price(closed_m1)
+                    now_utc = datetime.fromtimestamp(entry_time, timezone.utc)
+                    if daily_loss_reached:
+                        skip_daily_loss += 1
+                        continue
+                    if not session_allowed(cfg, now_utc):
+                        skip_session += 1
+                        continue
+                    if float(entry_time) < cooldown_until:
+                        skip_cooldown += 1
+                        continue
+                    if open_trade is not None and cfg.one_position_per_symbol:
+                        continue
+
+                    current_m1_bar = closed_m1[-1]
+                    spread_pips = _spread_pips(current_m1_bar, pip, point)
+                    if spread_pips > cfg.max_spread_pips:
+                        continue
+
+                    if cfg.use_bias_filter:
+                        bias_info = evaluate_bias(closed_bias, cfg.bias_ema_period)
+                        bias_ok = bias_info["ok_buy"] if pending_candidate.side == "BUY" else bias_info["ok_sell"]
+                        if not bias_ok:
+                            skip_bias += 1
+                            continue
+
+                    if cfg.use_order_block_filter:
+                        m5_rates_current = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
+                        signal_index = len(m5_rates_current) - 2
+                        order_block = find_local_order_block(
+                            rates=m5_rates_current,
+                            signal_index=signal_index,
+                            side=pending_candidate.side,
+                            pip=pip,
+                            lookback_bars=cfg.order_block_lookback_bars,
+                            max_age_bars=cfg.order_block_max_age_bars,
+                            zone_mode=cfg.order_block_zone_mode,
+                            min_impulse_pips=cfg.order_block_min_impulse_pips,
+                        )
+                        if order_block is None:
+                            skip_order_block += 1
+                            continue
+                        ob_distance = order_block_distance_pips(entry_price, order_block["low"], order_block["high"], pip)
+                        allowed_ob_distance, _ = resolve_order_block_distance_limit_pips(
+                            cfg.order_block_max_distance_pips,
+                            order_block,
+                            confirmation_mode=cfg.confirmation_mode,
+                            range_note="range_ok",
+                            strong_override_max_distance_pips=cfg.order_block_strong_override_max_distance_pips,
+                            strong_override_min_impulse_pips=cfg.order_block_strong_override_min_impulse_pips,
+                        )
+                        if ob_distance > allowed_ob_distance:
+                            skip_order_block += 1
+                            continue
+
+                    open_trade = _build_entry_trade(
+                        cfg,
+                        app_config.runtime,
+                        symbol_info,
+                        equity,
+                        pending_candidate.side,
+                        entry_time,
+                        entry_price,
+                        pending_candidate.signal_key,
+                        "confirm=none",
+                    )
+                    cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
+                else:
+                    pending = pending_candidate
         else:
             m5_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
             if cfg.strategy_mode == "session_open_scalp":
@@ -774,6 +864,17 @@ def run_backtest(
                     body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
                     preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
                     preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+                ).signal
+            elif cfg.strategy_mode == "opening_range_breakout_v2":
+                signal = detect_opening_range_breakout_v2_signal(
+                    m5_rates,
+                    session_start_utc=cfg.scalp_session_start_utc,
+                    open_range_minutes=cfg.scalp_open_range_minutes,
+                    watch_minutes=cfg.scalp_watch_minutes,
+                    buffer_price=cfg.buffer_pips * pip,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    range_multiple=cfg.confirmation_displacement_range_multiple,
                 ).signal
             elif cfg.strategy_mode == "h4_bias_micro_burst":
                 signal = detect_h4_bias_micro_burst_signal(

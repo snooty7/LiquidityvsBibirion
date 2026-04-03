@@ -87,6 +87,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "confirmation_displacement_range_multiple": 1.8,
             "micro_burst_pullback_bars": 2,
             "micro_burst_body_ratio_min": 0.45,
+            "max_hold_bars": 0,
             "early_exit_consecutive_adverse_closes": 0,
             "early_exit_large_adverse_body_r": 0.0,
             "trailing_stop_mode": "",
@@ -180,6 +181,7 @@ class SymbolConfig:
     confirmation_displacement_range_multiple: float = 1.8
     micro_burst_pullback_bars: int = 2
     micro_burst_body_ratio_min: float = 0.45
+    max_hold_bars: int = 0
     early_exit_consecutive_adverse_closes: int = 0
     early_exit_large_adverse_body_r: float = 0.0
     trailing_stop_mode: str = ""
@@ -308,6 +310,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 ),
                 micro_burst_pullback_bars=int(row.get("micro_burst_pullback_bars", 2)),
                 micro_burst_body_ratio_min=float(row.get("micro_burst_body_ratio_min", 0.45)),
+                max_hold_bars=int(row.get("max_hold_bars", 0)),
                 early_exit_consecutive_adverse_closes=int(row.get("early_exit_consecutive_adverse_closes", 0)),
                 early_exit_large_adverse_body_r=float(row.get("early_exit_large_adverse_body_r", 0.0)),
                 trailing_stop_mode=str(row.get("trailing_stop_mode", "") or "").lower(),
@@ -339,7 +342,13 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         raise ValueError("push_notification_url is required when push_notifications_enabled=true")
 
     valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"}
-    valid_strategy_modes = {"liquidity_sweep", "session_open_scalp", "h4_bias_micro_burst", "trend_micro_burst_v2"}
+    valid_strategy_modes = {
+        "liquidity_sweep",
+        "session_open_scalp",
+        "opening_range_breakout_v2",
+        "h4_bias_micro_burst",
+        "trend_micro_burst_v2",
+    }
     valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}
     for symbol in symbols:
@@ -389,6 +398,8 @@ def load_config(path: Union[str, Path]) -> AppConfig:
             raise ValueError(f"micro_burst_pullback_bars must be >= 1 for {symbol.symbol}")
         if not 0.0 < symbol.micro_burst_body_ratio_min <= 1.0:
             raise ValueError(f"micro_burst_body_ratio_min must be in (0, 1] for {symbol.symbol}")
+        if symbol.max_hold_bars < 0:
+            raise ValueError(f"max_hold_bars must be >= 0 for {symbol.symbol}")
         if symbol.early_exit_consecutive_adverse_closes < 0:
             raise ValueError(f"early_exit_consecutive_adverse_closes must be >= 0 for {symbol.symbol}")
         if symbol.early_exit_large_adverse_body_r < 0:

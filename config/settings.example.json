@@ -1,4 +1,4 @@
-{
+﻿{
   "runtime": {
     "poll_seconds": 5,
     "dry_run": false,
@@ -67,6 +67,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     },
     {
@@ -107,6 +108,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     },
     {
@@ -147,6 +149,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     },
     {
@@ -187,6 +190,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     },
     {
@@ -227,6 +231,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     },
     {
@@ -267,6 +272,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     },
     {
@@ -307,6 +313,7 @@
       "cisd_structure_bars": 4,
       "confirmation_displacement_range_multiple": 1.8,
       "confirmation_displacement_body_ratio_min": 0.55,
+      "max_hold_bars": 0,
       "trade_side_filter": "both"
     }
   ]

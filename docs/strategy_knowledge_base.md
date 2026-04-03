@@ -373,3 +373,139 @@ Interpretation:
 - Still modest, but now positive and testable.
 - This is a research candidate for demo, not a production branch yet.
 
+### 5. `M1 archetype research`
+Status:
+- Research complete for first pass.
+
+Goal:
+- Test whether a very short-hold `M1` family can produce enough positive expectancy to justify a new branch.
+- Keep the objective practical:
+  - small pip targets
+  - few candles in the trade
+  - explicit cost-aware results
+
+Test window:
+- `EURUSD`
+- `2025-12-23` -> `2026-03-31`
+- PnL includes a simple entry spread penalty, because `M1` results without costs are misleading.
+
+Archetypes tested:
+1. `two_candle_momentum`
+- Idea:
+  - two strong candles in the same direction
+  - continuation break beyond the first candle
+  - `H1` bias filter enabled
+- Result:
+  - `London`: `656` trades, `-77.60 pips`, `PF 0.848`
+  - `New York`: `658` trades, `-4.60 pips`, `PF 0.993`
+- Verdict:
+  - Not good enough.
+  - The naive idea "two bullish candles = buy" is too noisy.
+
+2. `opening_range_breakout`
+- Idea:
+  - first `15m` range of the session
+  - take continuation breakout beyond that range
+  - `H1` bias filter enabled
+- Result:
+  - `London`: `845` trades, `-99.70 pips`, `PF 0.866`
+  - `New York`: `819` trades, `+50.40 pips`, `PF 1.052`
+- Verdict:
+  - `London` rejected.
+  - `New York` is the only first-pass positive pocket, but still thin.
+  - This is the only archetype from the first pass worth carrying into a second research iteration.
+
+3. `overreaction_fade`
+- Idea:
+  - fade a statistically stretched `M1` bar after local overextension
+  - no higher-timeframe bias
+- Result:
+  - `London`: `298` trades, `-15.20 pips`, `PF 0.909`
+  - `New York`: `219` trades, `-24.90 pips`, `PF 0.877`
+- Verdict:
+  - Rejected.
+  - There is not enough edge after costs.
+
+First-pass conclusion:
+- `M1` is not solved by simple candle color logic.
+- The first pass rejects:
+  - `two_candle_momentum`
+  - `overreaction_fade`
+  - `London opening_range_breakout`
+- The only candidate worth a second pass is:
+  - `New York opening_range_breakout`
+
+Next research direction:
+- Build `M1 NY ORB v2` instead of adding more naive candle-pattern rules.
+- Focus on:
+  - `New York only`
+  - stricter quality filter after breakout
+  - small target / fast invalidation
+  - no blind two-candle entry logic
+
+Second-pass result:
+- `M1 NY ORB v2` improved meaningfully versus the raw ORB branch.
+
+Best tested case:
+- `opening_range_breakout_v2_newyork_tight`
+- `116` trades
+- `+33.20 pips`
+- `PF 1.459`
+- `win rate 40.52%`
+- `avg R 0.072`
+- `max DD 14.90 pips`
+
+Interpretation:
+- This is better quality than the raw `New York opening_range_breakout` branch:
+  - fewer trades
+  - lower drawdown
+  - materially higher `PF`
+- It is still a research candidate, not a production branch.
+- But this is now the strongest `M1` continuation idea tested so far.
+
+Decision:
+- Continue from `M1 NY ORB v2 tight`.
+- Do not continue with:
+  - `two_candle_momentum`
+  - `overreaction_fade`
+  - `London ORB`
+
+Latest rerun and tuning status:
+- After the final detector patch, `NY Micro-Pullback Drift` stayed positive, but weaker than the first optimistic run:
+  - `ny_micro_pullback_drift_newyork`
+  - `249` trades
+  - `+9.50 pips`
+  - `PF 1.060`
+  - verdict: research-only, too thin for live
+- The tighter variant is better:
+  - `ny_micro_pullback_drift_newyork_tight`
+  - `162` trades
+  - `+26.70 pips`
+  - `PF 1.308`
+  - verdict: promising, but still secondary to ORB v2
+
+Final focused tuning pass for `NY ORB v2`:
+- Best validated candidate:
+  - `opening_range_breakout_v2`
+  - `New York only`
+  - `use_h1_bias = true`
+  - `sl_pips = 4.0`
+  - `rr = 1.0`
+  - `max_hold_bars = 4`
+  - `adverse_limit = 1`
+  - `body_ratio_min = 0.48`
+  - `range_multiple = 1.35`
+  - `pullback_bars = 2`
+  - `buffer_pips = 0.10`
+- Result:
+  - `106` trades
+  - `+44.10 pips`
+  - `PF 1.699`
+  - `win rate 43.40%`
+  - `avg R 0.104`
+  - `max DD 11.60 pips`
+
+Current decision:
+- `NY ORB v2` is now the strongest `M1` research branch.
+- `NY Micro-Pullback Drift` remains useful research context, but not the branch to prioritize for live demo sampling.
+
