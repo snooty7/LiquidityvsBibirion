@@ -36,9 +36,13 @@ class SQLiteRepository:
 
     @contextmanager
     def transaction(self) -> Iterator[None]:
-        started = self._tx_depth == 0
+        started = self._tx_depth == 0 and not self.conn.in_transaction
+        savepoint_name: Optional[str] = None
         if started:
             self.conn.execute("BEGIN IMMEDIATE")
+        else:
+            savepoint_name = f"repo_tx_{self._tx_depth + 1}"
+            self.conn.execute(f"SAVEPOINT {savepoint_name}")
         self._tx_depth += 1
         try:
             yield
@@ -46,11 +50,16 @@ class SQLiteRepository:
             self._tx_depth = max(0, self._tx_depth - 1)
             if started:
                 self.conn.rollback()
+            elif savepoint_name is not None:
+                self.conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint_name}")
+                self.conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
             raise
         else:
             self._tx_depth = max(0, self._tx_depth - 1)
             if started:
                 self.conn.commit()
+            elif savepoint_name is not None:
+                self.conn.execute(f"RELEASE SAVEPOINT {savepoint_name}")
 
     def _maybe_commit(self) -> None:
         if self._tx_depth == 0:

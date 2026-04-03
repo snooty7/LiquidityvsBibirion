@@ -711,6 +711,40 @@ def test_atomic_retry_and_event_rolls_back_on_failure(tmp_path: Path) -> None:
         repo.close()
 
 
+def test_transaction_uses_savepoint_when_sqlite_transaction_already_open(tmp_path: Path) -> None:
+    repo = SQLiteRepository(str(tmp_path / "state.db"))
+    try:
+        repo.conn.execute(
+            """
+            INSERT INTO guard_state (id, day_key, daily_realized_pnl, daily_loss_reached, daily_loss_announced, updated_at)
+            VALUES (1, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                day_key = excluded.day_key,
+                daily_realized_pnl = excluded.daily_realized_pnl,
+                daily_loss_reached = excluded.daily_loss_reached,
+                daily_loss_announced = excluded.daily_loss_announced,
+                updated_at = excluded.updated_at
+            """,
+            ("2026-04-03", -1.0, 0, 0, datetime.now(timezone.utc).isoformat()),
+        )
+        assert repo.conn.in_transaction is True
+
+        with repo.transaction():
+            repo.append_event(
+                event_type="CHECKPOINT_SNAPSHOT",
+                symbol="ALL",
+                payload={"case": "savepoint_fallback"},
+            )
+
+        guard = repo.get_guard_state()
+        assert guard.day_key == "2026-04-03"
+        events = repo.list_events(event_type="CHECKPOINT_SNAPSHOT")
+        assert len(events) == 1
+        assert json.loads(events[0].payload_json)["case"] == "savepoint_fallback"
+    finally:
+        repo.close()
+
+
 def test_reconcile_transaction_rolls_back_if_event_write_fails(tmp_path: Path) -> None:
     repo = SQLiteRepository(str(tmp_path / "state.db"))
     try:
