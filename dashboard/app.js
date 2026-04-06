@@ -1,0 +1,208 @@
+const chartDefs = [
+  { tf: "M1", elementId: "chartM1", metaId: "metaM1" },
+  { tf: "M5", elementId: "chartM5", metaId: "metaM5" },
+  { tf: "H1", elementId: "chartH1", metaId: "metaH1" },
+  { tf: "D1", elementId: "chartD1", metaId: "metaD1" },
+];
+
+const charts = new Map();
+const symbolSelect = document.getElementById("symbolSelect");
+const refreshBtn = document.getElementById("refreshBtn");
+const statusText = document.getElementById("statusText");
+const generatedAt = document.getElementById("generatedAt");
+const signalCards = document.getElementById("signalCards");
+
+function createChart(container) {
+  const chart = LightweightCharts.createChart(container, {
+    layout: {
+      background: { color: "#0b141d" },
+      textColor: "#d8e6f0",
+    },
+    grid: {
+      vertLines: { color: "rgba(41, 64, 84, 0.5)" },
+      horzLines: { color: "rgba(41, 64, 84, 0.5)" },
+    },
+    rightPriceScale: {
+      borderColor: "rgba(138, 160, 181, 0.15)",
+    },
+    timeScale: {
+      borderColor: "rgba(138, 160, 181, 0.15)",
+      timeVisible: true,
+      secondsVisible: false,
+    },
+    crosshair: {
+      mode: LightweightCharts.CrosshairMode.Normal,
+    },
+  });
+
+  const series = chart.addCandlestickSeries({
+    upColor: "#f4f7fb",
+    downColor: "#5ca6ff",
+    wickUpColor: "#f4f7fb",
+    wickDownColor: "#5ca6ff",
+    borderVisible: false,
+    priceFormat: {
+      type: "price",
+      precision: 5,
+      minMove: 0.00001,
+    },
+  });
+
+  return { chart, series, priceLines: [], hasInitialFit: false, userRange: null };
+}
+
+function ensureCharts() {
+  for (const def of chartDefs) {
+    if (charts.has(def.tf)) continue;
+    const container = document.getElementById(def.elementId);
+    const bundle = createChart(container);
+    bundle.chart.timeScale().subscribeVisibleLogicalRangeChange((range) => {
+      if (range) {
+        bundle.userRange = range;
+      }
+    });
+    charts.set(def.tf, bundle);
+  }
+}
+
+function setStatus(text) {
+  statusText.textContent = text;
+}
+
+function clearPriceLines(bundle) {
+  for (const line of bundle.priceLines) {
+    bundle.series.removePriceLine(line);
+  }
+  bundle.priceLines = [];
+}
+
+function restoreRange(bundle) {
+  if (bundle.userRange) {
+    bundle.chart.timeScale().setVisibleLogicalRange(bundle.userRange);
+    return;
+  }
+  if (!bundle.hasInitialFit) {
+    bundle.chart.timeScale().fitContent();
+    bundle.hasInitialFit = true;
+  }
+}
+
+function applyMarkers(bundle, markers) {
+  bundle.series.setMarkers(
+    markers.map((marker) => ({
+      time: marker.time,
+      position: marker.position,
+      shape: marker.shape,
+      color: marker.color,
+      text: marker.text,
+      size: marker.size || 0.7,
+    })),
+  );
+
+  clearPriceLines(bundle);
+  const seen = new Set();
+  for (const marker of markers) {
+    if (marker.price == null) continue;
+    const key = `${marker.event}|${marker.price}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const line = bundle.series.createPriceLine({
+      price: marker.price,
+      color: marker.lineColor,
+      lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Dotted,
+      axisLabelVisible: false,
+      title: marker.text,
+    });
+    bundle.priceLines.push(line);
+    if (bundle.priceLines.length >= 8) {
+      break;
+    }
+  }
+}
+
+function renderSignals(items) {
+  signalCards.innerHTML = "";
+  if (!items.length) {
+    signalCards.innerHTML = `<div class="signal-card"><div class="title">No recent signal events</div></div>`;
+    return;
+  }
+
+  for (const item of items) {
+    const card = document.createElement("article");
+    card.className = "signal-card";
+    card.style.borderLeftColor = item.color;
+    const ts = new Date(item.ts).toLocaleString();
+    card.innerHTML = `
+      <div class="row">
+        <div class="title">${item.symbol} ${item.timeframe || "-"}</div>
+        <div>${item.event}</div>
+      </div>
+      <div class="meta">${ts} | ${item.side || "-"} | level=${item.level || "-"}</div>
+      <div class="message">${item.message || ""}</div>
+    `;
+    signalCards.appendChild(card);
+  }
+}
+
+async function loadSnapshot() {
+  const symbol = symbolSelect.value || "EURUSD";
+  setStatus(`loading ${symbol}`);
+  const response = await fetch(`/api/snapshot?symbol=${encodeURIComponent(symbol)}`);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Snapshot failed");
+  }
+
+  if (!symbolSelect.options.length) {
+    for (const item of data.symbols) {
+      const option = document.createElement("option");
+      option.value = item;
+      option.textContent = item;
+      symbolSelect.appendChild(option);
+    }
+    symbolSelect.value = symbol;
+  }
+
+  generatedAt.textContent = `updated ${new Date(data.generated_at_utc).toLocaleString()}`;
+  renderSignals(data.recentSignals || []);
+
+  for (const def of chartDefs) {
+    const bundle = charts.get(def.tf);
+    const tfData = data.timeframes[def.tf];
+    if (!bundle || !tfData) continue;
+    bundle.series.setData(tfData.candles || []);
+    applyMarkers(bundle, tfData.markers || []);
+    restoreRange(bundle);
+    document.getElementById(def.metaId).textContent = `${tfData.candles.length} candles | ${tfData.markers.length} signals`;
+  }
+
+  setStatus(`live ${symbol}`);
+}
+
+async function refresh() {
+  try {
+    await loadSnapshot();
+  } catch (error) {
+    setStatus(String(error.message || error));
+  }
+}
+
+function onResize() {
+  for (const def of chartDefs) {
+    const bundle = charts.get(def.tf);
+    const container = document.getElementById(def.elementId);
+    if (!bundle || !container) continue;
+    bundle.chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+  }
+}
+
+ensureCharts();
+window.addEventListener("resize", onResize);
+refreshBtn.addEventListener("click", refresh);
+symbolSelect.addEventListener("change", refresh);
+
+setInterval(refresh, 15000);
+refresh();
+setTimeout(onResize, 50);
