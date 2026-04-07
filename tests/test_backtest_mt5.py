@@ -1,6 +1,12 @@
 from src.risk.sizing import SymbolTradeInfo
 from src.services.config import RuntimeConfig, SymbolConfig
-from src.tools.backtest_mt5 import OpenTrade, _append_dummy_forming_bar, _apply_open_trade_bar, _side_allowed
+from src.tools.backtest_mt5 import (
+    OpenTrade,
+    _append_dummy_forming_bar,
+    _apply_open_trade_bar,
+    _latest_close_price_or_fallback,
+    _side_allowed,
+)
 
 
 def _runtime() -> RuntimeConfig:
@@ -78,6 +84,17 @@ def test_append_dummy_forming_bar_adds_next_timestamp() -> None:
     assert result[-1]["high"] == 1.155
     assert result[-1]["low"] == 1.155
     assert result[-1]["close"] == 1.155
+
+
+def test_latest_close_price_or_fallback_uses_first_non_empty_sequence() -> None:
+    assert (
+        _latest_close_price_or_fallback(
+            [],
+            [{"time": 100, "close": 1.155}],
+            [{"time": 160, "close": 1.156}],
+        )
+        == 1.155
+    )
 
 
 def test_apply_open_trade_bar_prefers_stop_when_tp_and_sl_hit_same_bar() -> None:

@@ -241,6 +241,13 @@ def _latest_close_price(closed_rates: Sequence[dict]) -> float:
     return float(closed_rates[-1]["close"])
 
 
+def _latest_close_price_or_fallback(*rate_sets: Sequence[dict]) -> float:
+    for rates in rate_sets:
+        if rates:
+            return float(rates[-1]["close"])
+    raise ValueError("No closed rates available.")
+
+
 def _evaluate_confirmation(
     cfg: SymbolConfig,
     pending: PendingSetupLite,
@@ -783,7 +790,7 @@ def run_backtest(
                 )
                 if cfg.confirmation_mode.lower() == "none":
                     entry_time = decision_time
-                    entry_price = _latest_close_price(closed_m1)
+                    entry_price = _latest_close_price_or_fallback(closed_m1, closed_m5)
                     now_utc = datetime.fromtimestamp(entry_time, timezone.utc)
                     if daily_loss_reached:
                         skip_daily_loss += 1
@@ -797,7 +804,7 @@ def run_backtest(
                     if open_trade is not None and cfg.one_position_per_symbol:
                         continue
 
-                    current_m1_bar = closed_m1[-1]
+                    current_m1_bar = closed_m1[-1] if closed_m1 else closed_m5[-1]
                     spread_pips = _spread_pips(current_m1_bar, pip, point)
                     if spread_pips > cfg.max_spread_pips:
                         continue
