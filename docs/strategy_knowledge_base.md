@@ -318,6 +318,221 @@ Purpose:
 - Add a high-frequency, session-driven branch that still respects the core liquidity philosophy.
 - This branch must not become an indicator-noise bot.
 
+## Branch policy
+- `92001` is the production winner and must stay unchanged.
+- Any new idea must be implemented as a new branch with:
+  - a new `magic`
+  - separate historical validation
+  - separate local demo observation
+- Do not change `92001` entry logic, exits, sessions, or filters in order to test new hypotheses.
+
+## Close-path and observability work
+Observed problem:
+- real trades were opening
+- some broker-side closes were ending as `POSITION_CLOSED_UNCONFIRMED`
+- this made active trading days look quieter than they really were
+
+Work completed:
+- added fallback close-deal matching in the MT5 adapter
+- if a close deal cannot be matched cleanly by `position_id`, fallback matching now uses:
+  - `symbol`
+  - `magic`
+  - `volume`
+  - `opened_at`
+- hardened SQLite transactions with savepoint fallback so runtime checkpointing no longer crashes on nested transaction state
+
+Operational meaning:
+- close visibility is better than before
+- daily trading activity is easier to reconstruct
+- runtime persistence is more stable under overlapping transaction paths
+
+## Daily review and missed-profit reporting
+Problem:
+- ad hoc console reading was not enough to understand:
+  - how many setups almost became trades
+  - how many profitable setups were missed
+  - why they were missed
+
+Work completed:
+- added automatic startup report generation for the previous Sofia trading day
+- output files:
+  - `reports/daily_review_YYYY-MM-DD.txt`
+  - `reports/day_near_trades_YYYY-MM-DD.csv`
+- the report now includes:
+  - actual `TRADE_OK` count
+  - near-trades count
+  - `confirmed-but-not-opened`
+  - `pending-only`
+  - per-setup what-if outcomes
+  - per-branch net pips
+  - missed-profit calculation in `EUR` using local `max_lot`
+
+Current money-summary logic:
+- uses local branch `max_lot` from `config/settings.json`
+- uses symbol pip value in `EUR`
+- reports:
+  - branch-by-branch missed `pips -> EUR`
+  - total missed `EUR`
+  - special block for `92001`
+  - positive-only missed `EUR`
+  - `confirmed-but-not-opened` missed `EUR`
+
+Interpretation:
+- this is not a theoretical backtest-only number
+- it is a practical “what was left on the table” view under the local sizing profile
+
+## Push notification simplification
+Problem:
+- push notifications were too noisy
+- ticket/setup-level metadata made them harder to scan on the phone
+
+Work completed:
+- push messages were reduced to only:
+  - `event`
+  - `symbol`
+  - `side`
+  - `time` in `Europe/Sofia`
+  - `entry`
+  - `sl`
+  - `tp`
+  - `trailing`
+
+Interpretation:
+- phone alerts are now operational, not forensic
+- detailed reconstruction remains in:
+  - `bot_events.csv`
+  - `daily_review_YYYY-MM-DD.txt`
+  - SQLite persistence
+
+## Signal dashboard
+Work completed:
+- created a local web dashboard under `dashboard/`
+- it visualizes:
+  - `M1`
+  - `M5`
+  - `H1`
+  - `D1`
+- it overlays signal-stage markers directly on candles
+
+Dashboard improvements already made:
+- chart refresh no longer resets zoom/pan
+- price display is fixed to 5 decimals
+- markers were simplified from arrows to small colored letter markers
+- live candle fetch was aligned to MT5 by switching to recent-bar retrieval instead of the earlier range path
+
+Operational purpose:
+- gives a TradingView-like monitoring surface for signal flow
+- useful for understanding:
+  - where a setup first appeared
+  - how it progressed through stages
+  - where it was rejected or executed
+
+## M1 / New York branch research
+### `opening_range_breakout_v2` (`92016`)
+Status:
+- best current `M1 / New York` candidate
+- enabled locally as a demo research branch
+
+Best tuned pocket found:
+- `use_h1_bias = true`
+- `sl_pips = 4.0`
+- `rr = 1.0`
+- `max_hold_bars = 4`
+- `early_exit_consecutive_adverse_closes = 1`
+- `body_ratio_min = 0.48`
+- `range_multiple = 1.35`
+- `pullback_bars = 2`
+- `buffer_pips = 0.10`
+
+Research result:
+- `106` trades
+- `+44.10 pips`
+- `PF 1.699`
+- `win rate 43.40%`
+- `max DD 11.60 pips`
+
+Decision:
+- keep as demo research branch
+- do not promote over `92001`
+
+### `ny_micro_pullback_drift`
+Status:
+- research only
+
+Result:
+- there is some life in the idea
+- but it remains weaker than `NY ORB v2`
+
+Decision:
+- rejected for live deployment
+- useful as a directional research reference only
+
+### `ny_reclaim_continuation`
+Status:
+- research only
+
+Result:
+- too few trades
+- negative first-pass outcome
+
+Decision:
+- rejected
+
+## New branch for missed-continuation pain point
+Problem observed:
+- many strong continuation moves were staying `pending-only`
+- some good confirmed setups were blocked by:
+  - `SKIP_ORDER_BLOCK`
+  - `SKIP_PORTFOLIO_CAP`
+
+New branch idea:
+- `92017`
+- separate from `92001`
+- intended to address:
+  - longer pending lifetime
+  - wider order-block tolerance
+  - optional portfolio-cap bypass on the experimental branch only
+
+Research result on the reference 90-day window:
+- `92001 baseline`
+  - trades: `73`
+  - net: `+517.68`
+  - PF: `1.690`
+  - avg R: `0.331`
+  - max DD: `139.76`
+- `92017` candidate with `confirm_expiry_bars = 5`, `order_block_max_distance_pips = 12`, `ignore_portfolio_cap = true`
+  - trades: `135`
+  - net: `+574.72`
+  - PF: `1.419`
+  - avg R: `0.199`
+  - max DD: `174.28`
+
+Interpretation:
+- statistically acceptable as a separate branch
+- not cleaner than `92001`
+- higher trade count, lower PF, higher drawdown
+- must remain separate and low-risk if used
+
+Decision:
+- do not merge its behavior into `92001`
+- if observed live, treat it strictly as an experimental companion branch
+
+## 92001 fast-path research outcome
+Question tested:
+- can `92001` be made more active by skipping confirmation or accelerating entry?
+
+Result:
+- fast-entry variants increased trade count
+- but degraded profit factor, expectancy, and drawdown materially
+
+Interpretation:
+- some single days make fast entry look attractive
+- over the full test window, it weakens the model
+
+Decision:
+- do not change `92001`
+- solve “missed continuation” only through separate experimental branches
+
 Core idea:
 - Opening range liquidity event
 - Followed by `C1`-style micro confirmation

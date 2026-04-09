@@ -2352,6 +2352,9 @@ def process_symbol(
 
     trade_info = SymbolTradeInfo.from_mt5(info)
     volume = calc_lot_by_risk(equity, cfg.sl_pips, cfg.risk_pct, trade_info, cfg.max_lot)
+    trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(
+        cfg, app_config.runtime
+    )
 
     context_message = " ".join(part for part in [f"confirm={confirm_note}", bias_note, ob_note] if part).strip()
 

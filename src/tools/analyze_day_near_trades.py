@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 from src.engine.orchestrator import TIMEFRAME_SECONDS, branch_id
 from src.execution.mt5_adapter import MT5Adapter
 from src.persistence.repository import SQLiteRepository
-from src.risk.sizing import SymbolTradeInfo
+from src.risk.sizing import SymbolTradeInfo, pip_value_per_lot
 from src.services.config import AppConfig, SymbolConfig, load_config
 from src.tools.backtest_mt5 import (
     ClosedTrade,
@@ -378,6 +378,60 @@ def _summarize_by_branch(rows: list[NearTradeRow]) -> dict[str, dict[str, object
     return summary
 
 
+def _format_signed(value: float, decimals: int = 2) -> str:
+    return f"{value:+.{decimals}f}"
+
+
+def _build_money_summary(
+    rows: list[NearTradeRow],
+    cfg_by_branch: dict[str, SymbolConfig],
+    symbol_info_by_symbol: dict[str, SymbolTradeInfo],
+) -> dict[str, object]:
+    pip_value_by_symbol = {
+        symbol: float(pip_value_per_lot(info))
+        for symbol, info in symbol_info_by_symbol.items()
+        if float(pip_value_per_lot(info)) > 0.0
+    }
+
+    max_lot_by_magic: dict[int, float] = {}
+    branch_rollup: dict[int, dict[str, float]] = {}
+    total_eur = 0.0
+    for row in rows:
+        cfg = cfg_by_branch.get(row.branch_id)
+        if cfg is None:
+            continue
+        pip_value = pip_value_by_symbol.get(row.symbol, 0.0)
+        lot = float(cfg.max_lot)
+        max_lot_by_magic[int(row.magic)] = lot
+        pnl_eur = float(row.pnl_pips) * pip_value * lot
+        item = branch_rollup.setdefault(
+            int(row.magic),
+            {
+                "pnl_pips": 0.0,
+                "pnl_eur": 0.0,
+                "positive_eur": 0.0,
+                "confirmed_positive_eur": 0.0,
+                "confirmed_net_eur": 0.0,
+            },
+        )
+        item["pnl_pips"] += float(row.pnl_pips)
+        item["pnl_eur"] += pnl_eur
+        if row.pnl_pips > 0:
+            item["positive_eur"] += pnl_eur
+            if row.stage == "confirmed":
+                item["confirmed_positive_eur"] += pnl_eur
+        if row.stage == "confirmed":
+            item["confirmed_net_eur"] += pnl_eur
+        total_eur += pnl_eur
+
+    return {
+        "pip_value_by_symbol": pip_value_by_symbol,
+        "max_lot_by_magic": max_lot_by_magic,
+        "branch_rollup": branch_rollup,
+        "total_eur": total_eur,
+    }
+
+
 def run_analysis(
     config_path: str,
     target_day_raw: str,
@@ -423,12 +477,14 @@ def run_analysis(
         setups_for_symbol.setdefault(effective_cfg.symbol, []).append((row, context, timeline, effective_cfg))
 
     analysis_rows: list[NearTradeRow] = []
+    symbol_info_by_symbol: dict[str, SymbolTradeInfo] = {}
     if setups_for_symbol:
         adapter = MT5Adapter(default_deviation=app_config.runtime.default_deviation)
         adapter.initialize()
         try:
             for symbol, items in setups_for_symbol.items():
                 symbol_info = SymbolTradeInfo.from_mt5(adapter.symbol_info(symbol))
+                symbol_info_by_symbol[symbol] = symbol_info
                 min_anchor = min(datetime.fromisoformat(item[2].anchor_time_utc).astimezone(timezone.utc) for item in items)
                 fetch_start = min_anchor - timedelta(hours=2)
                 m1_rates = _fetch_chunked_rates(adapter, symbol, "M1", fetch_start, horizon_end_utc + timedelta(minutes=1))
@@ -459,6 +515,7 @@ def run_analysis(
     for row in analysis_rows:
         outcome_counts[row.outcome] = outcome_counts.get(row.outcome, 0) + 1
     branch_summary = _summarize_by_branch(analysis_rows)
+    money_summary = _build_money_summary(analysis_rows, cfg_by_branch, symbol_info_by_symbol)
 
     print(f"Day: {target_day.isoformat()} ({tz_name})")
     print(f"UTC window: {day_start_utc.isoformat()} -> {day_end_utc.isoformat()}")
@@ -483,6 +540,48 @@ def run_analysis(
             print(
                 f"  {key}: setups={item['count']} confirmed={item['confirmed']} pending_only={item['pending_only']} "
                 f"net_pips={float(item['pnl_pips']):.2f} outcomes=[{outcomes}]"
+            )
+    else:
+        print("  none")
+    print("")
+    print("Пропуснати печалби (local sizing):")
+    if money_summary["branch_rollup"]:
+        print("  Сметнато е по branch max_lot от локалния config:")
+        for magic in sorted(dict(money_summary["max_lot_by_magic"])):
+            lot = float(dict(money_summary["max_lot_by_magic"])[magic])
+            print(f"    {magic} = {lot:.2f} lot")
+        print("  Ползвах pip value по symbol:")
+        for symbol in sorted(dict(money_summary["pip_value_by_symbol"])):
+            pip_value = float(dict(money_summary["pip_value_by_symbol"])[symbol])
+            print(f"    {symbol}: 1.00 lot ~= {pip_value:.2f} EUR/pip")
+        print("  Разбивка по branch:")
+        branch_rollup = dict(money_summary["branch_rollup"])
+        for magic in sorted(branch_rollup):
+            item = branch_rollup[magic]
+            print(
+                f"    {magic}: {_format_signed(float(item['pnl_pips']), 1)} pips -> "
+                f"{_format_signed(float(item['pnl_eur']))} EUR"
+            )
+        branch_92001 = branch_rollup.get(92001)
+        print("  Само за 92001:")
+        if branch_92001 is not None:
+            print(f"    нетно пропуснато: {_format_signed(float(branch_92001['pnl_eur']))} EUR")
+            print(f"    само положителните пропуснати setup-и: {_format_signed(float(branch_92001['positive_eur']))} EUR")
+            print(
+                f"    от confirmed-but-not-opened: "
+                f"{_format_signed(float(branch_92001['confirmed_positive_eur']))} EUR"
+            )
+        else:
+            print("    няма пропуснати setup-и за 92001")
+        print("  Общо:")
+        print(
+            f"    ако гледаме реалистично всички пропуснати по локалния sizing: "
+            f"около {_format_signed(float(money_summary['total_eur']))} EUR"
+        )
+        if branch_92001 is not None:
+            print(
+                f"    ако гледаме само основния печеливш branch 92001: "
+                f"{_format_signed(float(branch_92001['pnl_eur']))} EUR"
             )
     else:
         print("  none")
