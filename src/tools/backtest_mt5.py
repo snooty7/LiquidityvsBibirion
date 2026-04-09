@@ -27,6 +27,7 @@ from src.strategy.confirmations import (
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
     evaluate_session_open_scalp_c1_confirmation,
+    evaluate_sweep_displacement_only_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
@@ -41,6 +42,7 @@ from src.strategy.liquidity import (
     detect_opening_range_breakout_v2_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_trend_day_acceleration_signal,
     detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
     evaluate_range_filter,
@@ -263,6 +265,15 @@ def _evaluate_confirmation(
         return evaluate_cisd_confirmation(rates, pending.side, pending.candle_time, cfg.cisd_structure_bars)
     if mode == "sweep_displacement_mss":
         return evaluate_sweep_displacement_mss_confirmation(
+            rates,
+            pending.side,
+            pending.candle_time,
+            cfg.cisd_structure_bars,
+            displacement_body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+            displacement_range_multiple=cfg.confirmation_displacement_range_multiple,
+        )
+    if mode == "sweep_displacement_only":
+        return evaluate_sweep_displacement_only_confirmation(
             rates,
             pending.side,
             pending.candle_time,
@@ -730,6 +741,14 @@ def run_backtest(
                     range_multiple=cfg.confirmation_displacement_range_multiple,
                     buffer_price=cfg.buffer_pips * pip,
                 ).signal
+            elif cfg.strategy_mode == "trend_day_acceleration":
+                signal = detect_trend_day_acceleration_signal(
+                    m5_rates,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    range_multiple=cfg.confirmation_displacement_range_multiple,
+                    buffer_price=cfg.buffer_pips * pip,
+                ).signal
             else:
                 levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
                 signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
@@ -745,7 +764,7 @@ def run_backtest(
                     if not compression.blocked:
                         skip_range_chop += 1
                         continue
-                elif cfg.strategy_mode in ("opening_range_breakout_v2", "h4_bias_micro_burst", "trend_micro_burst_v2"):
+                elif cfg.strategy_mode in ("opening_range_breakout_v2", "h4_bias_micro_burst", "trend_micro_burst_v2", "trend_day_acceleration"):
                     pass
                 else:
                     prior_closed = m5_rates[:-2]
@@ -892,6 +911,14 @@ def run_backtest(
                 ).signal
             elif cfg.strategy_mode == "trend_micro_burst_v2":
                 signal = detect_trend_micro_burst_v2_signal(
+                    m5_rates,
+                    pullback_bars=cfg.micro_burst_pullback_bars,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    range_multiple=cfg.confirmation_displacement_range_multiple,
+                    buffer_price=cfg.buffer_pips * pip,
+                ).signal
+            elif cfg.strategy_mode == "trend_day_acceleration":
+                signal = detect_trend_day_acceleration_signal(
                     m5_rates,
                     pullback_bars=cfg.micro_burst_pullback_bars,
                     body_ratio_min=cfg.micro_burst_body_ratio_min,

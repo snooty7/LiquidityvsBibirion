@@ -440,6 +440,68 @@ def detect_trend_micro_burst_v2_signal(
     return MicroBurstSignalResult(None, "trend_micro_burst_v2_wait_break")
 
 
+def detect_trend_day_acceleration_signal(
+    rates: Sequence[object],
+    *,
+    pullback_bars: int,
+    body_ratio_min: float,
+    range_multiple: float,
+    buffer_price: float,
+) -> MicroBurstSignalResult:
+    needed = max(5, int(pullback_bars) + 4)
+    if len(rates) < needed:
+        return MicroBurstSignalResult(None, "trend_day_accel_context_insufficient")
+
+    signal_idx = len(rates) - 2
+    pullback_start = signal_idx - int(pullback_bars)
+    anchor_idx = pullback_start - 2
+    if anchor_idx < 0:
+        return MicroBurstSignalResult(None, "trend_day_accel_context_insufficient")
+
+    anchors = list(rates[anchor_idx:pullback_start])
+    pullback = list(rates[pullback_start:signal_idx])
+    last_closed = rates[signal_idx]
+    if len(anchors) < 2 or len(pullback) < int(pullback_bars):
+        return MicroBurstSignalResult(None, "trend_day_accel_context_insufficient")
+
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    body_ok = candle_body_ratio(last_closed) >= body_ratio_min
+    avg_pullback_range = sum(candle_range(item) for item in pullback) / max(len(pullback), 1)
+    range_ok = candle_range(last_closed) >= max(avg_pullback_range * range_multiple, 1e-10)
+
+    anchor_high = max(_price(item, "high") for item in anchors)
+    anchor_low = min(_price(item, "low") for item in anchors)
+    anchor_bullish = sum(1 for item in anchors if _price(item, "close") > _price(item, "open"))
+    anchor_bearish = sum(1 for item in anchors if _price(item, "close") < _price(item, "open"))
+    pullback_high = max(_price(item, "high") for item in pullback)
+    pullback_low = min(_price(item, "low") for item in pullback)
+    bearish_pullback = sum(1 for item in pullback if _price(item, "close") < _price(item, "open"))
+    bullish_pullback = sum(1 for item in pullback if _price(item, "close") > _price(item, "open"))
+
+    buy_anchor_ok = anchor_bullish >= max(1, len(anchors) // 2) and _price(anchors[-1], "close") >= anchor_high - buffer_price
+    buy_pullback_ok = bearish_pullback >= max(1, len(pullback) // 2) and pullback_low >= anchor_low - buffer_price
+    buy_break_ok = close_price > pullback_high + buffer_price and high_price > anchor_high + buffer_price
+    if buy_anchor_ok and buy_pullback_ok and body_ok and range_ok and close_price > open_price and buy_break_ok:
+        return MicroBurstSignalResult(
+            SweepSignal(side="BUY", level=float(pullback_high), candle_time=int(last_closed["time"])),
+            "trend_day_accel_buy_break",
+        )
+
+    sell_anchor_ok = anchor_bearish >= max(1, len(anchors) // 2) and _price(anchors[-1], "close") <= anchor_low + buffer_price
+    sell_pullback_ok = bullish_pullback >= max(1, len(pullback) // 2) and pullback_high <= anchor_high + buffer_price
+    sell_break_ok = close_price < pullback_low - buffer_price and low_price < anchor_low - buffer_price
+    if sell_anchor_ok and sell_pullback_ok and body_ok and range_ok and close_price < open_price and sell_break_ok:
+        return MicroBurstSignalResult(
+            SweepSignal(side="SELL", level=float(pullback_low), candle_time=int(last_closed["time"])),
+            "trend_day_accel_sell_break",
+        )
+
+    return MicroBurstSignalResult(None, "trend_day_accel_wait_break")
+
+
 def detect_two_candle_momentum_signal(
     rates: Sequence[object],
     *,
@@ -788,6 +850,129 @@ def detect_ny_micro_pullback_drift_signal(
         "micro_pullback_drift_wait",
         reference_high=float(drift_high),
         reference_low=float(drift_low),
+    )
+
+
+def detect_ny_reclaim_continuation_signal(
+    rates: Sequence[object],
+    *,
+    session_start_utc: str,
+    open_range_minutes: int,
+    watch_minutes: int,
+    buffer_price: float,
+    body_ratio_min: float,
+    pullback_bars: int,
+    range_multiple: float,
+    reclaim_tolerance_price: float,
+) -> SessionOpenScalpSignalResult:
+    needed = max(8, int(pullback_bars) + 6)
+    if len(rates) < needed:
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_context_insufficient")
+
+    signal_idx = len(rates) - 2
+    last_closed = rates[signal_idx]
+    last_dt = datetime.fromtimestamp(int(last_closed["time"]), tz=timezone.utc)
+    session_minutes = _parse_hhmm_to_minutes(session_start_utc)
+    session_start = last_dt.replace(
+        hour=session_minutes // 60,
+        minute=session_minutes % 60,
+        second=0,
+        microsecond=0,
+    )
+    if last_dt < session_start:
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_before_session")
+
+    open_range_end = session_start.timestamp() + int(open_range_minutes) * 60
+    watch_end = session_start.timestamp() + int(watch_minutes) * 60
+    last_closed_ts = int(last_closed["time"])
+    if last_closed_ts < int(open_range_end):
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_opening_range_incomplete")
+    if last_closed_ts >= int(watch_end):
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_outside_watch_window")
+
+    opening_range = [
+        bar for bar in rates[:-1] if int(session_start.timestamp()) <= int(bar["time"]) < int(open_range_end)
+    ]
+    if len(opening_range) < max(2, int(open_range_minutes // 2)):
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_opening_range_missing")
+
+    or_high = max(_price(bar, "high") for bar in opening_range)
+    or_low = min(_price(bar, "low") for bar in opening_range)
+
+    pullback_start = signal_idx - int(pullback_bars)
+    anchor_idx = pullback_start - 1
+    if anchor_idx < 0:
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_context_insufficient")
+
+    breakout_anchor = rates[anchor_idx]
+    pullback = list(rates[pullback_start:signal_idx])
+    if len(pullback) < int(pullback_bars):
+        return SessionOpenScalpSignalResult(None, "ny_reclaim_context_insufficient")
+
+    breakout_close = _price(breakout_anchor, "close")
+    breakout_open = _price(breakout_anchor, "open")
+    breakout_high = _price(breakout_anchor, "high")
+    breakout_low = _price(breakout_anchor, "low")
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    body_ok = candle_body_ratio(last_closed) >= body_ratio_min
+    avg_pullback_range = sum(candle_range(item) for item in pullback) / max(len(pullback), 1)
+    range_ok = candle_range(last_closed) >= max(avg_pullback_range * range_multiple, 1e-10)
+
+    pullback_high = max(_price(item, "high") for item in pullback)
+    pullback_low = min(_price(item, "low") for item in pullback)
+    bearish_pullback = sum(1 for item in pullback if _price(item, "close") < _price(item, "open"))
+    bullish_pullback = sum(1 for item in pullback if _price(item, "close") > _price(item, "open"))
+
+    buy_anchor_ok = breakout_close > breakout_open and breakout_close > or_high + buffer_price
+    buy_pullback_ok = (
+        bearish_pullback >= max(1, len(pullback) // 2)
+        and pullback_low <= or_high + reclaim_tolerance_price
+        and pullback_low >= or_high - reclaim_tolerance_price
+        and pullback_high <= breakout_high + buffer_price
+    )
+    buy_reclaim_ok = (
+        close_price > open_price
+        and close_price > or_high + buffer_price
+        and close_price > pullback_high + buffer_price
+        and high_price >= breakout_high - buffer_price
+    )
+    if buy_anchor_ok and buy_pullback_ok and body_ok and range_ok and buy_reclaim_ok:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="BUY", level=float(or_high), candle_time=int(last_closed["time"])),
+            "ny_reclaim_buy",
+            opening_range_high=float(or_high),
+            opening_range_low=float(or_low),
+        )
+
+    sell_anchor_ok = breakout_close < breakout_open and breakout_close < or_low - buffer_price
+    sell_pullback_ok = (
+        bullish_pullback >= max(1, len(pullback) // 2)
+        and pullback_high >= or_low - reclaim_tolerance_price
+        and pullback_high <= or_low + reclaim_tolerance_price
+        and pullback_low >= breakout_low - buffer_price
+    )
+    sell_reclaim_ok = (
+        close_price < open_price
+        and close_price < or_low - buffer_price
+        and close_price < pullback_low - buffer_price
+        and low_price <= breakout_low + buffer_price
+    )
+    if sell_anchor_ok and sell_pullback_ok and body_ok and range_ok and sell_reclaim_ok:
+        return SessionOpenScalpSignalResult(
+            SweepSignal(side="SELL", level=float(or_low), candle_time=int(last_closed["time"])),
+            "ny_reclaim_sell",
+            opening_range_high=float(or_high),
+            opening_range_low=float(or_low),
+        )
+
+    return SessionOpenScalpSignalResult(
+        None,
+        "ny_reclaim_wait",
+        opening_range_high=float(or_high),
+        opening_range_low=float(or_low),
     )
 
 

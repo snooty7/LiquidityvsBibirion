@@ -16,15 +16,18 @@ def test_build_push_message_for_trade_open() -> None:
             "price": 1.15574,
             "sl": 1.15674,
             "tp": 1.15374,
+            "trailing": "r_multiple/1.00R/1.00R/remove_tp=True",
             "retcode": 10009,
         },
     )
 
     assert title == "OPEN EURUSD SELL"
-    assert "ticket: 12345" in body
+    assert "event: TRADE_OK" in body
+    assert "time: 2026-03-26 08:00:00 EET" in body
     assert "entry: 1.15574" in body
     assert "sl: 1.15674" in body
     assert "tp: 1.15374" in body
+    assert "trailing: r_multiple/1.00R/1.00R/remove_tp=True" in body
     assert "white_check_mark" in tags
 
 
@@ -44,9 +47,11 @@ def test_build_push_message_for_close() -> None:
     )
 
     assert title == "CLOSE EURUSD SELL"
-    assert "close: 1.15674" in body
-    assert "pnl: -4.32" in body
-    assert "reason: broker_side_close_detected" in body
+    assert "event: POSITION_CLOSED_BROKER" in body
+    assert "time: 2026-03-26 10:59:48 EET" in body
+    assert "entry: -" in body
+    assert "sl: -" in body
+    assert "tp: -" in body
 
 
 def test_build_push_message_for_liquidity_alert() -> None:
@@ -68,10 +73,9 @@ def test_build_push_message_for_liquidity_alert() -> None:
     )
 
     assert title == "ALERT EURUSD BUY"
-    assert "stage: post_sweep_pre_confirmation" in body
-    assert "what_next: wait for displacement, then structure confirmation" in body
-    assert "sweep_note: sweep_significant" in body
-    assert "range_note: range_ok" in body
+    assert "event: LIQUIDITY_ALERT" in body
+    assert "time: 2026-04-02 10:00:00 EEST" in body
+    assert "entry: 1.15314" in body
     assert "rotating_light" in tags
 
 
@@ -108,10 +112,11 @@ def test_send_push_notification_posts_message(monkeypatch) -> None:
         ticket=12345,
         setup_id="setup-1",
         created_at_utc="2026-03-26T06:00:00+00:00",
-        payload={"side": "SELL", "price": 1.15574, "sl": 1.15674, "tp": 1.15374, "volume": 0.05},
+        payload={"side": "SELL", "price": 1.15574, "sl": 1.15674, "tp": 1.15374, "volume": 0.05, "trailing": "r_multiple/1.00R/1.00R/remove_tp=True"},
     )
 
     assert sent is True
     assert captured["url"] == "https://ntfy.sh/test-topic"
     assert "OPEN EURUSD SELL" in captured["headers"]["Title"]
     assert "entry: 1.15574" in captured["body"]
+    assert "trailing: r_multiple/1.00R/1.00R/remove_tp=True" in captured["body"]

@@ -60,6 +60,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "bias_ema_period": 20,
             "bias_lookback_bars": 80,
             "use_order_block_filter": True,
+            "ignore_portfolio_cap": False,
             "order_block_lookback_bars": 20,
             "order_block_max_distance_pips": 8.0,
             "order_block_strong_override_max_distance_pips": 8.0,
@@ -154,6 +155,7 @@ class SymbolConfig:
     bias_ema_period: int = 20
     bias_lookback_bars: int = 80
     use_order_block_filter: bool = True
+    ignore_portfolio_cap: bool = False
     order_block_lookback_bars: int = 20
     order_block_max_distance_pips: float = 8.0
     order_block_strong_override_max_distance_pips: float = 8.0
@@ -275,6 +277,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 bias_ema_period=int(row.get("bias_ema_period", 20)),
                 bias_lookback_bars=int(row.get("bias_lookback_bars", 80)),
                 use_order_block_filter=bool(row.get("use_order_block_filter", True)),
+                ignore_portfolio_cap=bool(row.get("ignore_portfolio_cap", False)),
                 order_block_lookback_bars=int(row.get("order_block_lookback_bars", 20)),
                 order_block_max_distance_pips=float(row.get("order_block_max_distance_pips", 8.0)),
                 order_block_strong_override_max_distance_pips=float(
@@ -341,13 +344,22 @@ def load_config(path: Union[str, Path]) -> AppConfig:
     if runtime.push_notifications_enabled and not runtime.push_notification_url:
         raise ValueError("push_notification_url is required when push_notifications_enabled=true")
 
-    valid_confirmation_modes = {"none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"}
+    valid_confirmation_modes = {
+        "none",
+        "c3",
+        "c4",
+        "cisd",
+        "sweep_displacement_mss",
+        "sweep_displacement_only",
+        "session_open_scalp_c1",
+    }
     valid_strategy_modes = {
         "liquidity_sweep",
         "session_open_scalp",
         "opening_range_breakout_v2",
         "h4_bias_micro_burst",
         "trend_micro_burst_v2",
+        "trend_day_acceleration",
     }
     valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}

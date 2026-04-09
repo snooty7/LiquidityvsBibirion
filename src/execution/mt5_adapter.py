@@ -381,6 +381,10 @@ class MT5Adapter:
         now_utc: datetime,
         *,
         lookback_hours: int = 48,
+        symbol: Optional[str] = None,
+        magic: Optional[int] = None,
+        opened_at: Optional[int] = None,
+        volume: Optional[float] = None,
     ):
         self._ensure_mt5()
         start = now_utc.timestamp() - max(1, int(lookback_hours)) * 3600
@@ -396,6 +400,24 @@ class MT5Adapter:
             if int(getattr(deal, "position_id", 0) or 0) == int(position_ticket)
             and getattr(deal, "entry", None) in (deal_entry_out, deal_entry_out_by)
         ]
+        if not matched and symbol is not None and magic is not None and opened_at is not None:
+            # Some broker-side close deals do not retain a usable position_id. Fall back to
+            # symbol/magic/volume/time matching so runtime sync can still reconstruct the close.
+            opened_after = max(0, int(opened_at) - 300)
+            fallback = []
+            for deal in deals:
+                if getattr(deal, "entry", None) not in (deal_entry_out, deal_entry_out_by):
+                    continue
+                if str(getattr(deal, "symbol", "") or "").upper() != str(symbol).upper():
+                    continue
+                if int(getattr(deal, "magic", -1) or -1) != int(magic):
+                    continue
+                if int(getattr(deal, "time", 0) or 0) < opened_after:
+                    continue
+                if volume is not None and abs(float(getattr(deal, "volume", 0.0) or 0.0) - float(volume)) > 1e-9:
+                    continue
+                fallback.append(deal)
+            matched = fallback
         if not matched:
             return None
         matched.sort(key=lambda item: int(getattr(item, "time_msc", 0) or 0), reverse=True)

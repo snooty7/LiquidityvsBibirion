@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from typing import Any, Callable, Optional
 import csv
 import math
 import time
 from uuid import uuid4
+from zoneinfo import ZoneInfo
 
 from src.execution.mt5_adapter import MT5Adapter
 from src.notifications.push import send_push_notification
@@ -37,6 +40,7 @@ from src.strategy.confirmations import (
     evaluate_c3_c4_confirmation,
     evaluate_cisd_confirmation,
     evaluate_session_open_scalp_c1_confirmation,
+    evaluate_sweep_displacement_only_confirmation,
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
@@ -52,6 +56,7 @@ from src.strategy.liquidity import (
     detect_opening_range_breakout_v2_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_trend_day_acceleration_signal,
     detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
     evaluate_range_filter,
@@ -185,6 +190,36 @@ def log_event(log_file: Path, row: dict) -> None:
         if not file_exists:
             writer.writeheader()
         writer.writerow({field: row.get(field, "") for field in LOG_FIELDS})
+
+
+def write_startup_daily_review_report(
+    config_path: str,
+    app_config: AppConfig,
+    *,
+    equity: float,
+) -> Optional[Path]:
+    from src.tools.analyze_day_near_trades import run_analysis
+
+    sofia_now = datetime.now(ZoneInfo("Europe/Sofia"))
+    target_day = (sofia_now.date()).fromordinal(sofia_now.date().toordinal() - 1)
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    txt_path = reports_dir / f"daily_review_{target_day.isoformat()}.txt"
+    csv_path = reports_dir / f"day_near_trades_{target_day.isoformat()}.csv"
+
+    buffer = StringIO()
+    with redirect_stdout(buffer):
+        run_analysis(
+            config_path,
+            target_day.isoformat(),
+            "Europe/Sofia",
+            float(equity),
+            csv_path,
+            confirmed_only=False,
+        )
+    content = buffer.getvalue().strip()
+    txt_path.write_text(content + "\n", encoding="utf-8")
+    return txt_path
 
 
 def _setup_wait_stage(note: str) -> str:
@@ -621,7 +656,14 @@ def sync_open_positions_for_symbol(
     for ticket, local in local_open.items():
         if ticket in broker_tickets:
             continue
-        close_deal = adapter.latest_close_deal_for_position(ticket, now_utc)
+        close_deal = adapter.latest_close_deal_for_position(
+            ticket,
+            now_utc,
+            symbol=cfg.symbol,
+            magic=cfg.magic,
+            opened_at=local.opened_at,
+            volume=local.volume,
+        )
         close_payload = {"side": local.side}
         event_type = "POSITION_CLOSED_UNCONFIRMED"
         close_reason = "missing_on_broker_runtime_sync_unconfirmed"
@@ -1357,6 +1399,16 @@ def evaluate_pending_confirmation(
             displacement_body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
             displacement_range_multiple=cfg.confirmation_displacement_range_multiple,
         )
+    if mode == "sweep_displacement_only":
+        confirm_rates = adapter.copy_rates(cfg.symbol, cfg.cisd_timeframe, cfg.cisd_lookback_bars)
+        return evaluate_sweep_displacement_only_confirmation(
+            confirm_rates,
+            pending.side,
+            pending.candle_time,
+            cfg.cisd_structure_bars,
+            displacement_body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+            displacement_range_multiple=cfg.confirmation_displacement_range_multiple,
+        )
     if mode == "session_open_scalp_c1":
         confirm_rates = adapter.copy_rates(cfg.symbol, cfg.cisd_timeframe, cfg.cisd_lookback_bars)
         return evaluate_session_open_scalp_c1_confirmation(confirm_rates, pending.side, pending.candle_time)
@@ -1622,6 +1674,15 @@ def process_symbol(
             buffer_price=cfg.buffer_pips * pip,
         )
         signal = micro_burst_result.signal
+    elif cfg.strategy_mode == "trend_day_acceleration":
+        micro_burst_result = detect_trend_day_acceleration_signal(
+            rates,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            range_multiple=cfg.confirmation_displacement_range_multiple,
+            buffer_price=cfg.buffer_pips * pip,
+        )
+        signal = micro_burst_result.signal
     else:
         levels = extract_pivot_levels(rates, cfg.pivot_len, cfg.max_levels)
         signal = detect_sweep_signal(rates, levels, cfg.buffer_pips * pip)
@@ -1661,7 +1722,7 @@ def process_symbol(
         elif cfg.strategy_mode == "opening_range_breakout_v2":
             chop_result = RangeFilterResult(False, "orb_v2_ok", 0.0, 0.0)
             sweep_note = scalp_result.note if scalp_result is not None else "orb_v2_signal"
-        elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2"):
+        elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2", "trend_day_acceleration"):
             chop_result = RangeFilterResult(False, "micro_burst_ok", 0.0, 0.0)
             sweep_note = micro_burst_result.note if micro_burst_result is not None else "micro_burst_signal"
         else:
@@ -2255,7 +2316,7 @@ def process_symbol(
             return
 
     equity = adapter.account_equity()
-    cap_message = portfolio_caps_message(adapter, app_config, cfg, equity)
+    cap_message = "" if cfg.ignore_portfolio_cap else portfolio_caps_message(adapter, app_config, cfg, equity)
     if cap_message:
         if entry_setup is not None:
             with repo.transaction():
@@ -2328,6 +2389,7 @@ def process_symbol(
     if entry_setup is not None:
         comment = f"{comment}|{entry_setup.setup_id[:8]}"
     comment = comment[:31]
+    trailing_summary = f"{trailing_mode}/{trailing_activation_r:.2f}R/{trailing_gap_r:.2f}R/remove_tp={trailing_remove_tp}"
 
     result = adapter.send_market_order_with_fallback(
         symbol=cfg.symbol,
@@ -2375,6 +2437,7 @@ def process_symbol(
                     "price": result.price,
                     "sl": result.sl,
                     "tp": result.tp,
+                    "trailing": trailing_summary,
                     "retcode": result.retcode,
                     "order": result.order,
                     "deal": result.deal,
@@ -2449,6 +2512,16 @@ def run(config_path: str = "config/settings.json") -> None:
         adapter.initialize()
         for cfg in app_config.symbols:
             adapter.ensure_symbol(cfg.symbol)
+        try:
+            startup_report = write_startup_daily_review_report(
+                config_path,
+                app_config,
+                equity=adapter.account_equity(),
+            )
+            if startup_report is not None:
+                print(f"DAILY_REVIEW {startup_report}")
+        except Exception as exc:
+            print(f"[{datetime.now(timezone.utc).isoformat()}] DAILY_REVIEW_FAIL {exc}")
 
         recovery_logger = recovery_event_logger(log_file, app_config, repo)
         local_open_count = len(repo.list_open_positions(status=POSITION_STATUS_OPEN))

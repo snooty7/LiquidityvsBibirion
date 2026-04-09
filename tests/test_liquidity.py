@@ -3,11 +3,13 @@ import pytest
 from src.strategy.liquidity import (
     detect_h4_bias_micro_burst_signal,
     detect_ny_micro_pullback_drift_signal,
+    detect_ny_reclaim_continuation_signal,
     detect_opening_range_breakout_signal,
     detect_opening_range_breakout_v2_signal,
     detect_overreaction_fade_signal,
     detect_session_open_scalp_signal,
     detect_sweep_signal,
+    detect_trend_day_acceleration_signal,
     detect_two_candle_momentum_signal,
     detect_trend_micro_burst_v2_signal,
     evaluate_compression_window,
@@ -15,7 +17,7 @@ from src.strategy.liquidity import (
     evaluate_sweep_significance,
     extract_pivot_levels,
 )
-from src.strategy.confirmations import evaluate_none_confirmation
+from src.strategy.confirmations import evaluate_none_confirmation, evaluate_sweep_displacement_only_confirmation
 from src.strategy.filters import resolve_order_block_distance_limit_pips
 
 
@@ -300,6 +302,90 @@ def test_detect_opening_range_breakout_v2_signal_buy_reacceleration() -> None:
     assert result.note == "orb_v2_buy_reacceleration"
 
 
+def test_detect_trend_day_acceleration_signal_buy_break() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1003, "low": 1.0999, "close": 1.1002},
+        {"time": 2, "open": 1.1002, "high": 1.1009, "low": 1.1001, "close": 1.1008},
+        {"time": 3, "open": 1.1008, "high": 1.1012, "low": 1.1007, "close": 1.1012},
+        {"time": 4, "open": 1.1011, "high": 1.10115, "low": 1.10090, "close": 1.10095},
+        {"time": 5, "open": 1.10095, "high": 1.10098, "low": 1.10078, "close": 1.10082},
+        {"time": 6, "open": 1.10084, "high": 1.10142, "low": 1.10082, "close": 1.10136},
+        {"time": 7, "open": 1.10136, "high": 1.10140, "low": 1.10130, "close": 1.10138},
+    ]
+
+    result = detect_trend_day_acceleration_signal(
+        rates,
+        pullback_bars=2,
+        body_ratio_min=0.45,
+        range_multiple=1.2,
+        buffer_price=0.00001,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "trend_day_accel_buy_break"
+
+
+def test_detect_ny_reclaim_continuation_signal_buy() -> None:
+    rates = [
+        {"time": 1775005000, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},
+        {"time": 1775005060, "open": 1.1001, "high": 1.1003, "low": 1.1000, "close": 1.1002},
+        {"time": 1775005120, "open": 1.1002, "high": 1.10035, "low": 1.1001, "close": 1.10025},
+        {"time": 1775005180, "open": 1.10025, "high": 1.10040, "low": 1.1002, "close": 1.10030},
+        {"time": 1775005240, "open": 1.10030, "high": 1.10045, "low": 1.1002, "close": 1.10040},
+        {"time": 1775005300, "open": 1.10040, "high": 1.10092, "low": 1.10035, "close": 1.10088},
+        {"time": 1775005360, "open": 1.10088, "high": 1.10089, "low": 1.10048, "close": 1.10056},
+        {"time": 1775005420, "open": 1.10056, "high": 1.10060, "low": 1.10042, "close": 1.10050},
+        {"time": 1775005480, "open": 1.10050, "high": 1.10098, "low": 1.10048, "close": 1.10094},
+        {"time": 1775005540, "open": 1.10094, "high": 1.10100, "low": 1.10090, "close": 1.10096},
+    ]
+
+    result = detect_ny_reclaim_continuation_signal(
+        rates,
+        session_start_utc="00:56",
+        open_range_minutes=4,
+        watch_minutes=180,
+        buffer_price=0.00001,
+        body_ratio_min=0.45,
+        pullback_bars=2,
+        range_multiple=1.2,
+        reclaim_tolerance_price=0.00010,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "ny_reclaim_buy"
+
+
+def test_detect_ny_reclaim_continuation_signal_wait_when_pullback_not_near_or() -> None:
+    rates = [
+        {"time": 1775005000, "open": 1.1000, "high": 1.1002, "low": 1.0999, "close": 1.1001},
+        {"time": 1775005060, "open": 1.1001, "high": 1.1003, "low": 1.1000, "close": 1.1002},
+        {"time": 1775005120, "open": 1.1002, "high": 1.10035, "low": 1.1001, "close": 1.10025},
+        {"time": 1775005180, "open": 1.10025, "high": 1.10040, "low": 1.1002, "close": 1.10030},
+        {"time": 1775005240, "open": 1.10030, "high": 1.10045, "low": 1.1002, "close": 1.10040},
+        {"time": 1775005300, "open": 1.10040, "high": 1.10092, "low": 1.10035, "close": 1.10088},
+        {"time": 1775005360, "open": 1.10088, "high": 1.10089, "low": 1.10010, "close": 1.10018},
+        {"time": 1775005420, "open": 1.10018, "high": 1.10022, "low": 1.10005, "close": 1.10012},
+        {"time": 1775005480, "open": 1.10012, "high": 1.10098, "low": 1.10010, "close": 1.10094},
+        {"time": 1775005540, "open": 1.10094, "high": 1.10100, "low": 1.10090, "close": 1.10096},
+    ]
+
+    result = detect_ny_reclaim_continuation_signal(
+        rates,
+        session_start_utc="00:56",
+        open_range_minutes=4,
+        watch_minutes=180,
+        buffer_price=0.00001,
+        body_ratio_min=0.45,
+        pullback_bars=2,
+        range_multiple=1.2,
+        reclaim_tolerance_price=0.00010,
+    )
+
+    assert result.signal is None
+
+
 def test_detect_overreaction_fade_signal_sell() -> None:
     rates = [
         {"time": 1, "open": 1.1000, "high": 1.1001, "low": 1.0999, "close": 1.10002},
@@ -408,3 +494,25 @@ def test_evaluate_none_confirmation_confirms_on_next_closed_candle() -> None:
 
     assert confirmed.confirmed is True
     assert confirmed.note == "none_confirmed"
+
+
+def test_sweep_displacement_only_confirms_without_structure_break() -> None:
+    rates = [
+        {"time": 1, "open": 1.1000, "high": 1.1002, "low": 1.0998, "close": 1.1000},
+        {"time": 2, "open": 1.1000, "high": 1.1001, "low": 1.0990, "close": 1.1001},
+        {"time": 3, "open": 1.1001, "high": 1.1004, "low": 1.1000, "close": 1.10035},
+        {"time": 4, "open": 1.10035, "high": 1.10105, "low": 1.10030, "close": 1.10095},
+        {"time": 5, "open": 1.10095, "high": 1.10096, "low": 1.10094, "close": 1.10095},
+    ]
+
+    result = evaluate_sweep_displacement_only_confirmation(
+        rates,
+        "BUY",
+        since_ts=2,
+        structure_bars=1,
+        displacement_body_ratio_min=0.4,
+        displacement_range_multiple=0.8,
+    )
+
+    assert result.confirmed is True
+    assert result.note == "sdd_buy_confirmed"

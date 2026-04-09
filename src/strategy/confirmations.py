@@ -209,6 +209,38 @@ def evaluate_sweep_displacement_mss_confirmation(
     return ConfirmationResult(True, False, "sdmss_sell_confirmed")
 
 
+def evaluate_sweep_displacement_only_confirmation(
+    rates: Sequence[object],
+    side: str,
+    since_ts: int,
+    structure_bars: int,
+    *,
+    displacement_body_ratio_min: float = 0.60,
+    displacement_range_multiple: float = 1.50,
+) -> ConfirmationResult:
+    closed = [bar for bar in rates[:-1] if int(bar["time"]) >= int(since_ts)]
+    needed_context = max(2, int(structure_bars))
+    if len(closed) <= needed_context:
+        return ConfirmationResult(False, True, f"await_sdd_context_{len(closed)}/{needed_context + 1}")
+
+    for idx in range(needed_context, len(closed)):
+        candle = closed[idx]
+        prior = closed[idx - needed_context : idx]
+        avg_range = sum(candle_range(item) for item in prior) / max(len(prior), 1)
+        ratio_ok = candle_body_ratio(candle) >= displacement_body_ratio_min
+        size_ok = candle_range(candle) >= max(avg_range * displacement_range_multiple, 1e-10)
+        if side == "BUY":
+            direction_ok = _price(candle, "close") > _price(candle, "open")
+        else:
+            direction_ok = _price(candle, "close") < _price(candle, "open")
+        if ratio_ok and size_ok and direction_ok:
+            if side == "BUY":
+                return ConfirmationResult(True, False, "sdd_buy_confirmed")
+            return ConfirmationResult(True, False, "sdd_sell_confirmed")
+
+    return ConfirmationResult(False, True, "sdd_wait_displacement")
+
+
 def evaluate_session_open_scalp_c1_confirmation(
     rates: Sequence[object],
     side: str,

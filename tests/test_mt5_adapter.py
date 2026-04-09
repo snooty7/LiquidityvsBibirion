@@ -66,6 +66,28 @@ class FakeMT5PositionsRetry(FakeMT5):
         return [SimpleNamespace(ticket=1, magic=92001)]
 
 
+class FakeMT5CloseFallback(FakeMT5):
+    DEAL_ENTRY_OUT = 1
+
+    def history_deals_get(self, date_from, date_to):
+        return [
+            SimpleNamespace(
+                position_id=0,
+                entry=self.DEAL_ENTRY_OUT,
+                symbol="EURUSD",
+                magic=92001,
+                time=200,
+                time_msc=200000,
+                volume=0.25,
+                price=1.1550,
+                profit=12.5,
+                commission=0.0,
+                swap=0.0,
+                fee=0.0,
+            )
+        ]
+
+
 def test_symbol_info_recovers_after_reinitialize(monkeypatch) -> None:
     fake = FakeMT5()
     monkeypatch.setattr(mt5_adapter, "mt5", fake)
@@ -113,3 +135,22 @@ def test_copy_rates_range_returns_data(monkeypatch) -> None:
     rates = adapter.copy_rates_range("EURUSD", "M5", None, None)
 
     assert rates == [4, 5, 6]
+
+
+def test_latest_close_deal_for_position_falls_back_to_symbol_magic_volume_match(monkeypatch) -> None:
+    fake = FakeMT5CloseFallback()
+    monkeypatch.setattr(mt5_adapter, "mt5", fake)
+
+    adapter = mt5_adapter.MT5Adapter()
+    from datetime import datetime, timezone
+
+    deal = adapter.latest_close_deal_for_position(
+        123456,
+        datetime.fromtimestamp(200000, tz=timezone.utc),
+        symbol="EURUSD",
+        magic=92001,
+        opened_at=100,
+        volume=0.25,
+    )
+    assert deal is not None
+    assert deal.price == 1.1550
