@@ -321,6 +321,24 @@ Purpose:
 - Add a high-frequency, session-driven branch that still respects the core liquidity philosophy.
 - This branch must not become an indicator-noise bot.
 
+Local GBPUSD note:
+- `GBPUSD` tested better in the New York session than in the London session.
+- New local branch:
+  - `92022`
+  - `GBPUSD M1 NY tight`
+  - tuned around the `92012` family
+- Best retained compromise on `2026-01-07 -> 2026-04-07`:
+  - `watch_minutes = 150`
+  - `preopen_max_compression_ratio = 3.0`
+  - `body_ratio_min = 0.42`
+- Result:
+  - `8` trades
+  - net `+6.79`
+  - `PF 4.980`
+- Interpretation:
+  - still too small a sample to trust
+  - keep as a strict experimental branch only
+
 ## Branch policy
 - `92001` is the production winner and must stay unchanged.
 - Any new idea must be implemented as a new branch with:
@@ -593,6 +611,19 @@ Interpretation:
 - Better than `v1`.
 - Still modest, but now positive and testable.
 - This is a research candidate for demo, not a production branch yet.
+
+Local GBPUSD note:
+- New local branch:
+  - `92021`
+  - `GBPUSD M1 trend_micro_burst_v2`
+- Result on `2026-01-07 -> 2026-04-07`:
+  - `102` trades
+  - net `+6.19`
+  - `PF 1.454`
+  - `avg R 0.089`
+- Interpretation:
+  - this is the first `GBPUSD` branch with enough sample and positive expectancy to justify continued demo observation
+  - if `GBPUSD` is expanded further, this is the cleaner first candidate
 
 ### 5. `M1 archetype research`
 Status:
