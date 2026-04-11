@@ -143,7 +143,7 @@ class SyncAdapter:
             return items
         return [item for item in items if int(getattr(item, "magic", -1)) == int(magic)]
 
-    def latest_close_deal_for_position(self, ticket: int, now_utc: datetime, *, lookback_hours: int = 48):
+    def latest_close_deal_for_position(self, ticket: int, now_utc: datetime, *, lookback_hours: int = 48, **kwargs):
         return self.close_deal_by_ticket.get(int(ticket))
 
 

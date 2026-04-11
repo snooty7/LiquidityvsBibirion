@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from contextlib import redirect_stdout
@@ -34,6 +35,7 @@ from src.persistence.recovery import bootstrap_recovery, build_pending_setup_rec
 from src.persistence.repository import SQLiteRepository
 from src.risk.sizing import SymbolTradeInfo, calc_lot_by_risk, calc_position_risk_money
 from src.services.config import AppConfig, SymbolConfig, load_config
+from src.services.news_calendar import NewsCalendar
 from src.strategy.confirmations import (
     ConfirmationResult,
     evaluate_none_confirmation,
@@ -1572,6 +1574,7 @@ def process_symbol(
     state: SymbolState,
     log_file: Path,
     repo: SQLiteRepository,
+    news_calendar: Optional[NewsCalendar] = None,
 ) -> None:
     mode = cfg.confirmation_mode.lower()
     if mode not in ("none", "c3", "c4", "cisd", "sweep_displacement_mss", "session_open_scalp_c1"):
@@ -1776,7 +1779,10 @@ def process_symbol(
                         "candle_time": int(signal.candle_time),
                         "message": (
                             f"{sweep_quality.note} sweep_range={sweep_quality.sweep_range:.5f} "
-                            f"avg_range={sweep_quality.avg_range:.5f} penetration={sweep_quality.penetration_price:.5f}"
+                            f"avg_range={sweep_quality.avg_range:.5f} penetration={sweep_quality.penetration_price:.5f} "
+                            f"pen_ratio={sweep_quality.penetration_ratio:.2f} "
+                            f"range_ratio={sweep_quality.range_ratio:.2f} "
+                            f"quality={sweep_quality.quality_score:.2f}"
                         ),
                     },
                 )
@@ -2167,6 +2173,25 @@ def process_symbol(
             log_event(log_file, {**base_row, "event": "SKIP_SESSION", "message": message})
         return
 
+    if news_calendar is not None:
+        news_calendar.refresh_if_needed(now_utc)
+        news_reason = news_calendar.blackout_reason(cfg.symbol, now_utc)
+        if news_reason:
+            if entry_setup is not None:
+                cancel_entry_setup(
+                    repo=repo,
+                    app_config=app_config,
+                    log_file=log_file,
+                    cfg=cfg,
+                    setup=entry_setup,
+                    event_type="SKIP_NEWS",
+                    message=news_reason,
+                    csv_row=base_row,
+                )
+            else:
+                log_event(log_file, {**base_row, "event": "SKIP_NEWS", "message": news_reason})
+            return
+
     if now_ts < float(state.cooldown_until):
         remaining = float(state.cooldown_until) - now_ts
         message = f"remaining={remaining:.0f}s"
@@ -2505,6 +2530,7 @@ def run(config_path: str = "config/settings.json") -> None:
     adapter = MT5Adapter(default_deviation=app_config.runtime.default_deviation)
     log_file = Path(app_config.runtime.log_file)
     repo = SQLiteRepository(app_config.runtime.db_path)
+    news_calendar = NewsCalendar(app_config.runtime)
     bot_instance_id = uuid4().hex
     repo.set_bot_instance_id(bot_instance_id)
 
@@ -2525,6 +2551,8 @@ def run(config_path: str = "config/settings.json") -> None:
                 print(f"DAILY_REVIEW {startup_report}")
         except Exception as exc:
             print(f"[{datetime.now(timezone.utc).isoformat()}] DAILY_REVIEW_FAIL {exc}")
+        if app_config.runtime.news_filter_enabled:
+            news_calendar.refresh_if_needed(datetime.now(timezone.utc))
 
         recovery_logger = recovery_event_logger(log_file, app_config, repo)
         local_open_count = len(repo.list_open_positions(status=POSITION_STATUS_OPEN))
@@ -2603,6 +2631,13 @@ def run(config_path: str = "config/settings.json") -> None:
             f"cap_positions={app_config.runtime.max_open_positions_total} "
             f"cap_open_risk_pct={app_config.runtime.max_total_open_risk_pct:.2f}"
         )
+        if app_config.runtime.news_filter_enabled:
+            print(
+                f"NEWS provider={app_config.runtime.news_provider} "
+                f"blocked={','.join(app_config.runtime.news_blocked_importances)} "
+                f"window=-{app_config.runtime.news_block_minutes_before}/+{app_config.runtime.news_block_minutes_after}m "
+                f"tz={app_config.runtime.news_timezone} cache={app_config.runtime.news_cache_path}"
+            )
         print(
             "RECOVERY "
             f"broker_only={recovery_stats.broker_only_count} "
@@ -2640,7 +2675,7 @@ def run(config_path: str = "config/settings.json") -> None:
                     sync_open_positions_for_symbol(adapter, cfg, app_config, repo, log_file)
                     manage_symbol_positions(adapter, cfg, app_config, state, log_file, repo)
                     if not daily_loss_reached:
-                        process_symbol(adapter, cfg, app_config, state, log_file, repo)
+                        process_symbol(adapter, cfg, app_config, state, log_file, repo, news_calendar=news_calendar)
                 except Exception as exc:
                     now_utc = datetime.now(timezone.utc)
                     print(f"[{now_utc.isoformat()}] {cfg.symbol} ERROR {exc}")
@@ -2673,7 +2708,10 @@ def run(config_path: str = "config/settings.json") -> None:
 
 
 def main() -> None:
-    run()
+    parser = argparse.ArgumentParser(description="Run the liquidity bot orchestrator")
+    parser.add_argument("--config", default="config/settings.json", help="Path to bot config")
+    args = parser.parse_args()
+    run(config_path=str(args.config))
 
 
 if __name__ == "__main__":

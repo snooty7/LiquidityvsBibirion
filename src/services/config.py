@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from pathlib import Path
 import json
@@ -35,6 +34,14 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "push_notification_url": "",
         "push_notification_token": "",
         "push_notification_timeout_sec": 5,
+        "news_filter_enabled": False,
+        "news_provider": "investpy",
+        "news_cache_path": "news_calendar_cache.json",
+        "news_refresh_interval_sec": 1800,
+        "news_timezone": "Europe/Sofia",
+        "news_block_minutes_before": 30,
+        "news_block_minutes_after": 15,
+        "news_blocked_importances": ["high", "medium"],
     },
     "symbols": [
         {
@@ -129,6 +136,14 @@ class RuntimeConfig:
     push_notification_url: str
     push_notification_token: str
     push_notification_timeout_sec: int
+    news_filter_enabled: bool = False
+    news_provider: str = "investpy"
+    news_cache_path: str = "news_calendar_cache.json"
+    news_refresh_interval_sec: int = 1800
+    news_timezone: str = "Europe/Sofia"
+    news_block_minutes_before: int = 30
+    news_block_minutes_after: int = 15
+    news_blocked_importances: tuple[str, ...] = ("high", "medium")
 
 
 @dataclass(frozen=True)
@@ -249,6 +264,14 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         push_notification_url=str(runtime_raw.get("push_notification_url", "")),
         push_notification_token=str(runtime_raw.get("push_notification_token", "")),
         push_notification_timeout_sec=int(runtime_raw.get("push_notification_timeout_sec", 5)),
+        news_filter_enabled=bool(runtime_raw.get("news_filter_enabled", False)),
+        news_provider=str(runtime_raw.get("news_provider", "investpy")).lower(),
+        news_cache_path=str(runtime_raw.get("news_cache_path", "news_calendar_cache.json")),
+        news_refresh_interval_sec=int(runtime_raw.get("news_refresh_interval_sec", 1800)),
+        news_timezone=str(runtime_raw.get("news_timezone", "Europe/Sofia")),
+        news_block_minutes_before=int(runtime_raw.get("news_block_minutes_before", 30)),
+        news_block_minutes_after=int(runtime_raw.get("news_block_minutes_after", 15)),
+        news_blocked_importances=tuple(str(item).lower() for item in runtime_raw.get("news_blocked_importances", ["high", "medium"])),
     )
 
     symbols: list[SymbolConfig] = []
@@ -343,6 +366,25 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         raise ValueError("push_notification_timeout_sec must be > 0")
     if runtime.push_notifications_enabled and not runtime.push_notification_url:
         raise ValueError("push_notification_url is required when push_notifications_enabled=true")
+    valid_news_providers = {"investpy"}
+    if runtime.news_provider not in valid_news_providers:
+        raise ValueError(f"Unsupported news_provider={runtime.news_provider}")
+    if runtime.news_refresh_interval_sec <= 0:
+        raise ValueError("news_refresh_interval_sec must be > 0")
+    if runtime.news_block_minutes_before < 0:
+        raise ValueError("news_block_minutes_before must be >= 0")
+    if runtime.news_block_minutes_after < 0:
+        raise ValueError("news_block_minutes_after must be >= 0")
+    valid_news_importances = {"high", "medium", "low"}
+    invalid_importances = [item for item in runtime.news_blocked_importances if item not in valid_news_importances]
+    if invalid_importances:
+        raise ValueError(f"Unsupported news_blocked_importances={invalid_importances}")
+    try:
+        from zoneinfo import ZoneInfo
+
+        ZoneInfo(runtime.news_timezone)
+    except Exception as exc:
+        raise ValueError(f"Invalid news_timezone={runtime.news_timezone}") from exc
 
     valid_confirmation_modes = {
         "none",
