@@ -8,6 +8,8 @@ $magicMap = @{
   "92016" = "EURUSD M1 NY ORB v2"
   "92021" = "GBPUSD M1 Trend Micro-Burst v2"
   "92022" = "GBPUSD M1 NY Tight"
+  "92023" = "NZDUSD M30 Sweep"
+  "92024" = "USDCHF M30 Sweep"
 }
 
 while ($true) {

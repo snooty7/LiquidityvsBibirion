@@ -78,6 +78,31 @@ Interpretation:
 - `EURUSD` remains the only symbol with a defendable edge in the current model.
 - Do not add the other symbols to live trading with a copy-paste config.
 
+### Local shortlist for the next trading day
+Prepared local candidates for Monday observation:
+- `92021` `GBPUSD M1 trend_micro_burst_v2`
+  - `102` trades
+  - net `+6.19`
+  - `PF 1.454`
+- `92022` `GBPUSD M1 NY tight`
+  - `8` trades
+  - net `+6.79`
+  - `PF 4.980`
+  - small sample, keep expectations conservative
+- `92023` `NZDUSD M30 liquidity_sweep`
+  - `42` trades
+  - net `+94.43`
+  - `PF 1.791`
+- `92024` `USDCHF M30 liquidity_sweep`
+  - `36` trades
+  - net `+83.75`
+  - `PF 1.408`
+
+Deployment note:
+- these four are the current local expansion shortlist
+- they should run in a separate profile from `92001`
+- `92001` remains the production reference branch and is not part of this expansion set
+
 ## USDJPY branch research
 A small dedicated `USDJPY` branch was tested with adjusted spread tolerance and nearby threshold tuning.
 
