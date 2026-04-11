@@ -120,6 +120,9 @@ Interpretation:
 - `M15` is rejected.
 - `M30` is interesting, but the sample is too small (`12` trades in 180 days).
 - `M30` should stay in research only until it is validated on a longer window.
+- Local tuning note:
+  - `92008` performed better with `H4` bias than with `H1` bias or no bias on the `2026-01-11 -> 2026-04-10` branch-only backtest.
+  - Reason: `H1` bias was blocking too many otherwise valid `M30` continuation entries.
 
 ## EURUSD trend micro-burst research
 `Trend Micro-Burst v1` was tested as:
@@ -516,6 +519,9 @@ Interpretation:
 Decision:
 - do not merge its behavior into `92001`
 - if observed live, treat it strictly as an experimental companion branch
+- Local tuning note:
+  - `confirm_expiry_bars = 6` was a better compromise than `5` or `7` on the `2026-01-11 -> 2026-04-10` branch-only backtest.
+  - `7` increased trade count but reduced quality too much.
 
 ## 92001 fast-path research outcome
 Question tested:
