@@ -10,15 +10,15 @@ from typing import Iterable
 TIMEFRAME_WINDOWS = {
     "M1": timedelta(hours=8),
     "M5": timedelta(days=2),
-    "H1": timedelta(days=14),
-    "D1": timedelta(days=180),
+    "M15": timedelta(days=5),
+    "M30": timedelta(days=10),
 }
 
 TIMEFRAME_SECONDS = {
     "M1": 60,
     "M5": 300,
-    "H1": 3600,
-    "D1": 86400,
+    "M15": 900,
+    "M30": 1800,
 }
 
 

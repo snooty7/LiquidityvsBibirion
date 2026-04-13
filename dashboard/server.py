@@ -93,6 +93,13 @@ class DashboardState:
         return result
 
 
+def resolve_runtime_path(config_path: Path, raw_path: str) -> Path:
+    target = Path(str(raw_path or "").strip())
+    if target.is_absolute():
+        return target
+    return (REPO_ROOT / target).resolve()
+
+
 def _json_bytes(payload: dict) -> bytes:
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
@@ -164,9 +171,17 @@ def main() -> None:
     parser = ArgumentParser(description="Serve local trading dashboard")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--config", default=str(CONFIG_PATH), help="Path to bot config")
+    parser.add_argument("--csv", default="", help="Optional explicit bot_events.csv path override")
     args = parser.parse_args()
 
-    state = DashboardState(CONFIG_PATH, CSV_PATH)
+    config_path = Path(args.config).resolve()
+    app_config = load_config(config_path)
+    csv_path = resolve_runtime_path(config_path, args.csv or app_config.runtime.log_file)
+    print(f"Dashboard config={config_path}")
+    print(f"Dashboard log={csv_path}")
+
+    state = DashboardState(config_path, csv_path)
     DashboardHandler.state = state
     server = ThreadingHTTPServer((args.host, args.port), DashboardHandler)
     print(f"Dashboard running on http://{args.host}:{args.port}")

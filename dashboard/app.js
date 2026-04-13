@@ -1,16 +1,20 @@
 const chartDefs = [
   { tf: "M1", elementId: "chartM1", metaId: "metaM1" },
   { tf: "M5", elementId: "chartM5", metaId: "metaM5" },
-  { tf: "H1", elementId: "chartH1", metaId: "metaH1" },
-  { tf: "D1", elementId: "chartD1", metaId: "metaD1" },
+  { tf: "M15", elementId: "chartM15", metaId: "metaM15" },
+  { tf: "M30", elementId: "chartM30", metaId: "metaM30" },
 ];
 
+const dashboardConfig = window.DASHBOARD_CONFIG || {};
+const snapshotMode = dashboardConfig.snapshotMode || "api";
+const dataBasePath = (dashboardConfig.dataBasePath || "data").replace(/\/+$/, "");
 const charts = new Map();
 const symbolSelect = document.getElementById("symbolSelect");
 const refreshBtn = document.getElementById("refreshBtn");
 const statusText = document.getElementById("statusText");
 const generatedAt = document.getElementById("generatedAt");
 const signalCards = document.getElementById("signalCards");
+let staticManifest = null;
 
 function createChart(container) {
   const chart = LightweightCharts.createChart(container, {
@@ -145,24 +149,62 @@ function renderSignals(items) {
   }
 }
 
+async function loadStaticManifest() {
+  if (snapshotMode !== "static") {
+    return null;
+  }
+  if (staticManifest) {
+    return staticManifest;
+  }
+
+  const response = await fetch(`${dataBasePath}/index.json?ts=${Date.now()}`);
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Static manifest failed");
+  }
+  staticManifest = data;
+  return data;
+}
+
+function ensureSymbolOptions(symbols, preferredSymbol) {
+  if (!Array.isArray(symbols) || symbols.length === 0) {
+    return preferredSymbol || "EURUSD";
+  }
+  if (!symbolSelect.options.length) {
+    for (const item of symbols) {
+      const option = document.createElement("option");
+      option.value = item;
+      option.textContent = item;
+      symbolSelect.appendChild(option);
+    }
+  }
+  const target = preferredSymbol && symbols.includes(preferredSymbol) ? preferredSymbol : symbols[0];
+  symbolSelect.value = target;
+  return target;
+}
+
 async function loadSnapshot() {
-  const symbol = symbolSelect.value || "EURUSD";
-  setStatus(`loading ${symbol}`);
-  const response = await fetch(`/api/snapshot?symbol=${encodeURIComponent(symbol)}`);
+  let symbol = symbolSelect.value || "EURUSD";
+  let response;
+
+  if (snapshotMode === "static") {
+    const manifest = await loadStaticManifest();
+    symbol = ensureSymbolOptions(manifest?.symbols || [], symbol);
+    setStatus(`loading ${symbol}`);
+    response = await fetch(`${dataBasePath}/snapshot-${encodeURIComponent(symbol)}.json?ts=${Date.now()}`);
+  } else {
+    setStatus(`loading ${symbol}`);
+    response = await fetch(`api/snapshot?symbol=${encodeURIComponent(symbol)}`);
+  }
+
   const data = await response.json();
 
   if (!response.ok) {
     throw new Error(data.error || "Snapshot failed");
   }
 
-  if (!symbolSelect.options.length) {
-    for (const item of data.symbols) {
-      const option = document.createElement("option");
-      option.value = item;
-      option.textContent = item;
-      symbolSelect.appendChild(option);
-    }
-    symbolSelect.value = symbol;
+  if (snapshotMode === "api") {
+    symbol = ensureSymbolOptions(data.symbols || [], symbol);
   }
 
   generatedAt.textContent = `updated ${new Date(data.generated_at_utc).toLocaleString()}`;
