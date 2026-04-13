@@ -786,3 +786,72 @@ Current decision:
 - `NY ORB v2` is now the strongest `M1` research branch.
 - `NY Micro-Pullback Drift` remains useful research context, but not the branch to prioritize for live demo sampling.
 
+## 2026-04-13 live tuning note
+
+Context:
+- running the full `16`-branch live stack from `config/settings.json`
+- focus was on the two branches that showed same-day missed-but-small positive near-trades:
+  - `92010` `EURUSD M1`
+  - `92018` `EURUSD M5`
+
+Same-day what-if result:
+- `92010` expired setup `c8fd3272`:
+  - outcome if entered: `+2.1 pips`
+  - interpretation: slightly too strict on confirmation expiry
+- `92018` expired setup `2aeb6438`:
+  - outcome if entered: `+3.5 pips`
+  - interpretation: tempting to extend expiry, but must be tested against full-window quality
+- `92021` confirmed setup `754bd3a4` was blocked by session filter:
+  - what-if outcome: `-1.5 pips`
+  - interpretation: session filter was correct for that sample
+
+Focused backtest pass:
+- reference window:
+  - `2026-01-07 -> 2026-04-13 11:00 UTC`
+
+`92010`:
+- baseline `confirm_expiry_bars = 5`
+  - `15` trades
+  - `net +2.45`
+  - `PF 1.572`
+- variant `confirm_expiry_bars = 7`
+  - `17` trades
+  - `net +5.59`
+  - `PF 2.308`
+- variant `confirm_expiry_bars = 8`
+  - same result as `7`
+- decision:
+  - promote `92010` to `confirm_expiry_bars = 7`
+  - this improves trade count, net, and PF without increasing max DD in the tested window
+
+`92018`:
+- baseline `confirm_expiry_bars = 3`
+  - `91` trades
+  - `net +419.95`
+  - `PF 1.546`
+  - `max DD 98.49`
+- variant `confirm_expiry_bars = 4`
+  - `114` trades
+  - `net +417.90`
+  - `PF 1.436`
+  - `max DD 108.06`
+- variant `confirm_expiry_bars = 5`
+  - `134` trades
+  - `net +377.37`
+  - `PF 1.315`
+  - `max DD 116.10`
+- decision:
+  - keep `92018` unchanged at `confirm_expiry_bars = 3`
+  - extending expiry adds trades but degrades edge and drawdown profile
+
+Operational outcome:
+- live config updated:
+  - `92010 confirm_expiry_bars = 7`
+  - `92018` unchanged
+- `GBPUSD 92021/92022` lot cap in active `config/settings.json` was aligned to `0.20`
+- live orchestrator restarted after the change
+
+Takeaway:
+- `92010` was genuinely too tight and earned a live tuning change
+- `92018` looked tight in the moment, but the broader test says the current version is still the better one
+
