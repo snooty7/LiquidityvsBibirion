@@ -16,6 +16,7 @@ build/
 # Environment
 .env
 .env.local
+config/*.local.json
 
 # IDE
 .vscode/
