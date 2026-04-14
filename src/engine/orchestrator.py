@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 import csv
 import math
+import re
 import time
 from uuid import uuid4
 from zoneinfo import ZoneInfo
@@ -100,6 +101,8 @@ TIMEFRAME_SECONDS = {
     "H1": 3600,
     "H4": 14400,
 }
+
+SOFIA_TZ = ZoneInfo("Europe/Sofia")
 
 
 @dataclass
@@ -255,6 +258,41 @@ def _setup_context_filters(pending: PendingSetup) -> str:
     return " ".join(parts)
 
 
+def _format_sofia_ts(value: datetime) -> str:
+    return value.astimezone(SOFIA_TZ).strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def _convert_session_range_to_sofia(value: str) -> str:
+    try:
+        start_raw, end_raw = [part.strip() for part in value.split("-", 1)]
+        start_min = parse_hhmm(start_raw)
+        end_min = parse_hhmm(end_raw)
+    except Exception:
+        return value
+
+    def _fmt(total_minutes: int) -> str:
+        total_minutes = total_minutes % (24 * 60)
+        hour = total_minutes // 60
+        minute = total_minutes % 60
+        return f"{hour:02d}:{minute:02d}"
+
+    sofia_offset_minutes = int(datetime.now(SOFIA_TZ).utcoffset().total_seconds() // 60)
+    start_local = _fmt(start_min + sofia_offset_minutes)
+    end_local = _fmt(end_min + sofia_offset_minutes)
+    return f"{start_local}-{end_local} Sofia"
+
+
+def _display_detail_text(detail: str) -> str:
+    if not detail:
+        return detail
+
+    return re.sub(
+        r"\b\d{2}:\d{2}-\d{2}:\d{2}\b",
+        lambda match: _convert_session_range_to_sofia(match.group(0)),
+        str(detail),
+    )
+
+
 def print_setup_visual(
     *,
     cfg: SymbolConfig,
@@ -264,9 +302,9 @@ def print_setup_visual(
     stage_note: str = "",
     reason: str = "",
 ) -> None:
-    now_utc = datetime.now(timezone.utc).isoformat()
+    now_local = _format_sofia_ts(datetime.now(timezone.utc))
     header = (
-        f"[{now_utc}] SETUP {cfg.symbol} {cfg.timeframe} #{_setup_short_id(pending.setup_id)} "
+        f"[{now_local}] SETUP {cfg.symbol} {cfg.timeframe} #{_setup_short_id(pending.setup_id)} "
         f"{pending.side} level={pending.level:.5f} {state_label}"
     )
     meta_parts = [
@@ -280,7 +318,7 @@ def print_setup_visual(
     print(header)
     print(f"    stages: pending -> {_setup_wait_stage(stage_note or pending.last_note)}")
     if detail:
-        print(f"    detail: {detail}")
+        print(f"    detail: {_display_detail_text(detail)}")
     if reason:
         print(f"    reason: {reason}")
     print(f"    meta: {' | '.join(meta_parts)}")
@@ -1867,7 +1905,7 @@ def process_symbol(
                     )
                     if state.pending_setup is not None:
                         print(
-                            f"[{now_utc.isoformat()}] ALERT {cfg.symbol} {cfg.timeframe} "
+                            f"[{_format_sofia_ts(now_utc)}] ALERT {cfg.symbol} {cfg.timeframe} "
                             f"{signal.side} level={signal.level:.5f} setup_id={stored_setup.setup_id[:8]} "
                             f"step=significant_sweep next=displacement->BOS->entry"
                         )
