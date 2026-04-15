@@ -3,14 +3,17 @@ $repo = Split-Path -Parent $PSScriptRoot
 Set-Location $repo
 $config = 'config/settings.json'
 $monitor = Join-Path $repo 'tools\monitor_fast_branches.ps1'
+$watchdog = Join-Path $repo 'tools\live_watchdog.ps1'
 $configResolved = (Resolve-Path $config).Path
 $monitorResolved = (Resolve-Path $monitor).Path
+$watchdogResolved = (Resolve-Path $watchdog).Path
 $launcherResolved = (Resolve-Path $MyInvocation.MyCommand.Path).Path
 
 function Stop-ExistingLiveProcesses {
     param(
         [string]$ConfigPath,
         [string]$MonitorPath,
+        [string]$WatchdogPath,
         [string]$LauncherPath
     )
 
@@ -29,6 +32,7 @@ function Stop-ExistingLiveProcesses {
     $shellTargets = $processes | Where-Object {
         $_.Name -eq 'powershell.exe' -and (
             $_.CommandLine -match [regex]::Escape($MonitorPath) -or
+            $_.CommandLine -match [regex]::Escape($WatchdogPath) -or
             $_.CommandLine -match [regex]::Escape($LauncherPath)
         )
     }
@@ -52,7 +56,8 @@ function Stop-ExistingLiveProcesses {
     Start-Sleep -Seconds 2
 }
 
-Stop-ExistingLiveProcesses -ConfigPath $configResolved -MonitorPath $monitorResolved -LauncherPath $launcherResolved
+Stop-ExistingLiveProcesses -ConfigPath $configResolved -MonitorPath $monitorResolved -WatchdogPath $watchdogResolved -LauncherPath $launcherResolved
 
+Start-Process powershell -ArgumentList @('-NoExit','-ExecutionPolicy','Bypass','-File', $watchdog, '-Config', $config, '-Launcher', $launcherResolved) | Out-Null
 Start-Process powershell -ArgumentList @('-NoExit','-ExecutionPolicy','Bypass','-File', $monitor, '-Config', $config) | Out-Null
 python -m src.engine.orchestrator --config $config
