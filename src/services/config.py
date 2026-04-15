@@ -76,7 +76,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "order_block_min_impulse_pips": 3.0,
             "order_block_max_age_bars": 15,
             "confirmation_mode": "sweep_displacement_mss",
-            "confirm_expiry_bars": 3,
+            "confirm_expiry_bars": 5,
             "cisd_timeframe": "M1",
             "cisd_lookback_bars": 120,
             "cisd_structure_bars": 4,
