@@ -33,7 +33,15 @@ function Stop-ExistingLiveProcesses {
         )
     }
 
-    foreach ($proc in @($pythonTargets + $shellTargets) | Sort-Object ProcessId -Unique) {
+    $targets = @()
+    if ($pythonTargets) {
+        $targets += @($pythonTargets)
+    }
+    if ($shellTargets) {
+        $targets += @($shellTargets)
+    }
+
+    foreach ($proc in $targets | Sort-Object ProcessId -Unique) {
         try {
             Stop-Process -Id $proc.ProcessId -Force -ErrorAction Stop
         } catch {
