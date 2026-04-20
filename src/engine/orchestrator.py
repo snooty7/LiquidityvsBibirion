@@ -55,6 +55,8 @@ from src.strategy.filters import (
 )
 from src.strategy.liquidity import (
     RangeFilterResult,
+    TrendRetestReclaimSignalResult,
+    detect_btc_mtf_trend_retest_reclaim_signal,
     detect_h4_bias_micro_burst_signal,
     detect_opening_range_breakout_v2_signal,
     detect_session_open_scalp_signal,
@@ -855,6 +857,7 @@ def apply_daily_loss_guard(
                         "side": "BUY" if int(position.type) == 0 else "SELL",
                         "volume": float(position.volume),
                         "price": result.price,
+                        "realized_pnl": round(float(getattr(position, "profit", 0.0) or 0.0), 2),
                         "retcode": result.retcode,
                         "order": result.order,
                         "deal": result.deal,
@@ -935,7 +938,7 @@ def manage_symbol_positions(
                 open_price=float(getattr(position, "price_open", 0.0) or 0.0),
                 current_exit_price_value=current_price,
                 current_sl=current_sl,
-                risk_distance_price=position_risk_distance_price(cfg, info),
+                risk_distance_price=position_risk_distance_price(cfg, info, position),
                 activation_r=float(trailing_activation_r),
                 gap_r=float(trailing_gap_r),
             )
@@ -1044,6 +1047,7 @@ def manage_symbol_positions(
                         "side": side,
                         "volume": float(position.volume),
                         "price": result.price,
+                        "realized_pnl": round(pnl_money, 2),
                         "loss_limit_money": loss_limit_money,
                         "loss_guard_mode": loss_guard_mode,
                         "retcode": result.retcode,
@@ -1160,7 +1164,16 @@ def resolve_loss_guard(
     return None, None, None
 
 
-def position_risk_distance_price(cfg: SymbolConfig, symbol_info: SymbolTradeInfo) -> float:
+def position_risk_distance_price(
+    cfg: SymbolConfig,
+    symbol_info: SymbolTradeInfo,
+    position: Optional[object] = None,
+) -> float:
+    if position is not None:
+        open_price = float(getattr(position, "price_open", 0.0) or 0.0)
+        stop_price = float(getattr(position, "sl", 0.0) or 0.0)
+        if open_price > 0 and stop_price > 0 and open_price != stop_price:
+            return abs(open_price - stop_price)
     return float(cfg.sl_pips * MT5Adapter.pip_size(symbol_info))
 
 
@@ -1495,6 +1508,47 @@ def _build_setup_context(
     }
 
 
+def _entry_risk_context(entry_setup: Optional[PendingSetup]) -> dict[str, Any]:
+    if entry_setup is None:
+        return {}
+    return dict(entry_setup.context.get("risk") or {})
+
+
+def _resolve_entry_protection(
+    cfg: SymbolConfig,
+    entry_setup: Optional[PendingSetup],
+    entry_side: str,
+    quote_price: float,
+    pip: float,
+) -> tuple[float, float, float, float, float]:
+    risk_context = _entry_risk_context(entry_setup)
+    risk_pct = float(risk_context.get("risk_pct_override", cfg.risk_pct) or cfg.risk_pct)
+    tp_r_multiple = float(risk_context.get("tp_r_multiple", cfg.rr) or cfg.rr)
+    custom_sl = risk_context.get("sl_price")
+
+    if custom_sl is None:
+        sl_pips = float(cfg.sl_pips)
+        tp_pips = float(cfg.tp_pips)
+        if entry_side == "BUY":
+            sl = float(quote_price - sl_pips * pip)
+            tp = float(quote_price + tp_pips * pip)
+        else:
+            sl = float(quote_price + sl_pips * pip)
+            tp = float(quote_price - tp_pips * pip)
+        return sl, tp, sl_pips, tp_pips, risk_pct
+
+    sl = float(custom_sl)
+    sl_distance_price = abs(float(quote_price) - sl)
+    sl_pips = float(sl_distance_price / max(pip, 1e-10))
+    tp_distance_price = float(sl_distance_price * tp_r_multiple)
+    if entry_side == "BUY":
+        tp = float(quote_price + tp_distance_price)
+    else:
+        tp = float(quote_price - tp_distance_price)
+    tp_pips = float(tp_distance_price / max(pip, 1e-10))
+    return sl, tp, sl_pips, tp_pips, risk_pct
+
+
 def semantic_setup_key(candle_time: int, side: str, level: float) -> str:
     return f"{side}|{float(level):.5f}"
 
@@ -1645,6 +1699,7 @@ def process_symbol(
     signal = None
     scalp_result = None
     micro_burst_result = None
+    trend_retest_result: Optional[TrendRetestReclaimSignalResult] = None
     if cfg.strategy_mode == "session_open_scalp":
         scalp_result = detect_session_open_scalp_signal(
             rates,
@@ -1724,6 +1779,35 @@ def process_symbol(
             buffer_price=cfg.buffer_pips * pip,
         )
         signal = micro_burst_result.signal
+    elif cfg.strategy_mode == "btc_mtf_trend_retest_reclaim":
+        setup_rates = adapter.copy_rates(cfg.symbol, cfg.setup_timeframe, cfg.setup_lookback_bars)
+        bias_rates = adapter.copy_rates(cfg.symbol, cfg.bias_timeframe, cfg.bias_lookback_bars)
+        trend_retest_result = detect_btc_mtf_trend_retest_reclaim_signal(
+            trigger_rates=rates,
+            setup_rates=setup_rates,
+            bias_rates=bias_rates,
+            ema_fast_period=cfg.ema_fast_period,
+            ema_mid_period=cfg.ema_mid_period,
+            ema_slow_period=cfg.ema_slow_period,
+            atr_period=cfg.atr_period,
+            adx_period=cfg.adx_period,
+            adx_threshold=cfg.adx_threshold,
+            volume_sma_period=cfg.volume_sma_period,
+            breakout_volume_multiple=cfg.breakout_volume_multiple,
+            structure_pivot_len=cfg.structure_pivot_len,
+            setup_max_age_bars=cfg.setup_max_age_bars,
+            trigger_sweep_lookback_bars=cfg.trigger_sweep_lookback_bars,
+            retest_zone_atr_multiple=cfg.retest_zone_atr_multiple,
+            reclaim_max_atr_multiple=cfg.reclaim_max_atr_multiple,
+            stop_atr_multiple=cfg.stop_atr_multiple,
+            entry_max_atr_multiple=cfg.entry_max_atr_multiple,
+            htf_target_min_r=cfg.htf_target_min_r,
+            overlap_lookback_bars=cfg.overlap_lookback_bars,
+            max_overlap_ratio=cfg.max_overlap_ratio,
+            base_risk_pct=cfg.risk_pct,
+            weekend_risk_multiplier=cfg.weekend_risk_multiplier,
+        )
+        signal = trend_retest_result.signal
     else:
         levels = extract_pivot_levels(rates, cfg.pivot_len, cfg.max_levels)
         signal = detect_sweep_signal(rates, levels, cfg.buffer_pips * pip)
@@ -1763,9 +1847,17 @@ def process_symbol(
         elif cfg.strategy_mode == "opening_range_breakout_v2":
             chop_result = RangeFilterResult(False, "orb_v2_ok", 0.0, 0.0)
             sweep_note = scalp_result.note if scalp_result is not None else "orb_v2_signal"
-        elif cfg.strategy_mode in ("h4_bias_micro_burst", "trend_micro_burst_v2", "trend_day_acceleration"):
+        elif cfg.strategy_mode in (
+            "h4_bias_micro_burst",
+            "trend_micro_burst_v2",
+            "trend_day_acceleration",
+            "btc_mtf_trend_retest_reclaim",
+        ):
             chop_result = RangeFilterResult(False, "micro_burst_ok", 0.0, 0.0)
-            sweep_note = micro_burst_result.note if micro_burst_result is not None else "micro_burst_signal"
+            if trend_retest_result is not None:
+                sweep_note = trend_retest_result.note
+            else:
+                sweep_note = micro_burst_result.note if micro_burst_result is not None else "micro_burst_signal"
         else:
             prior_closed = rates[:-2]
             chop_result = evaluate_range_filter(
@@ -1832,6 +1924,36 @@ def process_symbol(
             tf_seconds = TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
             expires_at = compute_setup_expiry(signal.candle_time, tf_seconds, cfg.confirm_expiry_bars)
             initial_status = PENDING_STATUS_CONFIRMED if mode == "none" else PENDING_STATUS_PENDING
+            setup_context = _build_setup_context(
+                cfg=cfg,
+                mode=mode,
+                levels=levels,
+                signal_side=signal.side,
+                signal_level=float(signal.level),
+                signal_candle_time=int(signal.candle_time),
+                signal_key=signal_key,
+                sweep_note=sweep_note,
+                range_note=chop_result.note,
+            )
+            if trend_retest_result is not None and trend_retest_result.stop_price > 0:
+                setup_context["risk"].update(
+                    {
+                        "sl_price": float(trend_retest_result.stop_price),
+                        "tp_r_multiple": float(trend_retest_result.tp_r_multiple or cfg.rr),
+                        "risk_pct_override": float(trend_retest_result.risk_pct_override or cfg.risk_pct),
+                    }
+                )
+                setup_context["model"] = {
+                    "bias_note": str(trend_retest_result.bias_note),
+                    "breakout_level": float(trend_retest_result.breakout_level),
+                    "sweep_level": float(trend_retest_result.sweep_level),
+                    "retest_zone_low": float(trend_retest_result.retest_zone_low),
+                    "retest_zone_high": float(trend_retest_result.retest_zone_high),
+                    "atr_trigger": float(trend_retest_result.atr_trigger),
+                    "adx_bias": float(trend_retest_result.adx_bias),
+                    "adx_setup": float(trend_retest_result.adx_setup),
+                    "volume_ratio": float(trend_retest_result.volume_ratio),
+                }
 
             setup_record = build_pending_setup_record(
                 symbol=cfg.symbol,
@@ -1841,17 +1963,7 @@ def process_symbol(
                 candle_time=int(signal.candle_time),
                 signal_key=signal_key,
                 expires_at=expires_at,
-                context=_build_setup_context(
-                    cfg=cfg,
-                    mode=mode,
-                    levels=levels,
-                    signal_side=signal.side,
-                    signal_level=float(signal.level),
-                    signal_candle_time=int(signal.candle_time),
-                    signal_key=signal_key,
-                    sweep_note=sweep_note,
-                    range_note=chop_result.note,
-                ),
+                context=setup_context,
                 initial_status=initial_status,
             )
             stored_setup, created = repo.create_or_get_pending_setup(setup_record)
@@ -2306,7 +2418,40 @@ def process_symbol(
                 log_event(log_file, {**base_row, "event": "SKIP_BIAS", "message": bias_note})
             return
 
-    price, sl, tp = adapter.quote_market_order(cfg.symbol, entry_side, cfg.sl_pips, cfg.tp_pips)
+    tick = adapter.symbol_tick(cfg.symbol)
+    price = float(tick.ask if entry_side == "BUY" else tick.bid)
+    sl, tp, resolved_sl_pips, resolved_tp_pips, resolved_risk_pct = _resolve_entry_protection(
+        cfg,
+        entry_setup,
+        entry_side,
+        price,
+        pip,
+    )
+    base_row["sl_pips"] = round(resolved_sl_pips, 5)
+    base_row["tp_pips"] = round(resolved_tp_pips, 5)
+    base_row["risk_pct"] = round(resolved_risk_pct, 5)
+    protection_invalid = (
+        resolved_sl_pips <= 0
+        or resolved_tp_pips < 0
+        or (entry_side == "BUY" and (sl >= price or tp <= price))
+        or (entry_side == "SELL" and (sl <= price or tp >= price))
+    )
+    if protection_invalid:
+        message = f"invalid_protection price={price:.5f} sl={sl:.5f} tp={tp:.5f}"
+        if entry_setup is not None:
+            cancel_entry_setup(
+                repo=repo,
+                app_config=app_config,
+                log_file=log_file,
+                cfg=cfg,
+                setup=entry_setup,
+                event_type="SKIP_INVALID_RISK",
+                message=message,
+                csv_row=base_row,
+            )
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_INVALID_RISK", "message": message})
+        return
 
     ob_note = ""
     if cfg.use_order_block_filter:
@@ -2414,7 +2559,7 @@ def process_symbol(
         return
 
     trade_info = SymbolTradeInfo.from_mt5(info)
-    volume = calc_lot_by_risk(equity, cfg.sl_pips, cfg.risk_pct, trade_info, cfg.max_lot)
+    volume = calc_lot_by_risk(equity, resolved_sl_pips, resolved_risk_pct, trade_info, cfg.max_lot)
     trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(
         cfg, app_config.runtime
     )
@@ -2457,12 +2602,12 @@ def process_symbol(
     comment = comment[:31]
     trailing_summary = f"{trailing_mode}/{trailing_activation_r:.2f}R/{trailing_gap_r:.2f}R/remove_tp={trailing_remove_tp}"
 
-    result = adapter.send_market_order_with_fallback(
+    result = adapter.send_market_order_with_price_protection(
         symbol=cfg.symbol,
         side=entry_side,
         volume=volume,
-        sl_pips=cfg.sl_pips,
-        tp_pips=cfg.tp_pips,
+        sl=sl,
+        tp=tp,
         magic=cfg.magic,
         comment=comment,
         deviation=app_config.runtime.default_deviation,

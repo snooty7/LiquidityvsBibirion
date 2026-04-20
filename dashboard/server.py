@@ -17,7 +17,15 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from threading import Lock
 from urllib.parse import parse_qs, urlparse
 
-from dashboard.data import TIMEFRAME_WINDOWS, bars_for_window, event_rows_for_symbol, load_recent_event_rows, recent_signal_cards, timeframe_markers
+from dashboard.data import (
+    TIMEFRAME_WINDOWS,
+    bars_for_window,
+    event_rows_for_symbol,
+    load_recent_event_rows,
+    recent_signal_cards,
+    timeframe_liquidity_levels,
+    timeframe_markers,
+)
 from src.execution.mt5_adapter import MT5Adapter
 from src.services.config import load_config
 
@@ -84,10 +92,18 @@ class DashboardState:
                 end_utc=now_utc,
                 match_timeframe_only=timeframe in {"M1", "M5"},
             )
+            levels = timeframe_liquidity_levels(
+                filtered_rows,
+                timeframe=timeframe,
+                start_utc=start_utc,
+                end_utc=now_utc,
+                match_timeframe_only=timeframe in {"M1", "M5"},
+            )
             result["timeframes"][timeframe] = {
                 "label": timeframe,
                 "candles": candles,
                 "markers": markers,
+                "levels": levels,
                 "windowHours": int(window.total_seconds() // 3600),
             }
         return result

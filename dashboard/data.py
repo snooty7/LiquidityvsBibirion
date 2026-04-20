@@ -37,6 +37,14 @@ EVENT_STYLES = {
 }
 
 
+LIQUIDITY_LINE_STYLES = {
+    "BUY": {"color": "#45d6ff", "label": "LQ-B", "line_style": "dotted"},
+    "SELL": {"color": "#ff6b9a", "label": "LQ-S", "line_style": "dotted"},
+    "OR_HIGH": {"color": "#59f2a7", "label": "ORH", "line_style": "solid"},
+    "OR_LOW": {"color": "#ffd166", "label": "ORL", "line_style": "solid"},
+}
+
+
 def _tail_lines(path: Path, limit: int) -> list[str]:
     with path.open("r", encoding="utf-8", errors="ignore") as handle:
         head = handle.readline()
@@ -136,6 +144,87 @@ def _extract_token(message: str, prefix: str) -> str | None:
         if part.startswith(prefix):
             return part[len(prefix) :].strip()
     return None
+
+
+def _extract_float_token(message: str, prefix: str) -> float | None:
+    token = _extract_token(message, prefix)
+    if token in (None, ""):
+        return None
+    try:
+        return float(token)
+    except ValueError:
+        return None
+
+
+def timeframe_liquidity_levels(
+    rows: Iterable[dict[str, str]],
+    *,
+    timeframe: str,
+    start_utc: datetime,
+    end_utc: datetime,
+    match_timeframe_only: bool = True,
+    limit: int = 10,
+) -> list[dict]:
+    levels: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    tf = timeframe.upper()
+
+    for row in reversed(list(rows)):
+        row_tf = str(row.get("timeframe", "")).upper()
+        if match_timeframe_only and row_tf and row_tf != tf:
+            continue
+
+        ts = parse_ts(row.get("ts", ""))
+        if ts is None or ts < start_utc or ts > end_utc:
+            continue
+
+        event_type = str(row.get("event", "")).strip()
+        side = str(row.get("side", "")).upper()
+
+        if event_type == "LIQUIDITY_ALERT":
+            try:
+                price = float(row.get("level") or row.get("price") or "")
+            except ValueError:
+                price = None
+            if price is not None:
+                style = LIQUIDITY_LINE_STYLES["SELL" if side == "SELL" else "BUY"]
+                key = (style["label"], f"{price:.5f}")
+                if key not in seen:
+                    seen.add(key)
+                    levels.append(
+                        {
+                            "price": price,
+                            "label": style["label"],
+                            "color": style["color"],
+                            "lineStyle": style["line_style"],
+                            "time": int(ts.timestamp()),
+                        }
+                    )
+
+        message = str(row.get("message", "")).strip()
+        for prefix, style_key in (("or_high=", "OR_HIGH"), ("or_low=", "OR_LOW")):
+            price = _extract_float_token(message, prefix)
+            if price is None:
+                continue
+            style = LIQUIDITY_LINE_STYLES[style_key]
+            key = (style["label"], f"{price:.5f}")
+            if key in seen:
+                continue
+            seen.add(key)
+            levels.append(
+                {
+                    "price": price,
+                    "label": style["label"],
+                    "color": style["color"],
+                    "lineStyle": style["line_style"],
+                    "time": int(ts.timestamp()),
+                }
+            )
+
+        if len(levels) >= limit:
+            break
+
+    return sorted(levels, key=lambda item: (item["price"], item["label"]))
 
 
 def recent_signal_cards(rows: Iterable[dict[str, str]], limit: int = 12) -> list[dict]:

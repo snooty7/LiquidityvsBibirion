@@ -102,26 +102,29 @@ function applyMarkers(bundle, markers) {
       size: marker.size || 0.7,
     })),
   );
+}
 
+function lineStyleValue(lineStyle) {
+  if (lineStyle === "solid") return LightweightCharts.LineStyle.Solid;
+  if (lineStyle === "dashed") return LightweightCharts.LineStyle.Dashed;
+  return LightweightCharts.LineStyle.Dotted;
+}
+
+function applyLevels(bundle, levels) {
   clearPriceLines(bundle);
-  const seen = new Set();
-  for (const marker of markers) {
-    if (marker.price == null) continue;
-    const key = `${marker.event}|${marker.price}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+  for (const level of levels || []) {
+    if (level.price == null) continue;
     const line = bundle.series.createPriceLine({
-      price: marker.price,
-      color: marker.lineColor,
+      price: level.price,
+      color: level.color,
       lineWidth: 1,
-      lineStyle: LightweightCharts.LineStyle.Dotted,
-      axisLabelVisible: false,
-      title: marker.text,
+      lineStyle: lineStyleValue(level.lineStyle),
+      axisLabelVisible: true,
+      axisLabelColor: level.color,
+      axisLabelTextColor: "#071018",
+      title: level.label,
     });
     bundle.priceLines.push(line);
-    if (bundle.priceLines.length >= 8) {
-      break;
-    }
   }
 }
 
@@ -216,8 +219,9 @@ async function loadSnapshot() {
     if (!bundle || !tfData) continue;
     bundle.series.setData(tfData.candles || []);
     applyMarkers(bundle, tfData.markers || []);
+    applyLevels(bundle, tfData.levels || []);
     restoreRange(bundle);
-    document.getElementById(def.metaId).textContent = `${tfData.candles.length} candles | ${tfData.markers.length} signals`;
+    document.getElementById(def.metaId).textContent = `${tfData.candles.length} candles | ${tfData.markers.length} signals | ${((tfData.levels || []).length)} liquidity`;
   }
 
   setStatus(`live ${symbol}`);
