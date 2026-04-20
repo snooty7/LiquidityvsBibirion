@@ -244,6 +244,81 @@ def _setup_wait_stage(note: str) -> str:
     return raw or "unknown"
 
 
+def should_refresh_pending_with_new_signal(
+    cfg: SymbolConfig,
+    pending: PendingSetup,
+    signal: Any,
+) -> bool:
+    if not bool(getattr(cfg, "refresh_pending_on_newer_signal", False)):
+        return False
+    if str(cfg.confirmation_mode or "").lower() == "none":
+        return False
+    if str(signal.side or "").upper() != str(pending.side or "").upper():
+        return False
+    if int(signal.candle_time) <= int(pending.candle_time):
+        return False
+
+    tf_seconds = TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
+    min_age_seconds = max(1, int(getattr(cfg, "refresh_pending_min_age_bars", 1))) * max(1, int(tf_seconds))
+    if int(signal.candle_time) < int(pending.candle_time) + min_age_seconds:
+        return False
+
+    return _setup_wait_stage(pending.last_note) in {"pending", "created", "displacement", "unknown"}
+
+
+def refresh_pending_setup_with_new_signal(
+    *,
+    repo: SQLiteRepository,
+    app_config: AppConfig,
+    log_file: Path,
+    cfg: SymbolConfig,
+    pending: PendingSetup,
+    signal: Any,
+) -> None:
+    now_utc = datetime.now(timezone.utc)
+    with repo.transaction():
+        repo.transition_pending_setup(
+            pending.setup_id,
+            PENDING_STATUS_CANCELED,
+            last_note="superseded_by_new_signal",
+            closed_reason="superseded_by_new_signal",
+        )
+        emit_event(
+            log_file=log_file,
+            repo=repo,
+            app_config=app_config,
+            event_type="PENDING_REFRESHED_NEW_SIGNAL",
+            symbol=cfg.symbol,
+            setup_id=pending.setup_id,
+            message=f"replaced_by={signal.side}|{float(signal.level):.5f}|{int(signal.candle_time)}",
+            payload={
+                "side": pending.side,
+                "level": pending.level,
+                "candle_time": pending.candle_time,
+                "new_side": str(signal.side).upper(),
+                "new_level": float(signal.level),
+                "new_candle_time": int(signal.candle_time),
+            },
+            csv_row={
+                "ts": now_utc.isoformat(),
+                "symbol": cfg.symbol,
+                "timeframe": cfg.timeframe,
+                "strategy": "SWEEP_V2",
+                "side": pending.side,
+                "level": f"{pending.level:.5f}",
+                "candle_time": pending.candle_time,
+            },
+        )
+    print_setup_visual(
+        cfg=cfg,
+        pending=pending,
+        state_label="DROP",
+        stage_note=pending.last_note,
+        reason="superseded_by_new_signal",
+        detail=f"new={str(signal.side).upper()} {float(signal.level):.5f} @ {int(signal.candle_time)}",
+    )
+
+
 def _setup_short_id(setup_id: Optional[str]) -> str:
     return str(setup_id or "")[:8]
 
@@ -1817,6 +1892,17 @@ def process_symbol(
     entry_level: float = 0.0
     entry_candle_time: int = 0
     confirm_note: str = ""
+
+    if signal is not None and state.pending_setup is not None and should_refresh_pending_with_new_signal(cfg, state.pending_setup, signal):
+        refresh_pending_setup_with_new_signal(
+            repo=repo,
+            app_config=app_config,
+            log_file=log_file,
+            cfg=cfg,
+            pending=state.pending_setup,
+            signal=signal,
+        )
+        state.pending_setup = None
 
     if signal is not None and not has_active_pending_setup(state, mode):
         if not trade_side_allowed(cfg, signal.side):

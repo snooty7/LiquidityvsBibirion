@@ -38,6 +38,7 @@ from src.strategy.filters import (
 )
 from src.strategy.liquidity import (
     SweepSignal,
+    detect_btc_mtf_trend_retest_reclaim_signal,
     detect_h4_bias_micro_burst_signal,
     detect_opening_range_breakout_v2_signal,
     detect_session_open_scalp_signal,
@@ -59,6 +60,7 @@ class PendingSetupLite:
     candle_time: int
     expires_at: int
     last_note: str = ""
+    context: dict[str, object] | None = None
 
 
 @dataclass
@@ -286,6 +288,128 @@ def _evaluate_confirmation(
     return ConfirmationResult(False, False, f"unknown_confirmation_mode={mode}")
 
 
+def _pending_wait_stage(note: str) -> str:
+    raw = str(note or "").strip().lower()
+    if "wait_displacement" in raw:
+        return "displacement"
+    if "wait_bos" in raw or "wait_buy_mss" in raw or "wait_sell_mss" in raw:
+        return "bos"
+    if "wait_reclaim" in raw:
+        return "reclaim"
+    if "await_next_closed_candle" in raw:
+        return "next_close"
+    if raw.startswith("confirm="):
+        return "confirmed"
+    return raw or "unknown"
+
+
+def _should_refresh_pending_with_new_signal(cfg: SymbolConfig, pending: PendingSetupLite, signal: SweepSignal) -> bool:
+    if not bool(getattr(cfg, "refresh_pending_on_newer_signal", False)):
+        return False
+    if str(cfg.confirmation_mode or "").lower() == "none":
+        return False
+    if str(signal.side or "").upper() != str(pending.side or "").upper():
+        return False
+    if int(signal.candle_time) <= int(pending.candle_time):
+        return False
+
+    tf_seconds = TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
+    min_age_seconds = max(1, int(getattr(cfg, "refresh_pending_min_age_bars", 1))) * max(1, int(tf_seconds))
+    if int(signal.candle_time) < int(pending.candle_time) + min_age_seconds:
+        return False
+
+    return _pending_wait_stage(pending.last_note) in {"pending", "created", "displacement", "unknown"}
+
+
+def _detect_signal_for_cfg(
+    cfg: SymbolConfig,
+    pip: float,
+    m5_rates,
+    closed_setup,
+    closed_bias,
+):
+    levels: list[float] = []
+    trend_retest_result = None
+
+    if cfg.strategy_mode == "session_open_scalp":
+        signal = detect_session_open_scalp_signal(
+            m5_rates,
+            session_start_utc=cfg.scalp_session_start_utc,
+            open_range_minutes=cfg.scalp_open_range_minutes,
+            watch_minutes=cfg.scalp_watch_minutes,
+            buffer_price=cfg.buffer_pips * pip,
+            body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
+            preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
+            preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
+        ).signal
+    elif cfg.strategy_mode == "opening_range_breakout_v2":
+        signal = detect_opening_range_breakout_v2_signal(
+            m5_rates,
+            session_start_utc=cfg.scalp_session_start_utc,
+            open_range_minutes=cfg.scalp_open_range_minutes,
+            watch_minutes=cfg.scalp_watch_minutes,
+            buffer_price=cfg.buffer_pips * pip,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            range_multiple=cfg.confirmation_displacement_range_multiple,
+        ).signal
+    elif cfg.strategy_mode == "h4_bias_micro_burst":
+        signal = detect_h4_bias_micro_burst_signal(
+            m5_rates,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            buffer_price=cfg.buffer_pips * pip,
+        ).signal
+    elif cfg.strategy_mode == "trend_micro_burst_v2":
+        signal = detect_trend_micro_burst_v2_signal(
+            m5_rates,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            range_multiple=cfg.confirmation_displacement_range_multiple,
+            buffer_price=cfg.buffer_pips * pip,
+        ).signal
+    elif cfg.strategy_mode == "trend_day_acceleration":
+        signal = detect_trend_day_acceleration_signal(
+            m5_rates,
+            pullback_bars=cfg.micro_burst_pullback_bars,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            range_multiple=cfg.confirmation_displacement_range_multiple,
+            buffer_price=cfg.buffer_pips * pip,
+        ).signal
+    elif cfg.strategy_mode == "btc_mtf_trend_retest_reclaim":
+        trend_retest_result = detect_btc_mtf_trend_retest_reclaim_signal(
+            trigger_rates=m5_rates,
+            setup_rates=_append_dummy_forming_bar(closed_setup, TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600)),
+            bias_rates=_append_dummy_forming_bar(closed_bias, TIMEFRAME_SECONDS.get(cfg.bias_timeframe, 900)),
+            ema_fast_period=cfg.ema_fast_period,
+            ema_mid_period=cfg.ema_mid_period,
+            ema_slow_period=cfg.ema_slow_period,
+            atr_period=cfg.atr_period,
+            adx_period=cfg.adx_period,
+            adx_threshold=cfg.adx_threshold,
+            volume_sma_period=cfg.volume_sma_period,
+            breakout_volume_multiple=cfg.breakout_volume_multiple,
+            structure_pivot_len=cfg.structure_pivot_len,
+            setup_max_age_bars=cfg.setup_max_age_bars,
+            trigger_sweep_lookback_bars=cfg.trigger_sweep_lookback_bars,
+            retest_zone_atr_multiple=cfg.retest_zone_atr_multiple,
+            reclaim_max_atr_multiple=cfg.reclaim_max_atr_multiple,
+            stop_atr_multiple=cfg.stop_atr_multiple,
+            entry_max_atr_multiple=cfg.entry_max_atr_multiple,
+            htf_target_min_r=cfg.htf_target_min_r,
+            overlap_lookback_bars=cfg.overlap_lookback_bars,
+            max_overlap_ratio=cfg.max_overlap_ratio,
+            base_risk_pct=cfg.risk_pct,
+            weekend_risk_multiplier=cfg.weekend_risk_multiplier,
+        )
+        signal = trend_retest_result.signal
+    else:
+        levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
+        signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
+
+    return signal, levels, trend_retest_result
+
+
 def _position_like(trade: OpenTrade) -> object:
     side_value = 0 if trade.side == "BUY" else 1
     return SimpleNamespace(
@@ -432,6 +556,12 @@ def _apply_open_trade_bar(
     return trade, None
 
 
+def _pending_risk_context(pending: Optional[PendingSetupLite]) -> dict[str, object]:
+    if pending is None or pending.context is None:
+        return {}
+    return dict(pending.context.get("risk") or {})
+
+
 def _build_entry_trade(
     cfg: SymbolConfig,
     runtime: RuntimeConfig,
@@ -442,16 +572,33 @@ def _build_entry_trade(
     entry_price: float,
     signal_key: str,
     confirm_note: str,
+    pending: Optional[PendingSetupLite] = None,
 ) -> OpenTrade:
     pip = MT5Adapter.pip_size(symbol_info)
-    if entry_side == "BUY":
-        sl = float(entry_price - cfg.sl_pips * pip)
-        tp = float(entry_price + cfg.tp_pips * pip)
+    risk_context = _pending_risk_context(pending)
+    risk_pct = float(risk_context.get("risk_pct_override", cfg.risk_pct) or cfg.risk_pct)
+    tp_r_multiple = float(risk_context.get("tp_r_multiple", cfg.rr) or cfg.rr)
+    custom_sl = risk_context.get("sl_price")
+    if custom_sl is None:
+        resolved_sl_pips = float(cfg.sl_pips)
+        resolved_tp_pips = float(cfg.tp_pips)
+        if entry_side == "BUY":
+            sl = float(entry_price - resolved_sl_pips * pip)
+            tp = float(entry_price + resolved_tp_pips * pip)
+        else:
+            sl = float(entry_price + resolved_sl_pips * pip)
+            tp = float(entry_price - resolved_tp_pips * pip)
     else:
-        sl = float(entry_price + cfg.sl_pips * pip)
-        tp = float(entry_price - cfg.tp_pips * pip)
+        sl = float(custom_sl)
+        resolved_sl_pips = abs(float(entry_price) - sl) / max(pip, 1e-10)
+        tp_distance = abs(float(entry_price) - sl) * tp_r_multiple
+        resolved_tp_pips = tp_distance / max(pip, 1e-10)
+        if entry_side == "BUY":
+            tp = float(entry_price + tp_distance)
+        else:
+            tp = float(entry_price - tp_distance)
 
-    volume = calc_lot_by_risk(equity, cfg.sl_pips, cfg.risk_pct, symbol_info, cfg.max_lot)
+    volume = calc_lot_by_risk(equity, resolved_sl_pips, risk_pct, symbol_info, cfg.max_lot)
     risk_money = calc_position_risk_money(
         entry_price=entry_price,
         stop_price=sl,
@@ -485,6 +632,7 @@ def _max_buffer_days(cfg: SymbolConfig) -> int:
         cfg.bars * (TIMEFRAME_SECONDS.get(cfg.timeframe, 300) // 60),
         cfg.bias_lookback_bars * (TIMEFRAME_SECONDS.get(cfg.bias_timeframe, 900) // 60),
         cfg.cisd_lookback_bars * (TIMEFRAME_SECONDS.get(cfg.cisd_timeframe, 60) // 60),
+        cfg.setup_lookback_bars * (TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600) // 60),
     ]
     max_minutes = max(bars_minutes)
     return max(7, int(max_minutes / (60 * 24)) + 3)
@@ -510,6 +658,7 @@ def run_backtest(
 
     m1 = _fetch_chunked_rates(adapter, cfg.symbol, "M1", fetch_start, fetch_end)
     m5 = _fetch_chunked_rates(adapter, cfg.symbol, cfg.timeframe, fetch_start, fetch_end)
+    setup_rates = _fetch_chunked_rates(adapter, cfg.symbol, cfg.setup_timeframe, fetch_start, fetch_end)
     bias_rates = _fetch_chunked_rates(adapter, cfg.symbol, cfg.bias_timeframe, fetch_start, fetch_end)
     symbol_info = SymbolTradeInfo.from_mt5(adapter.symbol_info(cfg.symbol))
     adapter.shutdown()
@@ -519,6 +668,7 @@ def run_backtest(
 
     m1_times = [int(item["time"]) for item in m1]
     m5_times = [int(item["time"]) for item in m5]
+    setup_times = [int(item["time"]) for item in setup_rates]
     bias_times = [int(item["time"]) for item in bias_rates]
     pip = MT5Adapter.pip_size(symbol_info)
     point = float(symbol_info.point)
@@ -607,6 +757,13 @@ def run_backtest(
             TIMEFRAME_SECONDS.get(cfg.bias_timeframe, 900),
             tail_bars=max(cfg.bias_lookback_bars, cfg.bias_ema_period + 3, 120),
         )
+        closed_setup = _available_closed_bars(
+            setup_rates,
+            setup_times,
+            decision_time,
+            TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600),
+            tail_bars=max(cfg.setup_lookback_bars, cfg.ema_slow_period + 3, 120),
+        )
         if len(closed_m5) < 3:
             continue
 
@@ -691,6 +848,7 @@ def run_backtest(
                     entry_price,
                     pending.signal_key,
                     str(confirm_result.note),
+                    pending,
                 )
                 cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
                 pending = None
@@ -700,58 +858,15 @@ def run_backtest(
                 skip_confirm_rejected += 1
                 pending = None
 
+        if pending is not None and bool(getattr(cfg, "refresh_pending_on_newer_signal", False)):
+            refresh_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
+            refresh_signal, _, _ = _detect_signal_for_cfg(cfg, pip, refresh_rates, closed_setup, closed_bias)
+            if refresh_signal is not None and _should_refresh_pending_with_new_signal(cfg, pending, refresh_signal):
+                pending = None
+
         if pending is None:
             m5_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
-            levels: list[float] = []
-            if cfg.strategy_mode == "session_open_scalp":
-                scalp_result = detect_session_open_scalp_signal(
-                    m5_rates,
-                    session_start_utc=cfg.scalp_session_start_utc,
-                    open_range_minutes=cfg.scalp_open_range_minutes,
-                    watch_minutes=cfg.scalp_watch_minutes,
-                    buffer_price=cfg.buffer_pips * pip,
-                    body_ratio_min=cfg.confirmation_displacement_body_ratio_min,
-                    preopen_lookback_bars=cfg.scalp_preopen_lookback_bars,
-                    preopen_max_compression_ratio=cfg.scalp_preopen_max_compression_ratio,
-                )
-                signal = scalp_result.signal
-            elif cfg.strategy_mode == "opening_range_breakout_v2":
-                signal = detect_opening_range_breakout_v2_signal(
-                    m5_rates,
-                    session_start_utc=cfg.scalp_session_start_utc,
-                    open_range_minutes=cfg.scalp_open_range_minutes,
-                    watch_minutes=cfg.scalp_watch_minutes,
-                    buffer_price=cfg.buffer_pips * pip,
-                    body_ratio_min=cfg.micro_burst_body_ratio_min,
-                    pullback_bars=cfg.micro_burst_pullback_bars,
-                    range_multiple=cfg.confirmation_displacement_range_multiple,
-                ).signal
-            elif cfg.strategy_mode == "h4_bias_micro_burst":
-                signal = detect_h4_bias_micro_burst_signal(
-                    m5_rates,
-                    pullback_bars=cfg.micro_burst_pullback_bars,
-                    body_ratio_min=cfg.micro_burst_body_ratio_min,
-                    buffer_price=cfg.buffer_pips * pip,
-                ).signal
-            elif cfg.strategy_mode == "trend_micro_burst_v2":
-                signal = detect_trend_micro_burst_v2_signal(
-                    m5_rates,
-                    pullback_bars=cfg.micro_burst_pullback_bars,
-                    body_ratio_min=cfg.micro_burst_body_ratio_min,
-                    range_multiple=cfg.confirmation_displacement_range_multiple,
-                    buffer_price=cfg.buffer_pips * pip,
-                ).signal
-            elif cfg.strategy_mode == "trend_day_acceleration":
-                signal = detect_trend_day_acceleration_signal(
-                    m5_rates,
-                    pullback_bars=cfg.micro_burst_pullback_bars,
-                    body_ratio_min=cfg.micro_burst_body_ratio_min,
-                    range_multiple=cfg.confirmation_displacement_range_multiple,
-                    buffer_price=cfg.buffer_pips * pip,
-                ).signal
-            else:
-                levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
-                signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
+            signal, levels, trend_retest_result = _detect_signal_for_cfg(cfg, pip, m5_rates, closed_setup, closed_bias)
             if signal is not None:
                 if not _side_allowed(side_mode, signal.side):
                     continue
@@ -764,7 +879,13 @@ def run_backtest(
                     if not compression.blocked:
                         skip_range_chop += 1
                         continue
-                elif cfg.strategy_mode in ("opening_range_breakout_v2", "h4_bias_micro_burst", "trend_micro_burst_v2", "trend_day_acceleration"):
+                elif cfg.strategy_mode in (
+                    "opening_range_breakout_v2",
+                    "h4_bias_micro_burst",
+                    "trend_micro_burst_v2",
+                    "trend_day_acceleration",
+                    "btc_mtf_trend_retest_reclaim",
+                ):
                     pass
                 else:
                     prior_closed = m5_rates[:-2]
@@ -806,6 +927,17 @@ def run_backtest(
                         cfg.confirm_expiry_bars,
                     ),
                     last_note="created",
+                    context=(
+                        {
+                            "risk": {
+                                "sl_price": float(trend_retest_result.stop_price),
+                                "tp_r_multiple": float(trend_retest_result.tp_r_multiple or cfg.rr),
+                                "risk_pct_override": float(trend_retest_result.risk_pct_override or cfg.risk_pct),
+                            }
+                        }
+                        if trend_retest_result is not None and trend_retest_result.stop_price > 0
+                        else None
+                    ),
                 )
                 if cfg.confirmation_mode.lower() == "none":
                     entry_time = decision_time
@@ -874,12 +1006,14 @@ def run_backtest(
                         entry_price,
                         pending_candidate.signal_key,
                         "confirm=none",
+                        pending_candidate,
                     )
                     cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
                 else:
                     pending = pending_candidate
         else:
             m5_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
+            trend_retest_result = None
             if cfg.strategy_mode == "session_open_scalp":
                 signal = detect_session_open_scalp_signal(
                     m5_rates,
@@ -925,6 +1059,33 @@ def run_backtest(
                     range_multiple=cfg.confirmation_displacement_range_multiple,
                     buffer_price=cfg.buffer_pips * pip,
                 ).signal
+            elif cfg.strategy_mode == "btc_mtf_trend_retest_reclaim":
+                trend_retest_result = detect_btc_mtf_trend_retest_reclaim_signal(
+                    trigger_rates=m5_rates,
+                    setup_rates=_append_dummy_forming_bar(closed_setup, TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600)),
+                    bias_rates=_append_dummy_forming_bar(closed_bias, TIMEFRAME_SECONDS.get(cfg.bias_timeframe, 900)),
+                    ema_fast_period=cfg.ema_fast_period,
+                    ema_mid_period=cfg.ema_mid_period,
+                    ema_slow_period=cfg.ema_slow_period,
+                    atr_period=cfg.atr_period,
+                    adx_period=cfg.adx_period,
+                    adx_threshold=cfg.adx_threshold,
+                    volume_sma_period=cfg.volume_sma_period,
+                    breakout_volume_multiple=cfg.breakout_volume_multiple,
+                    structure_pivot_len=cfg.structure_pivot_len,
+                    setup_max_age_bars=cfg.setup_max_age_bars,
+                    trigger_sweep_lookback_bars=cfg.trigger_sweep_lookback_bars,
+                    retest_zone_atr_multiple=cfg.retest_zone_atr_multiple,
+                    reclaim_max_atr_multiple=cfg.reclaim_max_atr_multiple,
+                    stop_atr_multiple=cfg.stop_atr_multiple,
+                    entry_max_atr_multiple=cfg.entry_max_atr_multiple,
+                    htf_target_min_r=cfg.htf_target_min_r,
+                    overlap_lookback_bars=cfg.overlap_lookback_bars,
+                    max_overlap_ratio=cfg.max_overlap_ratio,
+                    base_risk_pct=cfg.risk_pct,
+                    weekend_risk_multiplier=cfg.weekend_risk_multiplier,
+                )
+                signal = trend_retest_result.signal
             else:
                 levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
                 signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)

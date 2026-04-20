@@ -102,6 +102,8 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "trailing_activation_r": None,
             "trailing_gap_r": None,
             "trailing_remove_tp_on_activation": None,
+            "refresh_pending_on_newer_signal": False,
+            "refresh_pending_min_age_bars": 1,
         }
     ],
 }
@@ -198,6 +200,27 @@ class SymbolConfig:
     confirmation_displacement_range_multiple: float = 1.8
     micro_burst_pullback_bars: int = 2
     micro_burst_body_ratio_min: float = 0.45
+    setup_timeframe: str = "H1"
+    setup_lookback_bars: int = 120
+    ema_fast_period: int = 9
+    ema_mid_period: int = 21
+    ema_slow_period: int = 50
+    atr_period: int = 14
+    adx_period: int = 14
+    adx_threshold: float = 18.0
+    volume_sma_period: int = 20
+    breakout_volume_multiple: float = 1.2
+    structure_pivot_len: int = 3
+    setup_max_age_bars: int = 6
+    trigger_sweep_lookback_bars: int = 4
+    retest_zone_atr_multiple: float = 0.25
+    reclaim_max_atr_multiple: float = 1.8
+    stop_atr_multiple: float = 0.15
+    entry_max_atr_multiple: float = 1.6
+    htf_target_min_r: float = 1.0
+    overlap_lookback_bars: int = 8
+    max_overlap_ratio: float = 0.60
+    weekend_risk_multiplier: float = 1.0
     max_hold_bars: int = 0
     early_exit_consecutive_adverse_closes: int = 0
     early_exit_large_adverse_body_r: float = 0.0
@@ -205,6 +228,8 @@ class SymbolConfig:
     trailing_activation_r: float | None = None
     trailing_gap_r: float | None = None
     trailing_remove_tp_on_activation: bool | None = None
+    refresh_pending_on_newer_signal: bool = False
+    refresh_pending_min_age_bars: int = 1
 
     @property
     def tp_pips(self) -> float:
@@ -341,6 +366,27 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 ),
                 micro_burst_pullback_bars=int(row.get("micro_burst_pullback_bars", 2)),
                 micro_burst_body_ratio_min=float(row.get("micro_burst_body_ratio_min", 0.45)),
+                setup_timeframe=str(row.get("setup_timeframe", "H1")).upper(),
+                setup_lookback_bars=int(row.get("setup_lookback_bars", 120)),
+                ema_fast_period=int(row.get("ema_fast_period", 9)),
+                ema_mid_period=int(row.get("ema_mid_period", 21)),
+                ema_slow_period=int(row.get("ema_slow_period", 50)),
+                atr_period=int(row.get("atr_period", 14)),
+                adx_period=int(row.get("adx_period", 14)),
+                adx_threshold=float(row.get("adx_threshold", 18.0)),
+                volume_sma_period=int(row.get("volume_sma_period", 20)),
+                breakout_volume_multiple=float(row.get("breakout_volume_multiple", 1.2)),
+                structure_pivot_len=int(row.get("structure_pivot_len", 3)),
+                setup_max_age_bars=int(row.get("setup_max_age_bars", 6)),
+                trigger_sweep_lookback_bars=int(row.get("trigger_sweep_lookback_bars", 4)),
+                retest_zone_atr_multiple=float(row.get("retest_zone_atr_multiple", 0.25)),
+                reclaim_max_atr_multiple=float(row.get("reclaim_max_atr_multiple", 1.8)),
+                stop_atr_multiple=float(row.get("stop_atr_multiple", 0.15)),
+                entry_max_atr_multiple=float(row.get("entry_max_atr_multiple", 1.6)),
+                htf_target_min_r=float(row.get("htf_target_min_r", 1.0)),
+                overlap_lookback_bars=int(row.get("overlap_lookback_bars", 8)),
+                max_overlap_ratio=float(row.get("max_overlap_ratio", 0.60)),
+                weekend_risk_multiplier=float(row.get("weekend_risk_multiplier", 1.0)),
                 max_hold_bars=int(row.get("max_hold_bars", 0)),
                 early_exit_consecutive_adverse_closes=int(row.get("early_exit_consecutive_adverse_closes", 0)),
                 early_exit_large_adverse_body_r=float(row.get("early_exit_large_adverse_body_r", 0.0)),
@@ -356,6 +402,8 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                     if row.get("trailing_remove_tp_on_activation") is not None
                     else None
                 ),
+                refresh_pending_on_newer_signal=bool(row.get("refresh_pending_on_newer_signal", False)),
+                refresh_pending_min_age_bars=int(row.get("refresh_pending_min_age_bars", 1)),
             )
         )
 
@@ -407,6 +455,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         "h4_bias_micro_burst",
         "trend_micro_burst_v2",
         "trend_day_acceleration",
+        "btc_mtf_trend_retest_reclaim",
     }
     valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}
@@ -429,6 +478,40 @@ def load_config(path: Union[str, Path]) -> AppConfig:
             raise ValueError(f"scalp_watch_minutes must be > scalp_open_range_minutes for {symbol.symbol}")
         if symbol.scalp_preopen_lookback_bars < 3:
             raise ValueError(f"scalp_preopen_lookback_bars must be >= 3 for {symbol.symbol}")
+        if symbol.setup_lookback_bars < 20:
+            raise ValueError(f"setup_lookback_bars must be >= 20 for {symbol.symbol}")
+        if min(symbol.ema_fast_period, symbol.ema_mid_period, symbol.ema_slow_period) <= 0:
+            raise ValueError(f"EMA periods must be > 0 for {symbol.symbol}")
+        if symbol.atr_period <= 1:
+            raise ValueError(f"atr_period must be > 1 for {symbol.symbol}")
+        if symbol.adx_period <= 1:
+            raise ValueError(f"adx_period must be > 1 for {symbol.symbol}")
+        if symbol.volume_sma_period <= 1:
+            raise ValueError(f"volume_sma_period must be > 1 for {symbol.symbol}")
+        if symbol.breakout_volume_multiple <= 0:
+            raise ValueError(f"breakout_volume_multiple must be > 0 for {symbol.symbol}")
+        if symbol.structure_pivot_len < 2:
+            raise ValueError(f"structure_pivot_len must be >= 2 for {symbol.symbol}")
+        if symbol.setup_max_age_bars < 1:
+            raise ValueError(f"setup_max_age_bars must be >= 1 for {symbol.symbol}")
+        if symbol.trigger_sweep_lookback_bars < 2:
+            raise ValueError(f"trigger_sweep_lookback_bars must be >= 2 for {symbol.symbol}")
+        if symbol.retest_zone_atr_multiple <= 0:
+            raise ValueError(f"retest_zone_atr_multiple must be > 0 for {symbol.symbol}")
+        if symbol.reclaim_max_atr_multiple <= 0:
+            raise ValueError(f"reclaim_max_atr_multiple must be > 0 for {symbol.symbol}")
+        if symbol.stop_atr_multiple < 0:
+            raise ValueError(f"stop_atr_multiple must be >= 0 for {symbol.symbol}")
+        if symbol.entry_max_atr_multiple <= 0:
+            raise ValueError(f"entry_max_atr_multiple must be > 0 for {symbol.symbol}")
+        if symbol.htf_target_min_r < 0:
+            raise ValueError(f"htf_target_min_r must be >= 0 for {symbol.symbol}")
+        if symbol.overlap_lookback_bars < 2:
+            raise ValueError(f"overlap_lookback_bars must be >= 2 for {symbol.symbol}")
+        if not 0 <= symbol.max_overlap_ratio <= 1:
+            raise ValueError(f"max_overlap_ratio must be between 0 and 1 for {symbol.symbol}")
+        if symbol.weekend_risk_multiplier <= 0:
+            raise ValueError(f"weekend_risk_multiplier must be > 0 for {symbol.symbol}")
         if symbol.scalp_preopen_max_compression_ratio <= 0:
             raise ValueError(f"scalp_preopen_max_compression_ratio must be > 0 for {symbol.symbol}")
         if symbol.range_filter_lookback_bars < 3:
@@ -469,5 +552,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
             raise ValueError(f"trailing_activation_r must be > 0 for {symbol.symbol}")
         if symbol.trailing_gap_r is not None and symbol.trailing_gap_r < 0:
             raise ValueError(f"trailing_gap_r must be >= 0 for {symbol.symbol}")
+        if symbol.refresh_pending_min_age_bars < 1:
+            raise ValueError(f"refresh_pending_min_age_bars must be >= 1 for {symbol.symbol}")
 
     return AppConfig(runtime=runtime, symbols=tuple(symbols))
