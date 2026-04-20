@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Literal, Optional, Sequence
 
+from src.strategy.filters import ema
+
 
 @dataclass(frozen=True)
 class SweepSignal:
@@ -19,6 +21,9 @@ class SweepValidationResult:
     avg_range: float = 0.0
     sweep_range: float = 0.0
     penetration_price: float = 0.0
+    penetration_ratio: float = 0.0
+    range_ratio: float = 0.0
+    quality_score: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -52,10 +57,39 @@ class M1PatternSignalResult:
     reference_low: float = 0.0
 
 
+@dataclass(frozen=True)
+class TrendRetestReclaimSignalResult:
+    signal: Optional[SweepSignal]
+    note: str
+    stop_price: float = 0.0
+    tp_r_multiple: float = 0.0
+    risk_pct_override: float = 0.0
+    bias_note: str = ""
+    breakout_level: float = 0.0
+    sweep_level: float = 0.0
+    retest_zone_low: float = 0.0
+    retest_zone_high: float = 0.0
+    atr_trigger: float = 0.0
+    adx_bias: float = 0.0
+    adx_setup: float = 0.0
+    volume_ratio: float = 0.0
+
+
 def _price(bar: object, field: str) -> float:
     if isinstance(bar, dict):
         return float(bar[field])
     return float(bar[field])
+
+
+def _number(bar: object, field: str, default: float = 0.0) -> float:
+    try:
+        if isinstance(bar, dict):
+            value = bar.get(field, default)
+        else:
+            value = bar[field]
+    except Exception:
+        value = default
+    return float(value or default)
 
 
 def candle_range(candle: object) -> float:
@@ -64,6 +98,232 @@ def candle_range(candle: object) -> float:
 
 def candle_body_ratio(candle: object) -> float:
     return abs(_price(candle, "close") - _price(candle, "open")) / candle_range(candle)
+
+
+def _volume(bar: object) -> float:
+    real_volume = _number(bar, "real_volume", 0.0)
+    if real_volume > 0:
+        return real_volume
+    return _number(bar, "tick_volume", 0.0)
+
+
+def _atr_series(rates: Sequence[object], period: int) -> list[float]:
+    rows = list(rates)
+    if not rows:
+        return []
+    if period <= 1:
+        return [candle_range(item) for item in rows]
+
+    true_ranges: list[float] = []
+    prev_close = _price(rows[0], "close")
+    for item in rows:
+        high = _price(item, "high")
+        low = _price(item, "low")
+        true_ranges.append(max(high - low, abs(high - prev_close), abs(low - prev_close)))
+        prev_close = _price(item, "close")
+
+    result: list[float] = []
+    running = 0.0
+    for idx, tr in enumerate(true_ranges):
+        if idx == 0:
+            running = tr
+        elif idx < period:
+            running = ((running * idx) + tr) / float(idx + 1)
+        else:
+            running = ((running * (period - 1)) + tr) / float(period)
+        result.append(float(running))
+    return result
+
+
+def _adx_value(rates: Sequence[object], period: int) -> float:
+    rows = list(rates)
+    if len(rows) < max(5, period + 2):
+        return 0.0
+
+    plus_dm: list[float] = [0.0]
+    minus_dm: list[float] = [0.0]
+    true_ranges: list[float] = [candle_range(rows[0])]
+
+    for current, previous in zip(rows[1:], rows[:-1]):
+        up_move = _price(current, "high") - _price(previous, "high")
+        down_move = _price(previous, "low") - _price(current, "low")
+        plus_dm.append(up_move if up_move > down_move and up_move > 0 else 0.0)
+        minus_dm.append(down_move if down_move > up_move and down_move > 0 else 0.0)
+        prev_close = _price(previous, "close")
+        true_ranges.append(
+            max(
+                _price(current, "high") - _price(current, "low"),
+                abs(_price(current, "high") - prev_close),
+                abs(_price(current, "low") - prev_close),
+            )
+        )
+
+    smoothed_tr = true_ranges[0]
+    smoothed_plus = plus_dm[0]
+    smoothed_minus = minus_dm[0]
+    dx_values: list[float] = []
+    for idx in range(1, len(rows)):
+        if idx <= period:
+            smoothed_tr += true_ranges[idx]
+            smoothed_plus += plus_dm[idx]
+            smoothed_minus += minus_dm[idx]
+        else:
+            smoothed_tr = smoothed_tr - (smoothed_tr / period) + true_ranges[idx]
+            smoothed_plus = smoothed_plus - (smoothed_plus / period) + plus_dm[idx]
+            smoothed_minus = smoothed_minus - (smoothed_minus / period) + minus_dm[idx]
+
+        if idx < period:
+            continue
+        plus_di = 100.0 * smoothed_plus / max(smoothed_tr, 1e-10)
+        minus_di = 100.0 * smoothed_minus / max(smoothed_tr, 1e-10)
+        dx = 100.0 * abs(plus_di - minus_di) / max(plus_di + minus_di, 1e-10)
+        dx_values.append(float(dx))
+
+    if not dx_values:
+        return 0.0
+
+    adx = dx_values[0]
+    for value in dx_values[1:]:
+        adx = ((adx * (period - 1)) + value) / float(period)
+    return float(adx)
+
+
+def _average_overlap_ratio(rates: Sequence[object]) -> float:
+    rows = list(rates)
+    if len(rows) < 2:
+        return 0.0
+
+    realized: list[float] = []
+    for left, right in zip(rows[:-1], rows[1:]):
+        overlap = max(
+            0.0,
+            min(_price(left, "high"), _price(right, "high")) - max(_price(left, "low"), _price(right, "low")),
+        )
+        denominator = max(min(candle_range(left), candle_range(right)), 1e-10)
+        realized.append(overlap / denominator)
+    return float(sum(realized) / max(len(realized), 1))
+
+
+def _collect_swings(rates: Sequence[object], pivot_len: int) -> tuple[list[tuple[int, float]], list[tuple[int, float]]]:
+    highs: list[tuple[int, float]] = []
+    lows: list[tuple[int, float]] = []
+    rows = list(rates)
+    if len(rows) < pivot_len * 2 + 1:
+        return highs, lows
+
+    for index in range(pivot_len, len(rows) - pivot_len):
+        current_high = _price(rows[index], "high")
+        current_low = _price(rows[index], "low")
+        high_window = [_price(rows[idx], "high") for idx in range(index - pivot_len, index + pivot_len + 1)]
+        low_window = [_price(rows[idx], "low") for idx in range(index - pivot_len, index + pivot_len + 1)]
+        if current_high >= max(high_window):
+            highs.append((index, current_high))
+        if current_low <= min(low_window):
+            lows.append((index, current_low))
+    return highs, lows
+
+
+def _structure_state(
+    rates: Sequence[object],
+    pivot_len: int,
+) -> tuple[bool, bool, str, list[tuple[int, float]], list[tuple[int, float]]]:
+    highs, lows = _collect_swings(rates, pivot_len)
+    if len(highs) < 2 or len(lows) < 2:
+        return False, False, "structure_insufficient", highs, lows
+
+    last_highs = highs[-2:]
+    last_lows = lows[-2:]
+    bullish = last_highs[-1][1] > last_highs[-2][1] and last_lows[-1][1] > last_lows[-2][1]
+    bearish = last_highs[-1][1] < last_highs[-2][1] and last_lows[-1][1] < last_lows[-2][1]
+    if bullish:
+        note = "structure_hh_hl"
+    elif bearish:
+        note = "structure_ll_lh"
+    else:
+        note = "structure_mixed"
+    return bullish, bearish, note, highs, lows
+
+
+def _nearest_level(levels: Sequence[tuple[int, float]], *, above: Optional[float] = None, below: Optional[float] = None) -> float:
+    candidates: list[float] = []
+    for _, price in levels:
+        if above is not None and price > above:
+            candidates.append(float(price))
+        if below is not None and price < below:
+            candidates.append(float(price))
+    if above is not None:
+        return min(candidates) if candidates else 0.0
+    if below is not None:
+        return max(candidates) if candidates else 0.0
+    return 0.0
+
+
+def _scan_breakout_setup(
+    setup_rates: Sequence[object],
+    *,
+    side: str,
+    ema_mid_period: int,
+    atr_period: int,
+    adx_period: int,
+    adx_threshold: float,
+    volume_sma_period: int,
+    breakout_volume_multiple: float,
+    structure_pivot_len: int,
+    setup_max_age_bars: int,
+    overlap_lookback_bars: int,
+    max_overlap_ratio: float,
+) -> Optional[dict[str, float]]:
+    rows = list(setup_rates)
+    if len(rows) < max(volume_sma_period + 5, structure_pivot_len * 4 + 5):
+        return None
+
+    closes = [_price(item, "close") for item in rows]
+    ema_mid = ema(closes, ema_mid_period)
+    atr_values = _atr_series(rows, atr_period)
+    oldest_idx = max(structure_pivot_len * 2 + 2, len(rows) - int(setup_max_age_bars))
+
+    for index in range(len(rows) - 1, oldest_idx - 1, -1):
+        bar = rows[index]
+        prior = rows[:index]
+        if len(prior) < max(volume_sma_period, structure_pivot_len * 2 + 1):
+            continue
+
+        highs, lows = _collect_swings(prior, structure_pivot_len)
+        if side == "BUY":
+            if not highs:
+                continue
+            breakout_level = float(highs[-1][1])
+            breakout_ok = _price(bar, "close") > breakout_level
+        else:
+            if not lows:
+                continue
+            breakout_level = float(lows[-1][1])
+            breakout_ok = _price(bar, "close") < breakout_level
+        if not breakout_ok:
+            continue
+
+        volume_window = [_volume(item) for item in prior[-volume_sma_period:]]
+        volume_sma = sum(volume_window) / max(len(volume_window), 1)
+        volume_ratio = _volume(bar) / max(volume_sma, 1e-10)
+        if volume_ratio < breakout_volume_multiple:
+            continue
+
+        adx_window = rows[max(0, index - max(adx_period * 3, overlap_lookback_bars + 2)) : index + 1]
+        adx_value = _adx_value(adx_window, adx_period)
+        overlap_window = rows[max(0, index - overlap_lookback_bars + 1) : index + 1]
+        overlap_ratio = _average_overlap_ratio(overlap_window)
+        if adx_value < adx_threshold and overlap_ratio > max_overlap_ratio:
+            continue
+
+        return {
+            "breakout_level": breakout_level,
+            "breakout_time": float(bar["time"]),
+            "ema_mid": float(ema_mid[index]),
+            "atr": float(atr_values[index]) if atr_values else 0.0,
+            "adx": float(adx_value),
+            "volume_ratio": float(volume_ratio),
+        }
+    return None
 
 
 def locate_candle_index_by_time(rates: Sequence[object], candle_time: int) -> Optional[int]:
@@ -138,28 +398,40 @@ def evaluate_sweep_significance(
     sweep_candle = rates[sweep_index]
     avg_range = sum(candle_range(item) for item in prior) / len(prior)
     sweep_range = candle_range(sweep_candle)
+    required_range = max(avg_range * min_range_multiple, 1e-10)
+    required_penetration = max(min_penetration_price, 1e-10)
 
     if signal.side == "BUY":
         penetration_price = max(0.0, float(signal.level) - _price(sweep_candle, "low"))
     else:
         penetration_price = max(0.0, _price(sweep_candle, "high") - float(signal.level))
 
-    if penetration_price < max(min_penetration_price, 1e-10):
+    penetration_ratio = penetration_price / required_penetration
+    range_ratio = sweep_range / required_range
+    quality_score = min(penetration_ratio, range_ratio)
+
+    if penetration_price < required_penetration:
         return SweepValidationResult(
             False,
             "sweep_penetration_too_small",
             avg_range=avg_range,
             sweep_range=sweep_range,
             penetration_price=penetration_price,
+            penetration_ratio=penetration_ratio,
+            range_ratio=range_ratio,
+            quality_score=quality_score,
         )
 
-    if sweep_range < max(avg_range * min_range_multiple, 1e-10):
+    if sweep_range < required_range:
         return SweepValidationResult(
             False,
             "sweep_range_too_small",
             avg_range=avg_range,
             sweep_range=sweep_range,
             penetration_price=penetration_price,
+            penetration_ratio=penetration_ratio,
+            range_ratio=range_ratio,
+            quality_score=quality_score,
         )
 
     return SweepValidationResult(
@@ -168,6 +440,9 @@ def evaluate_sweep_significance(
         avg_range=avg_range,
         sweep_range=sweep_range,
         penetration_price=penetration_price,
+        penetration_ratio=penetration_ratio,
+        range_ratio=range_ratio,
+        quality_score=quality_score,
     )
 
 
@@ -973,6 +1248,257 @@ def detect_ny_reclaim_continuation_signal(
         "ny_reclaim_wait",
         opening_range_high=float(or_high),
         opening_range_low=float(or_low),
+    )
+
+
+def detect_btc_mtf_trend_retest_reclaim_signal(
+    trigger_rates: Sequence[object],
+    setup_rates: Sequence[object],
+    bias_rates: Sequence[object],
+    *,
+    ema_fast_period: int,
+    ema_mid_period: int,
+    ema_slow_period: int,
+    atr_period: int,
+    adx_period: int,
+    adx_threshold: float,
+    volume_sma_period: int,
+    breakout_volume_multiple: float,
+    structure_pivot_len: int,
+    setup_max_age_bars: int,
+    trigger_sweep_lookback_bars: int,
+    retest_zone_atr_multiple: float,
+    reclaim_max_atr_multiple: float,
+    stop_atr_multiple: float,
+    entry_max_atr_multiple: float,
+    htf_target_min_r: float,
+    overlap_lookback_bars: int,
+    max_overlap_ratio: float,
+    base_risk_pct: float,
+    weekend_risk_multiplier: float,
+) -> TrendRetestReclaimSignalResult:
+    trigger_rows = list(trigger_rates)
+    setup_rows = list(setup_rates)
+    bias_rows = list(bias_rates)
+    if len(trigger_rows) < max(trigger_sweep_lookback_bars + 4, atr_period + 4):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_trigger_context_insufficient")
+    if len(setup_rows) < max(volume_sma_period + 5, ema_slow_period + 5):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_setup_context_insufficient")
+    if len(bias_rows) < max(ema_slow_period + 5, structure_pivot_len * 4 + 5):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_bias_context_insufficient")
+
+    trigger_closed = trigger_rows[:-1]
+    setup_closed = setup_rows[:-1]
+    bias_closed = bias_rows[:-1]
+    if len(trigger_closed) < max(trigger_sweep_lookback_bars + 3, atr_period + 3):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_trigger_context_insufficient")
+    if len(setup_closed) < max(volume_sma_period + 3, ema_slow_period + 3):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_setup_context_insufficient")
+    if len(bias_closed) < max(ema_slow_period + 3, structure_pivot_len * 4 + 3):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_bias_context_insufficient")
+
+    bias_closes = [_price(item, "close") for item in bias_closed]
+    bias_ema_fast = ema(bias_closes, ema_fast_period)
+    bias_ema_mid = ema(bias_closes, ema_mid_period)
+    bias_ema_slow = ema(bias_closes, ema_slow_period)
+    last_bias = bias_closed[-1]
+    last_bias_close = _price(last_bias, "close")
+    adx_bias = _adx_value(bias_closed, adx_period)
+    ema_mid_slope = bias_ema_mid[-1] - bias_ema_mid[-2]
+    bullish_structure, bearish_structure, structure_note, bias_highs, bias_lows = _structure_state(
+        bias_closed, structure_pivot_len
+    )
+
+    bullish_bias = (
+        bias_ema_fast[-1] > bias_ema_mid[-1] > bias_ema_slow[-1]
+        and last_bias_close > bias_ema_mid[-1]
+        and bullish_structure
+        and (adx_bias > adx_threshold or ema_mid_slope > 0)
+    )
+    bearish_bias = (
+        bias_ema_fast[-1] < bias_ema_mid[-1] < bias_ema_slow[-1]
+        and last_bias_close < bias_ema_mid[-1]
+        and bearish_structure
+        and (adx_bias > adx_threshold or ema_mid_slope < 0)
+    )
+    if not bullish_bias and not bearish_bias:
+        return TrendRetestReclaimSignalResult(
+            None,
+            "btc_mtf_bias_neutral",
+            bias_note=(
+                f"{structure_note} close={last_bias_close:.2f} "
+                f"ema9={bias_ema_fast[-1]:.2f} ema21={bias_ema_mid[-1]:.2f} ema50={bias_ema_slow[-1]:.2f} "
+                f"adx={adx_bias:.2f} slope={ema_mid_slope:.5f}"
+            ),
+            adx_bias=float(adx_bias),
+        )
+
+    side = "BUY" if bullish_bias else "SELL"
+    setup_breakout = _scan_breakout_setup(
+        setup_closed,
+        side=side,
+        ema_mid_period=ema_mid_period,
+        atr_period=atr_period,
+        adx_period=adx_period,
+        adx_threshold=adx_threshold,
+        volume_sma_period=volume_sma_period,
+        breakout_volume_multiple=breakout_volume_multiple,
+        structure_pivot_len=structure_pivot_len,
+        setup_max_age_bars=setup_max_age_bars,
+        overlap_lookback_bars=overlap_lookback_bars,
+        max_overlap_ratio=max_overlap_ratio,
+    )
+    if setup_breakout is None:
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_wait_setup_breakout", adx_bias=float(adx_bias))
+
+    last_trigger = trigger_closed[-1]
+    if int(last_trigger["time"]) <= int(setup_breakout["breakout_time"]):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_wait_post_breakout_retest", adx_bias=float(adx_bias))
+
+    setup_closes = [_price(item, "close") for item in setup_closed]
+    setup_ema_mid = ema(setup_closes, ema_mid_period)
+    setup_ema_value = float(setup_ema_mid[-1])
+    zone_padding = max(float(setup_breakout["atr"]) * retest_zone_atr_multiple, 1e-10)
+    retest_zone_low = min(float(setup_breakout["breakout_level"]), setup_ema_value) - zone_padding
+    retest_zone_high = max(float(setup_breakout["breakout_level"]), setup_ema_value) + zone_padding
+    if _price(last_trigger, "high") < retest_zone_low or _price(last_trigger, "low") > retest_zone_high:
+        return TrendRetestReclaimSignalResult(
+            None,
+            "btc_mtf_wait_retest_zone",
+            adx_bias=float(adx_bias),
+            adx_setup=float(setup_breakout["adx"]),
+            volume_ratio=float(setup_breakout["volume_ratio"]),
+            breakout_level=float(setup_breakout["breakout_level"]),
+            retest_zone_low=float(retest_zone_low),
+            retest_zone_high=float(retest_zone_high),
+        )
+
+    trigger_atr_values = _atr_series(trigger_closed, atr_period)
+    trigger_atr = float(trigger_atr_values[-1]) if trigger_atr_values else 0.0
+    if trigger_atr <= 0:
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_trigger_atr_missing")
+
+    reclaim_range = candle_range(last_trigger)
+    if reclaim_range > trigger_atr * reclaim_max_atr_multiple:
+        return TrendRetestReclaimSignalResult(
+            None,
+            "btc_mtf_reclaim_too_large",
+            adx_bias=float(adx_bias),
+            adx_setup=float(setup_breakout["adx"]),
+            volume_ratio=float(setup_breakout["volume_ratio"]),
+            breakout_level=float(setup_breakout["breakout_level"]),
+            retest_zone_low=float(retest_zone_low),
+            retest_zone_high=float(retest_zone_high),
+            atr_trigger=float(trigger_atr),
+        )
+
+    trigger_history = trigger_closed[-(int(trigger_sweep_lookback_bars) + 1) : -1]
+    if len(trigger_history) < int(trigger_sweep_lookback_bars):
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_trigger_context_insufficient")
+
+    entry_price = _price(last_trigger, "close")
+    weekend_risk = float(base_risk_pct)
+    trigger_dt = datetime.fromtimestamp(int(last_trigger["time"]), tz=timezone.utc)
+    if trigger_dt.weekday() >= 5 and weekend_risk_multiplier != 1.0:
+        weekend_risk = float(base_risk_pct * weekend_risk_multiplier)
+
+    if side == "BUY":
+        sweep_level = min(_price(item, "low") for item in trigger_history)
+        reclaim_ok = (
+            _price(last_trigger, "low") < sweep_level
+            and entry_price > sweep_level
+            and entry_price > _price(last_trigger, "open")
+        )
+        if not reclaim_ok:
+            return TrendRetestReclaimSignalResult(
+                None,
+                "btc_mtf_wait_buy_reclaim",
+                adx_bias=float(adx_bias),
+                adx_setup=float(setup_breakout["adx"]),
+                volume_ratio=float(setup_breakout["volume_ratio"]),
+                breakout_level=float(setup_breakout["breakout_level"]),
+                sweep_level=float(sweep_level),
+                retest_zone_low=float(retest_zone_low),
+                retest_zone_high=float(retest_zone_high),
+                atr_trigger=float(trigger_atr),
+            )
+        stop_price = _price(last_trigger, "low") - (trigger_atr * stop_atr_multiple)
+        risk_distance = entry_price - stop_price
+        nearest_htf_level = _nearest_level(bias_highs, above=entry_price)
+    else:
+        sweep_level = max(_price(item, "high") for item in trigger_history)
+        reclaim_ok = (
+            _price(last_trigger, "high") > sweep_level
+            and entry_price < sweep_level
+            and entry_price < _price(last_trigger, "open")
+        )
+        if not reclaim_ok:
+            return TrendRetestReclaimSignalResult(
+                None,
+                "btc_mtf_wait_sell_reclaim",
+                adx_bias=float(adx_bias),
+                adx_setup=float(setup_breakout["adx"]),
+                volume_ratio=float(setup_breakout["volume_ratio"]),
+                breakout_level=float(setup_breakout["breakout_level"]),
+                sweep_level=float(sweep_level),
+                retest_zone_low=float(retest_zone_low),
+                retest_zone_high=float(retest_zone_high),
+                atr_trigger=float(trigger_atr),
+            )
+        stop_price = _price(last_trigger, "high") + (trigger_atr * stop_atr_multiple)
+        risk_distance = stop_price - entry_price
+        nearest_htf_level = _nearest_level(bias_lows, below=entry_price)
+
+    if risk_distance <= 0:
+        return TrendRetestReclaimSignalResult(None, "btc_mtf_invalid_risk_distance")
+    if risk_distance > trigger_atr * entry_max_atr_multiple:
+        return TrendRetestReclaimSignalResult(
+            None,
+            "btc_mtf_entry_too_far_from_invalidation",
+            adx_bias=float(adx_bias),
+            adx_setup=float(setup_breakout["adx"]),
+            volume_ratio=float(setup_breakout["volume_ratio"]),
+            breakout_level=float(setup_breakout["breakout_level"]),
+            sweep_level=float(sweep_level),
+            retest_zone_low=float(retest_zone_low),
+            retest_zone_high=float(retest_zone_high),
+            atr_trigger=float(trigger_atr),
+        )
+
+    if nearest_htf_level > 0:
+        distance_to_htf = abs(nearest_htf_level - entry_price)
+        if distance_to_htf < risk_distance * max(htf_target_min_r, 0.0):
+            return TrendRetestReclaimSignalResult(
+                None,
+                "btc_mtf_htf_level_too_close",
+                adx_bias=float(adx_bias),
+                adx_setup=float(setup_breakout["adx"]),
+                volume_ratio=float(setup_breakout["volume_ratio"]),
+                breakout_level=float(setup_breakout["breakout_level"]),
+                sweep_level=float(sweep_level),
+                retest_zone_low=float(retest_zone_low),
+                retest_zone_high=float(retest_zone_high),
+                atr_trigger=float(trigger_atr),
+            )
+
+    return TrendRetestReclaimSignalResult(
+        signal=SweepSignal(side=side, level=float(setup_breakout["breakout_level"]), candle_time=int(last_trigger["time"])),
+        note=f"btc_mtf_{side.lower()}_retest_reclaim",
+        stop_price=float(stop_price),
+        tp_r_multiple=2.0,
+        risk_pct_override=float(weekend_risk),
+        bias_note=(
+            f"{structure_note} adx4h={adx_bias:.2f} adx1h={float(setup_breakout['adx']):.2f} "
+            f"vol_ratio={float(setup_breakout['volume_ratio']):.2f}"
+        ),
+        breakout_level=float(setup_breakout["breakout_level"]),
+        sweep_level=float(sweep_level),
+        retest_zone_low=float(retest_zone_low),
+        retest_zone_high=float(retest_zone_high),
+        atr_trigger=float(trigger_atr),
+        adx_bias=float(adx_bias),
+        adx_setup=float(setup_breakout["adx"]),
+        volume_ratio=float(setup_breakout["volume_ratio"]),
     )
 
 

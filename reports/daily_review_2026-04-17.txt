@@ -1,0 +1,134 @@
+Day: 2026-04-17 (Europe/Sofia)
+UTC window: 2026-04-16T21:00:00+00:00 -> 2026-04-17T21:00:00+00:00
+Actual TRADE_OK count: 8
+Near-trade setups not executed: 71
+Confirmed but not executed: 8
+Pending-only / never confirmed: 63
+Analysis horizon end UTC: 2026-04-17T21:00:00+00:00
+
+Outcome counts:
+  adverse_close_exit: 22
+  large_adverse_bar_exit: 7
+  mark_to_horizon: 5
+  stop_loss: 17
+  take_profit: 6
+  trailing_stop: 14
+
+By branch:
+  EURUSD M1 magic=92014: setups=14 confirmed=0 pending_only=14 net_pips=4.60 outcomes=[adverse_close_exit=9, large_adverse_bar_exit=1, mark_to_horizon=1, take_profit=3]
+  EURUSD M30 magic=92008: setups=6 confirmed=2 pending_only=4 net_pips=153.60 outcomes=[mark_to_horizon=1, stop_loss=1, trailing_stop=4]
+  EURUSD M5 magic=92001: setups=9 confirmed=4 pending_only=5 net_pips=108.90 outcomes=[mark_to_horizon=1, stop_loss=3, trailing_stop=5]
+  EURUSD M5 magic=92015: setups=1 confirmed=0 pending_only=1 net_pips=1.40 outcomes=[mark_to_horizon=1]
+  EURUSD M5 magic=92017: setups=3 confirmed=0 pending_only=3 net_pips=-30.00 outcomes=[stop_loss=3]
+  EURUSD M5 magic=92018: setups=5 confirmed=0 pending_only=5 net_pips=149.50 outcomes=[stop_loss=2, trailing_stop=3]
+  GBPUSD M1 magic=92021: setups=25 confirmed=0 pending_only=25 net_pips=-14.80 outcomes=[adverse_close_exit=13, large_adverse_bar_exit=6, stop_loss=3, take_profit=3]
+  NZDUSD M30 magic=92023: setups=4 confirmed=1 pending_only=3 net_pips=-37.30 outcomes=[stop_loss=3, trailing_stop=1]
+  USDCHF M30 magic=92024: setups=4 confirmed=1 pending_only=3 net_pips=-5.80 outcomes=[mark_to_horizon=1, stop_loss=2, trailing_stop=1]
+
+Пропуснати печалби (local sizing):
+  Сметнато е по branch max_lot от локалния config:
+    92001 = 0.25 lot
+    92008 = 0.05 lot
+    92014 = 0.02 lot
+    92015 = 0.02 lot
+    92017 = 0.20 lot
+    92018 = 0.20 lot
+    92021 = 0.20 lot
+    92023 = 0.05 lot
+    92024 = 0.05 lot
+  Ползвах pip value по symbol:
+    EURUSD: 1.00 lot ~= 8.50 EUR/pip
+    GBPUSD: 1.00 lot ~= 8.50 EUR/pip
+    NZDUSD: 1.00 lot ~= 8.50 EUR/pip
+    USDCHF: 1.00 lot ~= 10.87 EUR/pip
+  Разбивка по branch:
+    92001: +108.9 pips -> +231.32 EUR
+    92008: +153.6 pips -> +65.25 EUR
+    92014: +4.6 pips -> +0.78 EUR
+    92015: +1.4 pips -> +0.24 EUR
+    92017: -30.0 pips -> -50.98 EUR
+    92018: +149.5 pips -> +254.05 EUR
+    92021: -14.8 pips -> -25.15 EUR
+    92023: -37.3 pips -> -15.85 EUR
+    92024: -5.8 pips -> -3.15 EUR
+  Само за 92001:
+    нетно пропуснато: +231.32 EUR
+    само положителните пропуснати setup-и: +295.05 EUR
+    от confirmed-but-not-opened: +140.20 EUR
+  Общо:
+    ако гледаме реалистично всички пропуснати по локалния sizing: около +456.52 EUR
+    ако гледаме само основния печеливш branch 92001: +231.32 EUR
+
+CSV: reports\day_near_trades_2026-04-17.csv
+
+2026-04-17T03:54:23.019231+00:00 EURUSD M5 magic=92001 BUY stage=confirmed status=CANCELED outcome=trailing_stop pnl_pips=59.60 pnl_r=5.960 mfe=69.90 mae=7.50 terminal=entry_blocked:SKIP_SESSION setup_id=e21cec23-f29d-4404-ab0b-d824f3bba956
+2026-04-17T04:00:00.100970+00:00 EURUSD M30 magic=92008 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=49.50 pnl_r=2.475 mfe=69.80 mae=7.60 terminal=expired_before_confirmation setup_id=4d5df0df-0597-429b-8a0d-1f7603cf53b9
+2026-04-17T04:00:00.412971+00:00 EURUSD M5 magic=92018 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=59.50 pnl_r=5.950 mfe=69.80 mae=7.60 terminal=expired_before_confirmation setup_id=3e2b2324-fb8d-409a-a31f-7c1a2fb86057
+2026-04-17T04:20:01.845000+00:00 EURUSD M5 magic=92018 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=61.40 pnl_r=6.140 mfe=71.70 mae=5.70 terminal=expired_before_confirmation setup_id=2064a641-07da-418c-afe9-21413c1a43c1
+2026-04-17T04:42:00.992495+00:00 EURUSD M1 magic=92014 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=1.90 pnl_r=0.475 mfe=3.00 mae=0.00 terminal=entry_blocked:SKIP_SESSION setup_id=abbb9072-d7c3-4368-8daa-79060e9f4693
+2026-04-17T06:30:01.031516+00:00 EURUSD M30 magic=92008 SELL stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-20.00 pnl_r=-1.000 mfe=4.50 mae=20.30 terminal=expired_before_confirmation setup_id=0c27521e-6821-4039-b461-876eeb279bd8
+2026-04-17T06:30:01.321519+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-0.60 pnl_r=-0.150 mfe=1.10 mae=0.60 terminal=entry_blocked:SKIP_BIAS setup_id=8887288c-46e9-4c2d-a8cc-4580044f0066
+2026-04-17T06:54:41.222583+00:00 EURUSD M5 magic=92001 BUY stage=confirmed status=CANCELED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=1.30 mae=10.10 terminal=entry_blocked:SKIP_POSITION_EXISTS setup_id=5d2c8797-6485-4383-9cd6-e84a4cf44255
+2026-04-17T07:10:04.711416+00:00 EURUSD M5 magic=92018 SELL stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=10.50 mae=10.60 terminal=expired_before_confirmation setup_id=57d27175-9f8a-4b9c-9418-3f16b2065f6c
+2026-04-17T07:25:02.485762+00:00 EURUSD M5 magic=92001 BUY stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=2.00 mae=10.80 terminal=expired_before_confirmation setup_id=71149fe1-3552-4a45-9ac0-871912481f9c
+2026-04-17T08:05:04.743485+00:00 EURUSD M5 magic=92018 BUY stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=2.50 mae=10.30 terminal=expired_before_confirmation setup_id=2ecb01bc-2173-4985-b876-197c2d04bdea
+2026-04-17T09:30:04.849762+00:00 EURUSD M30 magic=92008 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=54.50 pnl_r=2.725 mfe=74.80 mae=2.60 terminal=expired_before_confirmation setup_id=1f86b2c4-d137-4a29-840f-941a66bb0816
+2026-04-17T11:45:02.265014+00:00 EURUSD M5 magic=92018 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=48.60 pnl_r=4.860 mfe=58.90 mae=0.40 terminal=expired_before_confirmation setup_id=f1c6a351-eb6a-42cb-93cd-0f9e18174517
+2026-04-17T12:03:00.497010+00:00 EURUSD M1 magic=92014 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-2.40 pnl_r=-0.600 mfe=0.50 mae=3.20 terminal=entry_blocked:SKIP_SESSION setup_id=bc06b970-b3ca-420e-b588-9230b24d00db
+2026-04-17T12:05:01.333551+00:00 EURUSD M5 magic=92001 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=45.20 pnl_r=4.520 mfe=55.50 mae=3.30 terminal=expired_before_confirmation setup_id=12fc64e3-6c93-4336-9d23-9e5608089e26
+2026-04-17T12:30:00.699882+00:00 EURUSD M30 magic=92008 BUY stage=confirmed status=CANCELED outcome=trailing_stop pnl_pips=36.90 pnl_r=1.845 mfe=57.20 mae=1.50 terminal=entry_blocked:SKIP_ORDER_BLOCK setup_id=a57104bf-3591-4407-9fd4-2b89911bb435
+2026-04-17T13:07:01.008214+00:00 EURUSD M1 magic=92014 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=2.50 pnl_r=0.625 mfe=4.20 mae=0.00 terminal=entry_blocked:SKIP_SESSION setup_id=9c7c0ba5-0306-4184-8549-8be8f8994539
+2026-04-17T13:39:02.390347+00:00 EURUSD M1 magic=92014 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-1.50 pnl_r=-0.375 mfe=0.00 mae=3.10 terminal=entry_blocked:SKIP_SESSION setup_id=5eaaad95-605d-4a13-802a-aa7439931afe
+2026-04-17T14:13:03.188056+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-1.10 pnl_r=-0.275 mfe=1.10 mae=2.30 terminal=entry_blocked:SKIP_SESSION setup_id=440a2568-9d8c-4dd3-bc40-bc6e63652275
+2026-04-17T14:30:01.334263+00:00 EURUSD M30 magic=92008 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=31.30 pnl_r=1.565 mfe=51.60 mae=5.70 terminal=expired_before_confirmation setup_id=82a75121-a8ce-42d1-a170-baddd9b151c9
+2026-04-17T15:45:30.607206+00:00 EURUSD M5 magic=92001 BUY stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=27.20 pnl_r=2.720 mfe=37.50 mae=2.40 terminal=expired_before_confirmation setup_id=63522f4e-1286-48f7-a23c-5c6a789ad91e
+2026-04-17T15:54:02.108974+00:00 EURUSD M1 magic=92014 BUY stage=pending_only status=CANCELED outcome=take_profit pnl_pips=6.00 pnl_r=1.500 mfe=6.00 mae=3.90 terminal=entry_blocked:SKIP_SESSION setup_id=3a305911-36d4-4ac6-bb90-26d18a30c4f5
+2026-04-17T16:01:03.236594+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-3.00 pnl_r=-0.750 mfe=2.70 mae=3.10 terminal=entry_blocked:SKIP_SESSION setup_id=0126e203-d137-4c3b-9e68-d25cea38c587
+2026-04-17T16:15:04.772754+00:00 EURUSD M5 magic=92017 BUY stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=3.70 mae=10.50 terminal=expired_before_confirmation setup_id=3c34d1e2-d013-4414-a061-48a3de1a890c
+2026-04-17T17:20:04.948030+00:00 EURUSD M5 magic=92017 BUY stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=7.20 mae=10.50 terminal=expired_before_confirmation setup_id=ca6a5f6d-47a2-441d-ba22-dbf1db210a87
+2026-04-17T18:25:01.203424+00:00 EURUSD M5 magic=92001 BUY stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=8.50 mae=10.80 terminal=expired_before_confirmation setup_id=28de7db3-4bec-4174-80a1-18ab6f051a73
+2026-04-17T18:45:04.900990+00:00 EURUSD M5 magic=92017 BUY stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-10.00 pnl_r=-1.000 mfe=3.40 mae=12.40 terminal=expired_before_confirmation setup_id=d591dda6-f537-4e67-a0aa-deac6df4c194
+2026-04-17T18:50:05.734474+00:00 EURUSD M5 magic=92001 SELL stage=confirmed status=CANCELED outcome=trailing_stop pnl_pips=1.00 pnl_r=0.100 mfe=13.50 mae=2.30 terminal=entry_blocked:SKIP_POSITION_EXISTS setup_id=1b0a8353-db7b-4f3e-8b80-ca2f450d172f
+2026-04-17T18:51:00.912285+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-2.00 pnl_r=-0.500 mfe=1.30 mae=2.20 terminal=entry_blocked:SKIP_SESSION setup_id=ef0dba83-2b7e-4830-91b7-93802842ee8a
+2026-04-17T18:53:02.030680+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=take_profit pnl_pips=6.00 pnl_r=1.500 mfe=10.70 mae=0.90 terminal=entry_blocked:SKIP_SESSION setup_id=820cc424-cb22-469d-9e23-442f3c30a358
+2026-04-17T18:55:02.328066+00:00 EURUSD M5 magic=92001 SELL stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=0.50 pnl_r=0.050 mfe=13.00 mae=1.30 terminal=expired_before_confirmation setup_id=2556edc8-4412-4b69-981c-c2079775188f
+2026-04-17T19:00:03.328596+00:00 EURUSD M30 magic=92008 SELL stage=confirmed status=CANCELED outcome=mark_to_horizon pnl_pips=1.40 pnl_r=0.070 mfe=12.00 mae=7.90 terminal=entry_blocked:SKIP_BIAS setup_id=b92d5e92-9f55-418d-8f0c-4cc8bdf17a74
+2026-04-17T19:00:03.357597+00:00 EURUSD M5 magic=92015 SELL stage=pending_only status=CANCELED outcome=mark_to_horizon pnl_pips=1.40 pnl_r=0.140 mfe=12.00 mae=7.90 terminal=entry_blocked:SKIP_POSITION_EXISTS setup_id=79da7787-0c96-411f-b618-6d1ef300dc9b
+2026-04-17T19:25:02.496504+00:00 EURUSD M5 magic=92001 SELL stage=confirmed status=CANCELED outcome=mark_to_horizon pnl_pips=5.40 pnl_r=0.540 mfe=16.00 mae=1.10 terminal=entry_blocked:SKIP_ORDER_BLOCK setup_id=2b7b52ab-6053-4f95-92ae-6f64fc5b2fb0
+2026-04-17T19:55:02.316506+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=take_profit pnl_pips=6.00 pnl_r=1.500 mfe=7.00 mae=1.70 terminal=entry_blocked:SKIP_SESSION setup_id=163cde6a-764c-4479-9982-181c09f447dc
+2026-04-17T20:21:01.296298+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-2.00 pnl_r=-0.500 mfe=0.50 mae=2.20 terminal=entry_blocked:SKIP_SESSION setup_id=4061e84e-aebd-4dd7-813c-cf7001a3104b
+2026-04-17T20:45:00.109591+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-2.00 pnl_r=-0.500 mfe=0.60 mae=2.00 terminal=entry_blocked:SKIP_SESSION setup_id=718b9509-e77e-4abe-b41a-4e3667f9cf41
+2026-04-17T20:50:00.872515+00:00 EURUSD M1 magic=92014 SELL stage=pending_only status=CANCELED outcome=mark_to_horizon pnl_pips=-3.20 pnl_r=-0.800 mfe=0.20 mae=3.80 terminal=entry_blocked:SKIP_SESSION setup_id=6ba57e33-1725-4640-af3b-eb15781f3ad8
+2026-04-17T03:54:23.564155+00:00 USDCHF M30 magic=92024 BUY stage=pending_only status=REJECTED outcome=stop_loss pnl_pips=-20.00 pnl_r=-1.000 mfe=7.80 mae=21.20 terminal=restart_revalidation_failed:bias_invalid:bias close=0.78320 ema=0.78341 ema_prev=0.78343 setup_id=8dddfc7c-d8f8-4361-ba24-a6feeb1bb571
+2026-04-17T09:00:04.689983+00:00 USDCHF M30 magic=92024 SELL stage=pending_only status=EXPIRED outcome=trailing_stop pnl_pips=36.30 pnl_r=1.815 mfe=56.70 mae=6.00 terminal=expired_before_confirmation setup_id=a3b273d3-3f71-47f1-955a-1d787f672538
+2026-04-17T13:30:00.764965+00:00 USDCHF M30 magic=92024 BUY stage=pending_only status=REJECTED outcome=stop_loss pnl_pips=-20.00 pnl_r=-1.000 mfe=3.40 mae=22.20 terminal=restart_revalidation_failed:bias_invalid:bias close=0.77920 ema=0.78289 ema_prev=0.78328 setup_id=394ad501-9f4b-4cd4-b6fa-0c9df8f45683
+2026-04-17T19:00:03.388596+00:00 USDCHF M30 magic=92024 BUY stage=confirmed status=CANCELED outcome=mark_to_horizon pnl_pips=-2.10 pnl_r=-0.105 mfe=1.40 mae=2.60 terminal=entry_blocked:SKIP_BIAS setup_id=0ba7afa7-565e-4572-a410-23209f7b762a
+2026-04-17T03:58:04.527242+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-3.40 pnl_r=-0.850 mfe=1.20 mae=3.40 terminal=entry_blocked:SKIP_SESSION setup_id=c1017078-cc14-4e4b-bb28-fceefdcb3be2
+2026-04-17T04:41:00.552341+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-1.50 pnl_r=-0.375 mfe=0.50 mae=1.60 terminal=entry_blocked:SKIP_SESSION setup_id=d96967bd-e70f-4cdf-a187-2f8d8b482d9a
+2026-04-17T05:38:02.128771+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-0.40 pnl_r=-0.100 mfe=0.70 mae=0.70 terminal=entry_blocked:SKIP_POSITION_EXISTS setup_id=6751b3b3-cc90-4da7-9168-1a2fbcee6be8
+2026-04-17T07:31:03.744909+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=0.90 pnl_r=0.225 mfe=1.80 mae=1.60 terminal=entry_blocked:SKIP_BIAS setup_id=1ba7287c-c08d-4dd4-aa1a-b28b76d6b5d2
+2026-04-17T08:10:00.818513+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-0.30 pnl_r=-0.075 mfe=1.50 mae=0.90 terminal=entry_blocked:SKIP_SESSION setup_id=a396f980-6126-49b0-89dc-ed534f26910d
+2026-04-17T08:32:04.654593+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=2.50 pnl_r=0.625 mfe=3.30 mae=0.10 terminal=entry_blocked:SKIP_SESSION setup_id=ece3c891-5ddd-4038-be37-cc096c2ab2cd
+2026-04-17T09:28:04.240123+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-1.00 pnl_r=-0.250 mfe=0.00 mae=2.90 terminal=entry_blocked:SKIP_SESSION setup_id=9bc19001-4ab9-422f-9ec4-fb4b4c4eeaae
+2026-04-17T10:55:03.820861+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-2.80 pnl_r=-0.700 mfe=0.60 mae=3.60 terminal=entry_blocked:SKIP_SESSION setup_id=06fad5d4-3de0-4b58-9954-19fb1028925d
+2026-04-17T11:16:02.464391+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-2.80 pnl_r=-0.700 mfe=0.30 mae=3.00 terminal=entry_blocked:SKIP_SESSION setup_id=4f3210d8-58c5-41b8-bf09-34e8fc931d1d
+2026-04-17T12:03:00.782014+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-1.90 pnl_r=-0.475 mfe=1.70 mae=2.80 terminal=entry_blocked:SKIP_SESSION setup_id=0078a077-bb36-4442-9ac1-ed4f93a82386
+2026-04-17T12:36:02.183519+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-3.50 pnl_r=-0.875 mfe=0.00 mae=3.80 terminal=entry_blocked:SKIP_SESSION setup_id=c420fc9b-84ed-4337-9592-8b2d6901d25e
+2026-04-17T13:07:01.317216+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=1.00 pnl_r=0.250 mfe=4.00 mae=0.10 terminal=entry_blocked:SKIP_SESSION setup_id=3fe0e7bb-410d-4ad7-83fa-c26c6cf0c5a7
+2026-04-17T14:13:03.477058+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=stop_loss pnl_pips=-4.00 pnl_r=-1.000 mfe=1.00 mae=5.00 terminal=entry_blocked:SKIP_SESSION setup_id=7434895b-8ad6-42e5-b25a-a1ec9a6eb27b
+2026-04-17T14:47:04.238239+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-1.00 pnl_r=-0.250 mfe=0.00 mae=2.10 terminal=entry_blocked:SKIP_SESSION setup_id=29d6eb59-3a8e-4571-91d3-26015b95b973
+2026-04-17T15:01:01.734606+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-3.80 pnl_r=-0.950 mfe=0.50 mae=3.90 terminal=entry_blocked:SKIP_SESSION setup_id=f6a58f0b-4a18-4a7e-9df6-03178caed3c1
+2026-04-17T15:04:02.486118+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=1.40 pnl_r=0.350 mfe=2.80 mae=2.20 terminal=entry_blocked:SKIP_SESSION setup_id=e615427e-deec-457b-aa1c-c962eb27d955
+2026-04-17T15:54:02.115974+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=stop_loss pnl_pips=-4.00 pnl_r=-1.000 mfe=0.00 mae=7.10 terminal=entry_blocked:SKIP_SESSION setup_id=99f17f27-0a3f-489f-800a-2e9b648a7556
+2026-04-17T16:11:04.836499+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=take_profit pnl_pips=6.00 pnl_r=1.500 mfe=9.00 mae=0.00 terminal=entry_blocked:SKIP_SESSION setup_id=bee0e980-d5b5-4c3b-b231-cf1c2ff18788
+2026-04-17T16:29:01.995374+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-0.70 pnl_r=-0.175 mfe=4.50 mae=0.80 terminal=entry_blocked:SKIP_SESSION setup_id=b1cff8b6-8403-4052-80fc-f2ad636f0368
+2026-04-17T16:59:01.596733+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-0.60 pnl_r=-0.150 mfe=3.40 mae=1.70 terminal=entry_blocked:SKIP_SESSION setup_id=7c6122b0-52f4-40d9-bd79-128761f34078
+2026-04-17T17:54:01.256099+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=large_adverse_bar_exit pnl_pips=-2.10 pnl_r=-0.525 mfe=2.60 mae=2.60 terminal=entry_blocked:SKIP_SESSION setup_id=a42a09e6-07dc-4cd2-8136-618e4387b384
+2026-04-17T18:43:04.597455+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=stop_loss pnl_pips=-4.00 pnl_r=-1.000 mfe=1.00 mae=8.20 terminal=entry_blocked:SKIP_SESSION setup_id=68642f0a-629a-4248-bbc4-9a2123b9ba02
+2026-04-17T18:53:02.036682+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=take_profit pnl_pips=6.00 pnl_r=1.500 mfe=6.10 mae=0.60 terminal=entry_blocked:SKIP_SESSION setup_id=0595df41-1981-45cc-8ffa-ae8f86c76c8e
+2026-04-17T19:55:02.339504+00:00 GBPUSD M1 magic=92021 SELL stage=pending_only status=CANCELED outcome=take_profit pnl_pips=6.00 pnl_r=1.500 mfe=6.00 mae=1.20 terminal=entry_blocked:SKIP_SESSION setup_id=f2cc93a8-a4ac-4067-9cd5-e729183a313b
+2026-04-17T20:39:04.148224+00:00 GBPUSD M1 magic=92021 BUY stage=pending_only status=CANCELED outcome=adverse_close_exit pnl_pips=-0.80 pnl_r=-0.200 mfe=2.50 mae=1.20 terminal=entry_blocked:SKIP_SESSION setup_id=a002a490-9fb0-4db7-a4c3-4d5ab74ee49b
+2026-04-17T04:00:00.706972+00:00 NZDUSD M30 magic=92023 BUY stage=pending_only status=REJECTED outcome=trailing_stop pnl_pips=22.70 pnl_r=1.135 mfe=43.00 mae=6.30 terminal=restart_revalidation_failed:bias_invalid:bias close=0.58861 ema=0.58864 ema_prev=0.58865 setup_id=5db897f0-e983-4554-99e1-b89efd3d6581
+2026-04-17T06:30:02.061526+00:00 NZDUSD M30 magic=92023 SELL stage=pending_only status=EXPIRED outcome=stop_loss pnl_pips=-20.00 pnl_r=-1.000 mfe=0.10 mae=25.50 terminal=expired_before_confirmation setup_id=71430b87-79c0-40ac-af71-86ea298ae1ec
+2026-04-17T10:00:04.813069+00:00 NZDUSD M30 magic=92023 SELL stage=confirmed status=CANCELED outcome=stop_loss pnl_pips=-20.00 pnl_r=-1.000 mfe=7.60 mae=21.30 terminal=entry_blocked:SKIP_BIAS setup_id=108c77aa-65d9-4663-b9b2-2a7b5f9c1ee7
+2026-04-17T13:30:00.417364+00:00 NZDUSD M30 magic=92023 SELL stage=pending_only status=REJECTED outcome=stop_loss pnl_pips=-20.00 pnl_r=-1.000 mfe=7.70 mae=21.20 terminal=restart_revalidation_failed:bias_invalid:bias close=0.59203 ema=0.58903 ema_prev=0.58871 setup_id=03d8b7ca-5366-4a96-83ac-689507588c4f

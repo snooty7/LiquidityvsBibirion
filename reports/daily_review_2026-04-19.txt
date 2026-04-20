@@ -1,0 +1,18 @@
+Day: 2026-04-19 (Europe/Sofia)
+UTC window: 2026-04-18T21:00:00+00:00 -> 2026-04-19T21:00:00+00:00
+Actual TRADE_OK count: 0
+Near-trade setups not executed: 0
+Confirmed but not executed: 0
+Pending-only / never confirmed: 0
+Analysis horizon end UTC: 2026-04-19T21:00:00+00:00
+
+Outcome counts:
+  none
+
+By branch:
+  none
+
+Пропуснати печалби (local sizing):
+  none
+
+CSV: reports\day_near_trades_2026-04-19.csv

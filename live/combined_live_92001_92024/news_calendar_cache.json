@@ -1,0 +1,3057 @@
+{
+  "last_refresh_utc": "2026-04-14T07:30:01.749407+00:00",
+  "events": [
+    {
+      "starts_at_utc": "2026-04-12T22:30:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Performance of Services Index  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-12T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "M2 Money Stock (YoY)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-12T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "M3 Money Supply  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T03:00:00+00:00",
+      "currency": "IDR",
+      "importance": "low",
+      "event": "Retail Sales (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T04:30:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Dutch Trade Balance  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T05:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Finnish Current Account  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T07:00:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Current Account (USD)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T07:00:00+00:00",
+      "currency": "TRY",
+      "importance": "medium",
+      "event": "Turkish Retail Sales (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T07:00:00+00:00",
+      "currency": "TRY",
+      "importance": "medium",
+      "event": "Turkish Retail Sales (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T08:00:00+00:00",
+      "currency": "CZK",
+      "importance": "low",
+      "event": "Current Account  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T09:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "M2 Money Stock (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T09:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "New Loans  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T09:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Outstanding Loan Growth (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T09:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Chinese Total Social Financing  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "IMF Meetings",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "OPEC Monthly Report",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German Buba Monthly Report",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Portuguese CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Portuguese CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's De Guindos Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "OMR",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:00:00+00:00",
+      "currency": "OMR",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:05:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German 12-Month Bubill Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:05:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German 6-Month Bubill Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T10:30:00+00:00",
+      "currency": "INR",
+      "importance": "medium",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T11:25:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "BCB Focus Market Readout",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T12:00:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "Current Account (EUR)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T12:15:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's De Guindos Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "Building Permits (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French 12-Month BTF Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French 3-Month BTF Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French 6-Month BTF Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T13:00:00+00:00",
+      "currency": "RUB",
+      "importance": "low",
+      "event": "Trade Balance  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "Existing Home Sales  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Existing Home Sales (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T15:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "3-Month Bill Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T15:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "6-Month Bill Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T16:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German Buba Balz Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T16:00:00+00:00",
+      "currency": "MZN",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "External Migration & Visitors  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Permanent/Long-Term Migration  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Visitor Arrivals (MoM)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-13T23:01:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "BRC Retail Sales Monitor (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T00:00:00+00:00",
+      "currency": "SGD",
+      "importance": "low",
+      "event": "GDP (YoY)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T00:00:00+00:00",
+      "currency": "SGD",
+      "importance": "low",
+      "event": "GDP (QoQ)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T00:30:00+00:00",
+      "currency": "AUD",
+      "importance": "low",
+      "event": "Westpac Consumer Sentiment  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "medium",
+      "event": "NAB Business Confidence  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "low",
+      "event": "NAB Business Survey  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T03:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Exports  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T03:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Imports  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T03:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T03:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Exports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T03:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Imports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T03:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Trade Balance (USD)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T04:30:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Capacity Utilization (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T04:30:00+00:00",
+      "currency": "JPY",
+      "importance": "medium",
+      "event": "Industrial Production (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T05:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T05:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Finnish CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "SEK",
+      "importance": "low",
+      "event": "CPIF Ex Energy MoM (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "SEK",
+      "importance": "low",
+      "event": "CPIF Ex Energy YoY (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "SEK",
+      "importance": "medium",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "SEK",
+      "importance": "medium",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "SEK",
+      "importance": "low",
+      "event": "CPIF (CPI at constant interest rates) (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "SEK",
+      "importance": "low",
+      "event": "CPIF (CPI at constant interest rates) (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German WPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German WPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T06:00:00+00:00",
+      "currency": "RON",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Core CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Spanish CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "Spanish CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Spanish HICP (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "Spanish HICP (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "CZK",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T07:00:00+00:00",
+      "currency": "CZK",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T08:40:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Spanish 3-Month Letras Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T08:50:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "BoE MPC Member Mann Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T09:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "IEA Monthly Report",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T09:30:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German 5-Year Bobl Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T09:30:00+00:00",
+      "currency": "ZAR",
+      "importance": "low",
+      "event": "Business Confidence  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T09:30:00+00:00",
+      "currency": "ZAR",
+      "importance": "low",
+      "event": "Gold Production (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T09:30:00+00:00",
+      "currency": "ZAR",
+      "importance": "low",
+      "event": "Mining Production  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T09:31:00+00:00",
+      "currency": "ZAR",
+      "importance": "low",
+      "event": "Business Confidence  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "IMF Meetings",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "NFIB Small Business Optimism  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T10:00:00+00:00",
+      "currency": "RSD",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T10:00:00+00:00",
+      "currency": "RSD",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T11:00:00+00:00",
+      "currency": "ILS",
+      "importance": "low",
+      "event": "M1 Money Supply (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T11:00:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "Brazilian Service Sector Growth (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T11:00:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "Brazilian Service Sector Growth (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:00:00+00:00",
+      "currency": "BHD",
+      "importance": "low",
+      "event": "GDP (YoY)  (Q4)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:15:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "ADP Employment Change Weekly",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Core PPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Core PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "PPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "PPI ex. Food/Energy/Transport (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "PPI ex. Food/Energy/Transport (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "New Motor Vehicle Sales (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T12:55:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Redbook (YoY)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T13:45:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Fed Goolsbee Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T14:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's Lane Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T15:30:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's Lane Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T16:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "BoE Gov Bailey Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T16:10:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Fed Goolsbee Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T16:45:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Fed Vice Chair for Supervision Barr Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T17:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Fed Collins Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T17:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "FOMC Member Barkin Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T17:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German Buba Balz Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T19:00:00+00:00",
+      "currency": "ARS",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T19:00:00+00:00",
+      "currency": "ARS",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T20:10:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "BoE Breeden Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T20:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "API Weekly Crude Oil Stock",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T21:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "Export Price Index (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T21:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "Import Price Index (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T21:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB President Lagarde Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T23:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Core Machinery Orders (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-14T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Core Machinery Orders (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T00:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "Exports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T00:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "Imports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T00:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T03:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "M3 Money Supply  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T03:00:00+00:00",
+      "currency": "KRW",
+      "importance": "low",
+      "event": "M2 Money supply  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:00:00+00:00",
+      "currency": "SAR",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:00:00+00:00",
+      "currency": "SAR",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:00:00+00:00",
+      "currency": "NOK",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:30:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "WPI Food (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:30:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "WPI Fuel (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:30:00+00:00",
+      "currency": "INR",
+      "importance": "medium",
+      "event": "WPI Inflation (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:30:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "WPI Manufacturing Inflation (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French CPI NSA (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French CPI NSA (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "French CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "French HICP (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French HICP (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T06:45:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "France Inflation Ex-Tobacco (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T07:00:00+00:00",
+      "currency": "RON",
+      "importance": "low",
+      "event": "Industrial Production (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T07:00:00+00:00",
+      "currency": "RON",
+      "importance": "low",
+      "event": "Industrial Production (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T07:30:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T07:30:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T07:30:00+00:00",
+      "currency": "HUF",
+      "importance": "low",
+      "event": "Industrial Output (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T08:00:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Budget balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak Core CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak Core CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "Exports (USD)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "Imports (USD)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Greek CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Greek HICP (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "Industrial Production (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Industrial Production (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T09:30:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German 30-Year Bund Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "IMF Meetings",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Resi Prop Prices (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Resi Prop Prices (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Reserve Assets Total  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T10:00:00+00:00",
+      "currency": "GHS",
+      "importance": "low",
+      "event": "PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T10:30:00+00:00",
+      "currency": "INR",
+      "importance": "medium",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "MBA 30-Year Mortgage Rate",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "MBA Mortgage Applications (WoW)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "MBA Purchase Index",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Mortgage Market Index",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Mortgage Refinance Index",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "IGP-10 Inflation Index (MoM)  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T11:00:00+00:00",
+      "currency": "KES",
+      "importance": "low",
+      "event": "GDP (QoQ)  (Q4)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:00:00+00:00",
+      "currency": "NGN",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:00:00+00:00",
+      "currency": "NGN",
+      "importance": "low",
+      "event": "Food Inflation (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:00:00+00:00",
+      "currency": "BRL",
+      "importance": "medium",
+      "event": "Retail Sales (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:00:00+00:00",
+      "currency": "BRL",
+      "importance": "medium",
+      "event": "Retail Sales (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Export Price Index (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Export Price Index (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Fed Vice Chair for Supervision Barr Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Import Price Index (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Import Price Index (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "NY Empire State Manufacturing Index  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "Manufacturing Sales (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "Wholesale Sales (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "NAHB Housing Market Index  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "Crude Oil Inventories",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "EIA Refinery Crude Runs  (WoW)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Crude Oil Imports",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Cushing Crude Oil Inventories",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Distillate Fuel Production",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "EIA Weekly Distillates Stocks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Gasoline Production",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Heating Oil Stockpiles",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "EIA Weekly Refinery Utilization Rates (WoW)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Gasoline Inventories",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T15:00:00+00:00",
+      "currency": "PEN",
+      "importance": "low",
+      "event": "GDP (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T15:00:00+00:00",
+      "currency": "PEN",
+      "importance": "low",
+      "event": "Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T15:30:00+00:00",
+      "currency": "ILS",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T15:30:00+00:00",
+      "currency": "ILS",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T15:50:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "BoE Gov Bailey Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T16:06:00+00:00",
+      "currency": "BWP",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T16:06:00+00:00",
+      "currency": "BWP",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T17:00:00+00:00",
+      "currency": "CHF",
+      "importance": "low",
+      "event": "SNB Chairman Schlegel Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T17:30:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "Foreign Exchange Flows",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T17:45:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "FOMC Member Bowman Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T18:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "BoE Gov Bailey Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T18:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Beige Book",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T19:30:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB President Lagarde Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T20:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "US Foreign Buying, T-bonds  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T20:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Overall Net Capital Flow  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T20:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "TIC Net Long-Term Transactions  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T20:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "TIC Net Long-Term Transactions including Swaps  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T20:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's Schnabel Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T23:00:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Reuters Tankan Index  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Core Machinery Orders (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Core Machinery Orders (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Foreign Bonds Buying",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-15T23:50:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Foreign Investments in Japanese Stocks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:00:00+00:00",
+      "currency": "AUD",
+      "importance": "low",
+      "event": "MI Inflation Expectations  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "medium",
+      "event": "Employment Change  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "medium",
+      "event": "Full Employment Change  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "low",
+      "event": "Participation Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "low",
+      "event": "Reserve Assets Total  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:30:00+00:00",
+      "currency": "AUD",
+      "importance": "medium",
+      "event": "Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T01:30:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "House Prices (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Fixed Asset Investment (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "high",
+      "event": "GDP (YoY)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "GDP (QoQ)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Chinese GDP YTD  (YoY)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Industrial Production (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Chinese Industrial Production YTD  (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Retail Sales (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "Chinese Retail Sales YTD  (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "Chinese Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T02:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "NBS Press Conference",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T03:40:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's Lane Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T04:00:00+00:00",
+      "currency": "SEK",
+      "importance": "low",
+      "event": "Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T04:30:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Dutch Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "Construction Output (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "U.K. Construction Output (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "high",
+      "event": "GDP (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "GDP (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "Index of Services",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Industrial Production (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "Industrial Production (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Manufacturing Production (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "Manufacturing Production (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Monthly GDP 3M/3M Change  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Trade Balance  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Trade Balance Non-EU  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:30:00+00:00",
+      "currency": "CHF",
+      "importance": "medium",
+      "event": "PPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T06:30:00+00:00",
+      "currency": "CHF",
+      "importance": "low",
+      "event": "PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Austrian CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Austrian CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Austrian HICP (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T07:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Austrian HICP (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T07:30:00+00:00",
+      "currency": "CHF",
+      "importance": "medium",
+      "event": "SNB Monetary Policy Assessment",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian CPI Ex Tobacco (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian HICP (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian HICP (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak EU Normalized CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak EU Normalized CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "CNY",
+      "importance": "low",
+      "event": "FDI  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "Core CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Core CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "high",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "CPI ex Tobacco (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "CPI ex Tobacco (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "CPI, n.s.a  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "HICP ex Energy & Food (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "HICP ex Energy and Food (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T09:15:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB Supervisory Board Member Tuominen Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "IMF Meetings",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German Buba Monthly Report",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T10:00:00+00:00",
+      "currency": "ILS",
+      "importance": "low",
+      "event": "GDP Annualized (QoQ)  (Q4)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Slovak Unemployment Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T10:45:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German Buba Mauderer Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T11:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "NIESR Monthly GDP Tracker  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T11:00:00+00:00",
+      "currency": "GHS",
+      "importance": "low",
+      "event": "PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T11:30:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Gross FX Reserves",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T11:30:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Net FX Reserves",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T11:30:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB Publishes Account of Monetary Policy Meeting",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:00:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "IBC-Br Economic Activity  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:00:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "Core CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Continuing Jobless Claims",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "Initial Jobless Claims",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Jobless Claims 4-Week Avg.",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "Philadelphia Fed Manufacturing Index  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Philly Fed Business Conditions  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Philly Fed CAPEX Index  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Philly Fed Employment  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Philly Fed New Orders  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Philly Fed Prices Paid  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T12:35:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "FOMC Member Williams Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T13:00:00+00:00",
+      "currency": "RUB",
+      "importance": "low",
+      "event": "Central Bank reserves (USD)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's Schnabel Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T13:15:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Capacity Utilization Rate  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T13:15:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Industrial Production (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T13:15:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Industrial Production (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T13:15:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Manufacturing Production (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T14:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Natural Gas Storage",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T15:00:00+00:00",
+      "currency": "COP",
+      "importance": "low",
+      "event": "Industrial Production (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T15:00:00+00:00",
+      "currency": "COP",
+      "importance": "low",
+      "event": "Retail Sales (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T15:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "4-Week Bill Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T15:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "8-Week Bill Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T15:40:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "BoE Deputy Governor Woods Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T16:06:00+00:00",
+      "currency": "ARS",
+      "importance": "low",
+      "event": "Budget Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T16:45:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German Buba President Nagel Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T18:30:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ECB's Lane Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T20:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Fed's Balance Sheet",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T20:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Reserve Balances with Federal Reserve Banks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "medium",
+      "event": "Electronic Card Retail Sales (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Electronic Card Retail Sales (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "FPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-16T23:30:00+00:00",
+      "currency": "PEN",
+      "importance": "low",
+      "event": "Trade Balance  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T00:30:00+00:00",
+      "currency": "SGD",
+      "importance": "low",
+      "event": "Non-Oil Exports (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T00:30:00+00:00",
+      "currency": "SGD",
+      "importance": "low",
+      "event": "Non-Oil Exports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T00:30:00+00:00",
+      "currency": "SGD",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T04:00:00+00:00",
+      "currency": "MYR",
+      "importance": "low",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T04:00:00+00:00",
+      "currency": "MYR",
+      "importance": "medium",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T04:00:00+00:00",
+      "currency": "MYR",
+      "importance": "medium",
+      "event": "GDP (YoY)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T06:30:00+00:00",
+      "currency": "HUF",
+      "importance": "low",
+      "event": "Gross Wages (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T07:00:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "End Year CPI Forecast  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T07:30:00+00:00",
+      "currency": "THB",
+      "importance": "low",
+      "event": "Currency Swaps (USD)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T07:30:00+00:00",
+      "currency": "THB",
+      "importance": "low",
+      "event": "Foreign Reserves (USD)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian Trade Balance  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Italian Trade Balance EU  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Current Account  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Current Account n.s.a.  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T08:30:00+00:00",
+      "currency": "AOA",
+      "importance": "low",
+      "event": "FX Reserve  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "Trade Balance  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "IMF Meetings",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T10:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Portuguese Current Account  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T11:30:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "Bank Loan Growth",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T11:30:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "Deposit Growth",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T11:30:00+00:00",
+      "currency": "INR",
+      "importance": "low",
+      "event": "FX Reserves, USD",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T12:15:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "Housing Starts  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "Foreign Securities Purchases  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "Foreign Securities Purchases by Canadians  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T14:00:00+00:00",
+      "currency": "MWK",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T14:30:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German Buba Vice President Buch Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T15:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "FOMC Member Daly Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T16:15:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "FOMC Member Barkin Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T17:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "U.S. Baker Hughes Oil Rig Count",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T17:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "U.S. Baker Hughes Total Rig Count",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T18:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Fed Waller Speaks",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "CFTC GBP speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Aluminium speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Copper speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Corn speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "CFTC Crude Oil speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "CFTC Gold speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "CFTC Nasdaq 100 speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Natural Gas speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "CFTC S&P 500 speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Silver speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Soybeans speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "CFTC Wheat speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "CFTC CAD speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "MXN",
+      "importance": "low",
+      "event": "CFTC MXN speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "CHF",
+      "importance": "low",
+      "event": "CFTC CHF speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "AUD",
+      "importance": "medium",
+      "event": "CFTC AUD speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "BRL",
+      "importance": "medium",
+      "event": "CFTC BRL speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "JPY",
+      "importance": "medium",
+      "event": "CFTC JPY speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "CFTC NZD speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T19:30:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "CFTC EUR speculative net positions",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T23:30:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "CPI, n.s.a (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T23:30:00+00:00",
+      "currency": "JPY",
+      "importance": "medium",
+      "event": "National Core CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T23:30:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "National CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-17T23:30:00+00:00",
+      "currency": "JPY",
+      "importance": "medium",
+      "event": "National CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-18T10:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "IMF Meetings",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-19T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Exports  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-19T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Imports  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-19T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Trade Balance (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-19T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "Trade Balance (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T00:01:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Irish Consumer Confidence  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T01:00:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "China Loan Prime Rate 5Y  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T01:15:00+00:00",
+      "currency": "CNY",
+      "importance": "medium",
+      "event": "PBoC Loan Prime Rate",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T03:00:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "RBNZ Offshore Holdings  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T04:00:00+00:00",
+      "currency": "MYR",
+      "importance": "low",
+      "event": "Exports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T04:00:00+00:00",
+      "currency": "MYR",
+      "importance": "low",
+      "event": "Imports (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T04:00:00+00:00",
+      "currency": "MYR",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T04:30:00+00:00",
+      "currency": "JPY",
+      "importance": "low",
+      "event": "Tertiary Industry Activity Index  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T05:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Estonian PPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T05:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Estonian PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T06:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German PPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T06:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "German PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T07:00:00+00:00",
+      "currency": "CZK",
+      "importance": "low",
+      "event": "PPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T07:00:00+00:00",
+      "currency": "CZK",
+      "importance": "low",
+      "event": "PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T08:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Greek Current Account (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "Construction Output (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T11:25:00+00:00",
+      "currency": "BRL",
+      "importance": "low",
+      "event": "BCB Focus Market Readout",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "Common CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "Core CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "Core CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "medium",
+      "event": "CPI (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "Median CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T12:30:00+00:00",
+      "currency": "CAD",
+      "importance": "low",
+      "event": "Trimmed CPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French 12-Month BTF Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French 3-Month BTF Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T13:00:00+00:00",
+      "currency": "EUR",
+      "importance": "low",
+      "event": "French 6-Month BTF Auction",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T14:30:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Central Government Debt Stock  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T19:00:00+00:00",
+      "currency": "ARS",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T22:00:00+00:00",
+      "currency": "NZD",
+      "importance": "medium",
+      "event": "NZIER Business Confidence  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T22:00:00+00:00",
+      "currency": "NZD",
+      "importance": "low",
+      "event": "NZIER QSBO Capacity Utilization  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "medium",
+      "event": "CPI (QoQ)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-20T22:45:00+00:00",
+      "currency": "NZD",
+      "importance": "medium",
+      "event": "CPI (YoY)  (Q1)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "low",
+      "event": "Average Earnings ex Bonus  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Average Earnings Index +Bonus  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Claimant Count Change  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Employment Change 3M/3M (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T06:00:00+00:00",
+      "currency": "GBP",
+      "importance": "medium",
+      "event": "Unemployment Rate  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T06:00:00+00:00",
+      "currency": "CHF",
+      "importance": "low",
+      "event": "Trade Balance  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:00:00+00:00",
+      "currency": "CHF",
+      "importance": "low",
+      "event": "M3 Money Supply  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:00:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Capacity Utilization  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:00:00+00:00",
+      "currency": "TRY",
+      "importance": "low",
+      "event": "Manufacturing Confidence  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:30:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "Corp. Sector Wages (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:30:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "Employment Growth (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:30:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "Industrial Output (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T07:30:00+00:00",
+      "currency": "PLN",
+      "importance": "low",
+      "event": "PPI (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T08:00:00+00:00",
+      "currency": "TWD",
+      "importance": "low",
+      "event": "Export Orders (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German ZEW Current Conditions  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "German ZEW Economic Sentiment  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T09:00:00+00:00",
+      "currency": "EUR",
+      "importance": "medium",
+      "event": "ZEW Economic Sentiment  (Apr)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "Core Retail Sales (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Retail Control (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "high",
+      "event": "Retail Sales (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Retail Sales (YoY)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T12:30:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Retail Sales Ex Gas/Autos (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Business Inventories (MoM)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Pending Home Sales (MoM)  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "low",
+      "event": "Pending Home Sales Index  (Mar)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T14:00:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Retail Inventories Ex Auto  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T15:00:00+00:00",
+      "currency": "COP",
+      "importance": "low",
+      "event": "Imports (YoY)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T15:00:00+00:00",
+      "currency": "COP",
+      "importance": "low",
+      "event": "Trade Balance (USD)  (Feb)",
+      "source": "investpy"
+    },
+    {
+      "starts_at_utc": "2026-04-21T15:30:00+00:00",
+      "currency": "USD",
+      "importance": "medium",
+      "event": "Atlanta Fed GDPNow  (Q1)",
+      "source": "investpy"
+    }
+  ]
+}

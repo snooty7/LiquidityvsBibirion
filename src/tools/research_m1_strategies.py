@@ -15,6 +15,7 @@ from src.strategy.liquidity import (
     SessionOpenScalpSignalResult,
     SweepSignal,
     detect_ny_micro_pullback_drift_signal,
+    detect_ny_reclaim_continuation_signal,
     detect_opening_range_breakout_signal,
     detect_opening_range_breakout_v2_signal,
     detect_overreaction_fade_signal,
@@ -46,6 +47,7 @@ class ScenarioConfig:
     range_multiple: float = 2.0
     pullback_bars: int = 2
     drift_lookback_bars: int = 4
+    reclaim_tolerance_pips: float = 0.0
 
 
 @dataclass
@@ -319,6 +321,20 @@ def _scenario_signal(scenario: ScenarioConfig, closed_m1: Sequence[dict], pip: f
                 buffer_price=buffer_price,
             )
         )
+    if scenario.strategy == "ny_reclaim_continuation":
+        return _signal_from_result(
+            detect_ny_reclaim_continuation_signal(
+                rates,
+                session_start_utc="12:30",
+                open_range_minutes=scenario.open_range_minutes,
+                watch_minutes=scenario.watch_minutes,
+                buffer_price=buffer_price,
+                body_ratio_min=scenario.body_ratio_min,
+                pullback_bars=scenario.pullback_bars,
+                range_multiple=scenario.range_multiple,
+                reclaim_tolerance_price=float(scenario.reclaim_tolerance_pips) * pip,
+            )
+        )
     raise ValueError(f"Unsupported scenario strategy={scenario.strategy}")
 
 
@@ -536,6 +552,40 @@ def default_scenarios() -> list[ScenarioConfig]:
             buffer_pips=0.03,
             pullback_bars=1,
             drift_lookback_bars=3,
+        ),
+        ScenarioConfig(
+            name="ny_reclaim_continuation_newyork",
+            strategy="ny_reclaim_continuation",
+            session_name="newyork",
+            use_h1_bias=True,
+            sl_pips=4.0,
+            rr=1.0,
+            max_hold_bars=4,
+            adverse_limit=1,
+            body_ratio_min=0.45,
+            buffer_pips=0.10,
+            open_range_minutes=15,
+            watch_minutes=180,
+            pullback_bars=2,
+            range_multiple=1.2,
+            reclaim_tolerance_pips=0.8,
+        ),
+        ScenarioConfig(
+            name="ny_reclaim_continuation_newyork_tight",
+            strategy="ny_reclaim_continuation",
+            session_name="newyork",
+            use_h1_bias=True,
+            sl_pips=4.0,
+            rr=1.0,
+            max_hold_bars=4,
+            adverse_limit=1,
+            body_ratio_min=0.50,
+            buffer_pips=0.10,
+            open_range_minutes=15,
+            watch_minutes=180,
+            pullback_bars=2,
+            range_multiple=1.3,
+            reclaim_tolerance_pips=0.6,
         ),
         ScenarioConfig(
             name="overreaction_fade_london",

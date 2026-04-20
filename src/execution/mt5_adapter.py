@@ -268,6 +268,67 @@ class MT5Adapter:
             raw=last_result,
         )
 
+    def send_market_order_with_price_protection(
+        self,
+        symbol: str,
+        side: Literal["BUY", "SELL"],
+        volume: float,
+        *,
+        sl: float,
+        tp: float,
+        magic: int,
+        comment: str,
+        deviation: Optional[int] = None,
+    ) -> ExecutionResult:
+        self._ensure_mt5()
+
+        tick = self.symbol_tick(symbol)
+        deviation = self.default_deviation if deviation is None else int(deviation)
+        if side == "BUY":
+            price = float(tick.ask)
+            order_type = mt5.ORDER_TYPE_BUY
+        else:
+            price = float(tick.bid)
+            order_type = mt5.ORDER_TYPE_SELL
+
+        invalid_fill_retcode = int(getattr(mt5, "TRADE_RETCODE_INVALID_FILL", 10030))
+        last_result = None
+        for fill_type in self._fill_modes():
+            request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": symbol,
+                "volume": float(volume),
+                "type": order_type,
+                "price": float(price),
+                "sl": float(sl),
+                "tp": float(tp),
+                "deviation": deviation,
+                "magic": int(magic),
+                "comment": str(comment)[:31],
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": fill_type,
+            }
+            result = mt5.order_send(request)
+            last_result = result
+            if result is None:
+                break
+            retcode = getattr(result, "retcode", None)
+            if retcode != invalid_fill_retcode:
+                break
+
+        retcode = getattr(last_result, "retcode", None) if last_result is not None else None
+        is_done = retcode == mt5.TRADE_RETCODE_DONE
+        return ExecutionResult(
+            ok=bool(is_done),
+            retcode=retcode,
+            order=getattr(last_result, "order", None) if last_result is not None else None,
+            deal=getattr(last_result, "deal", None) if last_result is not None else None,
+            price=float(price),
+            sl=float(sl),
+            tp=float(tp),
+            raw=last_result,
+        )
+
     def close_position_market_with_fallback(
         self,
         symbol: str,
