@@ -28,6 +28,7 @@ from src.persistence.models import (
     PENDING_STATUS_PENDING,
     PENDING_STATUS_REJECTED,
     PENDING_TERMINAL_STATUSES,
+    POSITION_STATUS_CLOSED,
     POSITION_STATUS_OPEN,
     PendingSetupRecord,
     SymbolRuntimeStateRecord,
@@ -93,6 +94,10 @@ LOG_FIELDS = [
     "deal",
     "message",
 ]
+
+UNCONFIRMED_RUNTIME_CLOSE_REASON = "missing_on_broker_runtime_sync_unconfirmed"
+BROKER_SIDE_CLOSE_REASON = "broker_side_close_detected"
+BROKER_SIDE_CLOSE_REPAIR_REASON = "broker_side_close_detected_repaired"
 
 
 TIMEFRAME_SECONDS = {
@@ -729,6 +734,28 @@ def position_to_record(cfg: SymbolConfig, position: object, setup_id: Optional[s
     )
 
 
+def broker_close_deal_details(close_deal: object, close_reason: str) -> tuple[float, float, int, dict[str, Any]]:
+    profit = float(getattr(close_deal, "profit", 0.0) or 0.0)
+    commission = float(getattr(close_deal, "commission", 0.0) or 0.0)
+    swap = float(getattr(close_deal, "swap", 0.0) or 0.0)
+    fee = float(getattr(close_deal, "fee", 0.0) or 0.0)
+    realized_pnl = profit + commission + swap + fee
+    close_price = float(getattr(close_deal, "price", 0.0) or 0.0)
+    closed_at = int(getattr(close_deal, "time", 0) or 0)
+    return (
+        realized_pnl,
+        close_price,
+        closed_at,
+        {
+            "exit_price": close_price,
+            "close_price": close_price,
+            "closed_at": closed_at,
+            "realized_pnl": round(realized_pnl, 2),
+            "close_reason": close_reason,
+        },
+    )
+
+
 def sync_open_positions_for_symbol(
     adapter: MT5Adapter,
     cfg: SymbolConfig,
@@ -783,7 +810,7 @@ def sync_open_positions_for_symbol(
         )
         close_payload = {"side": local.side}
         event_type = "POSITION_CLOSED_UNCONFIRMED"
-        close_reason = "missing_on_broker_runtime_sync_unconfirmed"
+        close_reason = UNCONFIRMED_RUNTIME_CLOSE_REASON
         message = "broker no longer reports position; close deal not reconstructed"
         csv_row = {
             "ts": now_utc.isoformat(),
@@ -795,22 +822,12 @@ def sync_open_positions_for_symbol(
         }
         if close_deal is not None:
             event_type = "POSITION_CLOSED_BROKER"
-            close_reason = "broker_side_close_detected"
-            profit = float(getattr(close_deal, "profit", 0.0) or 0.0)
-            commission = float(getattr(close_deal, "commission", 0.0) or 0.0)
-            swap = float(getattr(close_deal, "swap", 0.0) or 0.0)
-            fee = float(getattr(close_deal, "fee", 0.0) or 0.0)
-            realized_pnl = profit + commission + swap + fee
-            close_price = float(getattr(close_deal, "price", 0.0) or 0.0)
-            closed_at = int(getattr(close_deal, "time", 0) or 0)
-            close_payload.update(
-                {
-                    "close_price": close_price,
-                    "closed_at": closed_at,
-                    "realized_pnl": round(realized_pnl, 2),
-                    "close_reason": close_reason,
-                }
+            close_reason = BROKER_SIDE_CLOSE_REASON
+            realized_pnl, close_price, _closed_at, close_details = broker_close_deal_details(
+                close_deal,
+                close_reason,
             )
+            close_payload.update(close_details)
             message = f"broker close detected pnl={realized_pnl:.2f}"
             csv_row["price"] = close_price
         else:
@@ -832,6 +849,70 @@ def sync_open_positions_for_symbol(
             message=message,
             payload=close_payload,
             csv_row=csv_row,
+        )
+
+
+def repair_unconfirmed_closed_positions_for_symbol(
+    adapter: MT5Adapter,
+    cfg: SymbolConfig,
+    app_config: AppConfig,
+    repo: SQLiteRepository,
+    log_file: Path,
+    *,
+    lookback_hours: int = 72,
+) -> None:
+    now_utc = datetime.now(timezone.utc)
+    cutoff_ts = int(now_utc.timestamp()) - max(1, int(lookback_hours)) * 3600
+    candidates = [
+        pos
+        for pos in repo.list_open_positions(symbol=cfg.symbol, magic=cfg.magic, status=POSITION_STATUS_CLOSED)
+        if pos.close_reason == UNCONFIRMED_RUNTIME_CLOSE_REASON
+        and (pos.opened_at is None or int(pos.opened_at) >= cutoff_ts)
+    ]
+
+    for local in candidates:
+        close_deal = adapter.latest_close_deal_for_position(
+            int(local.ticket),
+            now_utc,
+            lookback_hours=lookback_hours,
+            symbol=cfg.symbol,
+            magic=cfg.magic,
+            opened_at=local.opened_at,
+            volume=local.volume,
+        )
+        if close_deal is None:
+            continue
+
+        close_reason = BROKER_SIDE_CLOSE_REPAIR_REASON
+        realized_pnl, close_price, _closed_at, close_details = broker_close_deal_details(
+            close_deal,
+            close_reason,
+        )
+        close_payload = {
+            "side": local.side,
+            "repaired": True,
+            **close_details,
+        }
+        repo.mark_open_position_closed(int(local.ticket), close_reason)
+        emit_event(
+            log_file=log_file,
+            repo=repo,
+            app_config=app_config,
+            event_type="POSITION_CLOSED_BROKER",
+            symbol=cfg.symbol,
+            setup_id=local.setup_id,
+            ticket=int(local.ticket),
+            message=f"broker close repaired pnl={realized_pnl:.2f}",
+            payload=close_payload,
+            csv_row={
+                "ts": now_utc.isoformat(),
+                "symbol": cfg.symbol,
+                "timeframe": cfg.timeframe,
+                "strategy": "SWEEP_V2",
+                "position": int(local.ticket),
+                "side": local.side,
+                "price": close_price,
+            },
         )
 
 
@@ -932,6 +1013,7 @@ def apply_daily_loss_guard(
                         "side": "BUY" if int(position.type) == 0 else "SELL",
                         "volume": float(position.volume),
                         "price": result.price,
+                        "exit_price": result.price,
                         "realized_pnl": round(float(getattr(position, "profit", 0.0) or 0.0), 2),
                         "retcode": result.retcode,
                         "order": result.order,
@@ -1122,6 +1204,7 @@ def manage_symbol_positions(
                         "side": side,
                         "volume": float(position.volume),
                         "price": result.price,
+                        "exit_price": result.price,
                         "realized_pnl": round(pnl_money, 2),
                         "loss_limit_money": loss_limit_money,
                         "loss_guard_mode": loss_guard_mode,
@@ -2645,7 +2728,14 @@ def process_symbol(
         return
 
     trade_info = SymbolTradeInfo.from_mt5(info)
-    volume = calc_lot_by_risk(equity, resolved_sl_pips, resolved_risk_pct, trade_info, cfg.max_lot)
+    volume = calc_lot_by_risk(
+        equity,
+        resolved_sl_pips,
+        resolved_risk_pct,
+        trade_info,
+        cfg.max_lot,
+        min_lot=cfg.min_lot,
+    )
     trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(
         cfg, app_config.runtime
     )
@@ -2942,6 +3032,7 @@ def run(config_path: str = "config/settings.json") -> None:
                 state = states[branch_id(cfg)]
                 try:
                     sync_open_positions_for_symbol(adapter, cfg, app_config, repo, log_file)
+                    repair_unconfirmed_closed_positions_for_symbol(adapter, cfg, app_config, repo, log_file)
                     manage_symbol_positions(adapter, cfg, app_config, state, log_file, repo)
                     if not daily_loss_reached:
                         process_symbol(adapter, cfg, app_config, state, log_file, repo, news_calendar=news_calendar)

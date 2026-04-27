@@ -53,6 +53,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "sl_pips": 10.0,
             "rr": 2.0,
             "risk_pct": 0.10,
+            "min_lot": 0.0,
             "max_lot": 0.10,
             "max_spread_pips": 1.8,
             "cooldown_sec": 300,
@@ -163,6 +164,7 @@ class SymbolConfig:
     cooldown_sec: int
     magic: int
     trade_side_filter: str = "both"
+    min_lot: float = 0.0
     max_levels: int = 25
     one_position_per_symbol: bool = True
     strategy_mode: str = "liquidity_sweep"
@@ -316,6 +318,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 sl_pips=float(row.get("sl_pips", 10.0)),
                 rr=float(row.get("rr", 2.0)),
                 risk_pct=float(row.get("risk_pct", 0.1)),
+                min_lot=float(row.get("min_lot", 0.0)),
                 max_lot=float(row.get("max_lot", 0.10)),
                 max_spread_pips=float(row.get("max_spread_pips", 1.8)),
                 cooldown_sec=int(row.get("cooldown_sec", 300)),

@@ -45,6 +45,29 @@ def test_calc_lot_by_risk_handles_broker_fallback() -> None:
     assert lot >= 0.01
 
 
+def test_calc_lot_by_risk_respects_branch_min_lot() -> None:
+    info = SymbolTradeInfo(
+        digits=5,
+        point=0.00001,
+        volume_min=0.01,
+        volume_max=100.0,
+        volume_step=0.01,
+        trade_tick_value=1.0,
+        trade_tick_size=0.00001,
+    )
+
+    lot = calc_lot_by_risk(
+        equity=100.0,
+        sl_pips=10.0,
+        risk_pct=0.5,
+        symbol_info=info,
+        max_lot=0.20,
+        min_lot=0.20,
+    )
+
+    assert lot == 0.20
+
+
 def test_calc_position_risk_money() -> None:
     info = SymbolTradeInfo(
         digits=5,

@@ -49,9 +49,11 @@ def test_build_push_message_for_close() -> None:
     assert title == "CLOSE EURUSD SELL"
     assert "event: POSITION_CLOSED_BROKER" in body
     assert "time: 2026-03-26 10:59:48 EET" in body
-    assert "entry: -" in body
+    assert "exit: 1.15674" in body
     assert "sl: -" in body
     assert "tp: -" in body
+    assert "pnl: -4.32" in body
+    assert "result: loss" in body
 
 
 def test_build_push_message_for_liquidity_alert() -> None:

@@ -598,7 +598,14 @@ def _build_entry_trade(
         else:
             tp = float(entry_price - tp_distance)
 
-    volume = calc_lot_by_risk(equity, resolved_sl_pips, risk_pct, symbol_info, cfg.max_lot)
+    volume = calc_lot_by_risk(
+        equity,
+        resolved_sl_pips,
+        risk_pct,
+        symbol_info,
+        cfg.max_lot,
+        min_lot=cfg.min_lot,
+    )
     risk_money = calc_position_risk_money(
         entry_price=entry_price,
         stop_price=sl,

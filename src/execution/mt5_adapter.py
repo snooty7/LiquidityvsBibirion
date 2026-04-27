@@ -449,24 +449,48 @@ class MT5Adapter:
     ):
         self._ensure_mt5()
         start = now_utc.timestamp() - max(1, int(lookback_hours)) * 3600
-        deals = mt5.history_deals_get(datetime.fromtimestamp(start, tz=now_utc.tzinfo), now_utc)
-        if deals is None:
-            return None
-
         deal_entry_out = getattr(mt5, "DEAL_ENTRY_OUT", 1)
         deal_entry_out_by = getattr(mt5, "DEAL_ENTRY_OUT_BY", 3)
-        matched = [
-            deal
-            for deal in deals
-            if int(getattr(deal, "position_id", 0) or 0) == int(position_ticket)
-            and getattr(deal, "entry", None) in (deal_entry_out, deal_entry_out_by)
-        ]
+
+        def close_deals_for_ticket(deals: object) -> list[object]:
+            return [
+                deal
+                for deal in deals or []
+                if int(getattr(deal, "position_id", 0) or 0) == int(position_ticket)
+                and getattr(deal, "entry", None) in (deal_entry_out, deal_entry_out_by)
+            ]
+
+        # Prefer MT5's direct position history lookup. It is more reliable than
+        # a broad date range immediately after the broker has removed a position.
+        matched: list[object] = []
+        position_deals = None
+        try:
+            position_deals = mt5.history_deals_get(position=int(position_ticket))
+        except TypeError:
+            position_deals = None
+        except Exception:
+            position_deals = None
+        if position_deals is not None:
+            matched = close_deals_for_ticket(position_deals)
+
+        deals = None
+        if not matched:
+            start_dt = datetime.fromtimestamp(start, tz=now_utc.tzinfo)
+            deals = mt5.history_deals_get(start_dt, now_utc)
+            if deals is None and symbol is not None:
+                self.ensure_symbol(symbol)
+                deals = mt5.history_deals_get(start_dt, now_utc)
+            if deals is None and position_deals is None:
+                return None
+            matched = close_deals_for_ticket(deals)
+
         if not matched and symbol is not None and magic is not None and opened_at is not None:
             # Some broker-side close deals do not retain a usable position_id. Fall back to
             # symbol/magic/volume/time matching so runtime sync can still reconstruct the close.
             opened_after = max(0, int(opened_at) - 300)
             fallback = []
-            for deal in deals:
+            fallback_deals = deals if deals is not None else position_deals
+            for deal in fallback_deals or []:
                 if getattr(deal, "entry", None) not in (deal_entry_out, deal_entry_out_by):
                     continue
                 if str(getattr(deal, "symbol", "") or "").upper() != str(symbol).upper():

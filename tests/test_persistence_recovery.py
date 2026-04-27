@@ -23,6 +23,7 @@ from src.engine.orchestrator import (
     resolve_loss_guard,
     restore_runtime_state,
     semantic_setup_key,
+    repair_unconfirmed_closed_positions_for_symbol,
     sync_open_positions_for_symbol,
 )
 from src.strategy.confirmations import ConfirmationResult
@@ -437,6 +438,63 @@ def test_sync_open_positions_marks_unconfirmed_close_when_broker_missing_without
 
         events = repo.list_events(event_type="POSITION_CLOSED_UNCONFIRMED")
         assert len(events) == 1
+    finally:
+        repo.close()
+
+
+def test_repair_unconfirmed_closed_position_reconstructs_broker_close(tmp_path: Path) -> None:
+    db_path = tmp_path / "state.db"
+    repo = SQLiteRepository(str(db_path))
+    app_config = _make_config(db_path)
+    log_file = tmp_path / "events.csv"
+    opened_at = int(datetime.now(timezone.utc).timestamp()) - 60
+    try:
+        repo.upsert_open_position(
+            OpenPositionRecord(
+                ticket=7101,
+                symbol="EURUSD",
+                magic=92001,
+                setup_id=None,
+                side="SELL",
+                volume=0.10,
+                open_price=1.1000,
+                sl=1.1010,
+                tp=1.0980,
+                comment="SWEEP@1.10000|repair",
+                opened_at=opened_at,
+                status=POSITION_STATUS_OPEN,
+            )
+        )
+        repo.mark_open_position_closed(7101, "missing_on_broker_runtime_sync_unconfirmed")
+        close_deal = SimpleNamespace(
+            position_id=7101,
+            entry=1,
+            symbol="EURUSD",
+            magic=92001,
+            time=opened_at + 30,
+            time_msc=(opened_at + 30) * 1000,
+            volume=0.10,
+            price=1.0991,
+            profit=8.5,
+            commission=-0.2,
+            swap=0.0,
+            fee=0.0,
+        )
+        adapter = SyncAdapter(positions={"EURUSD": []}, close_deal_by_ticket={7101: close_deal})
+
+        repair_unconfirmed_closed_positions_for_symbol(adapter, app_config.symbols[0], app_config, repo, log_file)
+
+        repaired = repo.get_open_position(7101)
+        assert repaired is not None
+        assert repaired.status == POSITION_STATUS_CLOSED
+        assert repaired.close_reason == "broker_side_close_detected_repaired"
+
+        events = repo.list_events(event_type="POSITION_CLOSED_BROKER")
+        assert len(events) == 1
+        payload = json.loads(events[0].payload_json)
+        assert payload["exit_price"] == 1.0991
+        assert payload["realized_pnl"] == 8.3
+        assert payload["repaired"] is True
     finally:
         repo.close()
 

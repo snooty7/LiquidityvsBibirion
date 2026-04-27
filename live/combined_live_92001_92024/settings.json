@@ -49,6 +49,7 @@
       "sl_pips": 10.0,
       "rr": 2.0,
       "risk_pct": 0.5,
+      "min_lot": 0.25,
       "max_lot": 0.25,
       "max_spread_pips": 1.8,
       "cooldown_sec": 900,

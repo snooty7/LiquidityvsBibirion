@@ -20,13 +20,25 @@ if (-not [System.IO.Path]::IsPathRooted($logFile)) {
 $lastRestartAt = [datetime]::MinValue
 
 function Get-OrchestratorProcess {
-  param([string]$ConfigArg)
+  param([string[]]$ConfigArgs)
 
   Get-CimInstance Win32_Process | Where-Object {
-    $_.Name -eq 'python.exe' -and
-    $_.CommandLine -and
-    $_.CommandLine -match 'src.engine.orchestrator' -and
-    $_.CommandLine -match [regex]::Escape($ConfigArg)
+    $cmd = $_.CommandLine
+    if (-not $cmd) {
+      return $false
+    }
+    if ($_.Name -ne 'python.exe') {
+      return $false
+    }
+    if ($cmd -notmatch 'src.engine.orchestrator') {
+      return $false
+    }
+    foreach ($configArg in $ConfigArgs) {
+      if ($configArg -and $cmd -match [regex]::Escape($configArg)) {
+        return $true
+      }
+    }
+    return $false
   } | Select-Object -First 1
 }
 
@@ -36,7 +48,7 @@ Write-Host "WATCHDOG log=$logFile stale=${StaleSeconds}s check=${CheckSeconds}s 
 
 while ($true) {
   $now = Get-Date
-  $orchestrator = Get-OrchestratorProcess -ConfigArg 'config/settings.json'
+  $orchestrator = Get-OrchestratorProcess -ConfigArgs @($Config, $configPath)
   $logInfo = $null
   if (Test-Path $logFile) {
     $logInfo = Get-Item $logFile

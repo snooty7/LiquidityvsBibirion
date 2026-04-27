@@ -71,31 +71,46 @@ def build_push_message(
     title = f"{event_type} {symbol}".strip()
     tags = "chart_with_upwards_trend"
     entry_value = _first_payload_value(data, "price", "level")
+    exit_value = _first_payload_value(data, "exit_price", "close_price", "price", "level")
     sl_value = _first_payload_value(data, "sl", "to_sl")
     tp_value = _first_payload_value(data, "tp", "to_tp")
     realized_pnl = _first_payload_value(data, "realized_pnl", "pnl", "profit")
     trailing_value = str(data.get("trailing", "") or "-")
+    result_value = "-"
+    if realized_pnl is not None:
+        if realized_pnl > 0:
+            result_value = "profit"
+        elif realized_pnl < 0:
+            result_value = "loss"
+        else:
+            result_value = "breakeven"
 
     lines = [
         f"event: {event_type}",
         f"symbol: {symbol}",
         f"side: {side}",
         f"time: {_fmt_local_time(created_at_utc)}",
-        f"entry: {_fmt_price(entry_value)}",
         f"sl: {_fmt_price(sl_value)}",
         f"tp: {_fmt_price(tp_value)}",
         f"trailing: {trailing_value}",
     ]
 
     if event_type in OPEN_EVENTS:
+        lines.insert(4, f"entry: {_fmt_price(entry_value)}")
         title = f"OPEN {symbol} {side}"
         tags = "white_check_mark,chart_with_downwards_trend" if side == "SELL" else "white_check_mark,chart_with_upwards_trend"
     elif event_type in CLOSE_EVENTS:
+        lines.insert(4, f"exit: {_fmt_price(exit_value)}")
         lines.append(f"pnl: {_fmt_money(realized_pnl)}")
+        lines.append(f"result: {result_value}")
         title = f"CLOSE {symbol} {side}"
-        if realized_pnl is not None:
-            title = f"{title} {_fmt_money(realized_pnl)}"
         tags = "money_with_wings" if realized_pnl is None or realized_pnl >= 0 else "x"
+    elif event_type == "LIQUIDITY_ALERT":
+        lines.insert(4, f"entry: {_fmt_price(entry_value)}")
+        title = f"ALERT {symbol} {side}"
+        tags = "rotating_light"
+    else:
+        lines.insert(4, f"entry: {_fmt_price(entry_value)}")
 
     message = "\n".join(lines)
     return title, message, tags

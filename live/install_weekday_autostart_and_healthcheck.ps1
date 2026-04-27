@@ -1,4 +1,6 @@
 param(
+  [string]$Config = "config/settings.json",
+  [string]$Launcher = "live/start_all_16_live.ps1",
   [string]$StartTime = "07:00",
   [string]$HealthStartTime = "07:05",
   [string]$HealthEndTime = "23:05",
@@ -10,9 +12,9 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$startScript = (Resolve-Path (Join-Path $repoRoot 'live\start_all_16_live.ps1')).Path
+$startScript = (Resolve-Path (Join-Path $repoRoot $Launcher)).Path
 $healthScript = (Resolve-Path (Join-Path $repoRoot 'tools\live_healthcheck_restart.ps1')).Path
-$configPath = (Resolve-Path (Join-Path $repoRoot 'config\settings.json')).Path
+$configPath = (Resolve-Path (Join-Path $repoRoot $Config)).Path
 $reportsDir = Join-Path $repoRoot 'reports'
 if (-not (Test-Path $reportsDir)) {
   New-Item -ItemType Directory -Path $reportsDir | Out-Null

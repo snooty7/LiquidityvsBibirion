@@ -52,6 +52,7 @@ def calc_lot_by_risk(
     risk_pct: float,
     symbol_info: SymbolTradeInfo,
     max_lot: float,
+    min_lot: float = 0.0,
 ) -> float:
     if equity <= 0:
         raise ValueError("Equity must be positive.")
@@ -65,10 +66,13 @@ def calc_lot_by_risk(
         lot = risk_money / (sl_pips * pvl)
 
     hard_cap = min(symbol_info.volume_max, max_lot)
-    lot = max(lot, symbol_info.volume_min)
+    hard_floor = max(symbol_info.volume_min, min_lot)
+    if hard_floor > hard_cap:
+        hard_floor = hard_cap
+    lot = max(lot, hard_floor)
     lot = min(lot, hard_cap)
     lot = _round_to_step(lot, symbol_info.volume_step)
-    lot = max(lot, symbol_info.volume_min)
+    lot = max(lot, hard_floor)
     lot = min(lot, hard_cap)
 
     if not math.isfinite(lot):
