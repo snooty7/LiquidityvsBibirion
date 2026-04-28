@@ -918,3 +918,80 @@ Decision:
 - EURUSD and NZDUSD are worth monitoring in demo/research only
 - GBPUSD and USDCHF do not currently validate this edge
 - this strategy should not be merged into the active top live branches until it produces a larger validated sample
+
+## 2026-04-28 HTF Liquidity Sweep BOS FVG research
+
+Strategy idea:
+- HTF: `M15`
+- LTF confirmation: `M1`
+- flow:
+  - sweep HTF liquidity
+  - close back inside level
+  - BOS in the opposite direction
+  - form FVG or order block
+  - price retests the zone
+  - M1 BOS confirms the entry
+  - SL beyond sweep
+  - TP tested as fixed `2R`
+
+Implemented research tool:
+- `src/tools/research_htf_liquidity_sweep_bos_fvg.py`
+
+Conservative implementation details:
+- sweep types:
+  - previous day high
+  - previous day low
+  - equal highs
+  - equal lows
+- BOS requires:
+  - close through recent M15 structure
+  - body ratio filter
+  - impulse range filter
+- entry zone:
+  - FVG if available
+  - fallback to last opposite-candle order block
+- entry requires M1 BOS during the M15 retest candle
+
+Backtest window:
+- `2025-08-25 -> 2026-04-28`
+
+Base result, `RR=2.0`:
+- `EURUSD`:
+  - `63` trades
+  - `+17.6` pips
+  - PF `1.066`
+  - win rate `36.5%`
+  - avg R `-0.017`
+- `GBPUSD`:
+  - `64` trades
+  - `-113.8` pips
+  - PF `0.755`
+  - win rate `34.4%`
+- `NZDUSD`:
+  - `55` trades
+  - `-92.2` pips
+  - PF `0.571`
+  - win rate `29.1%`
+- `USDCHF`:
+  - `55` trades
+  - `+125.0` pips
+  - PF `1.636`
+  - win rate `49.1%`
+  - avg R `0.276`
+
+Focused tuning pass:
+- `EURUSD` did not hold edge:
+  - base: `+17.6` pips, PF `1.066`
+  - `RR=1.5`: `-29.6` pips, PF `0.890`
+  - stricter equal levels: `+0.1` pips, PF `1.000`
+  - faster BOS/retest: `-45.4` pips, PF `0.784`
+- `USDCHF` stayed positive across variants:
+  - base: `+125.0` pips, PF `1.636`
+  - `RR=1.5`: `+87.5` pips, PF `1.455`
+  - stricter equal levels: `+99.7` pips, PF `1.532`
+  - faster BOS/retest: `+29.9` pips, PF `1.214`
+
+Decision:
+- not a EURUSD live candidate at this stage
+- USDCHF is a real research candidate because it stayed positive across several variants
+- next useful step is to convert only the USDCHF version into a demo branch after adding a stronger TP target selector toward opposing liquidity

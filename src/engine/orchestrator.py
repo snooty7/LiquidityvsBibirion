@@ -3034,11 +3034,12 @@ def run(config_path: str = "config/settings.json") -> None:
                 app_config.runtime,
             )
             print(
-                f"{cfg.symbol} tf={cfg.timeframe} confirm={cfg.confirmation_mode}/{cfg.confirm_expiry_bars} "
+                f"{cfg.magic} {cfg.symbol} tf={cfg.timeframe} confirm={cfg.confirmation_mode}/{cfg.confirm_expiry_bars} "
                 f"cisd={cfg.cisd_timeframe}/{cfg.cisd_structure_bars}/{cfg.cisd_lookback_bars} "
                 f"bias={cfg.use_bias_filter}/{cfg.bias_timeframe}/{cfg.bias_ema_period} "
                 f"ob={cfg.use_order_block_filter}/{cfg.order_block_zone_mode}/{cfg.order_block_lookback_bars}/"
                 f"{cfg.order_block_max_distance_pips}/{cfg.order_block_min_impulse_pips}/{cfg.order_block_max_age_bars} "
+                f"lot={cfg.min_lot:.2f}-{cfg.max_lot:.2f} "
                 f"hold={cfg.max_hold_bars} "
                 f"trail={trailing_mode}/{trailing_activation_r:.2f}R/{trailing_gap_r:.2f}R/"
                 f"remove_tp={trailing_remove_tp}"
