@@ -12,6 +12,7 @@ from src.strategy.liquidity import (
     detect_trend_day_acceleration_signal,
     detect_two_candle_momentum_signal,
     detect_trend_micro_burst_v2_signal,
+    detect_volume_sweep_reclaim_signal,
     evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
@@ -476,6 +477,64 @@ def test_detect_trend_micro_burst_v2_signal_buy_break() -> None:
     assert result.signal is not None
     assert result.signal.side == "BUY"
     assert result.note == "trend_micro_burst_v2_buy_break"
+
+
+def test_detect_volume_sweep_reclaim_signal_buy_against_ema() -> None:
+    rates = []
+    price = 1.1010
+    for idx in range(60):
+        rates.append(
+            {
+                "time": idx + 1,
+                "open": price,
+                "high": price + 0.00015,
+                "low": price - 0.00015,
+                "close": price - 0.00003,
+                "tick_volume": 100,
+                "real_volume": 0,
+            }
+        )
+        price -= 0.00001
+
+    prior_low = min(item["low"] for item in rates[-21:-1])
+    rates[-1] = {
+        "time": 61,
+        "open": prior_low - 0.00020,
+        "high": prior_low + 0.00045,
+        "low": prior_low - 0.00025,
+        "close": prior_low + 0.00020,
+        "tick_volume": 220,
+        "real_volume": 0,
+    }
+    rates.append(
+        {
+            "time": 62,
+            "open": rates[-1]["close"],
+            "high": rates[-1]["close"],
+            "low": rates[-1]["close"],
+            "close": rates[-1]["close"],
+            "tick_volume": 0,
+            "real_volume": 0,
+        }
+    )
+
+    result = detect_volume_sweep_reclaim_signal(
+        rates,
+        lookback_bars=20,
+        volume_sma_period=20,
+        volume_multiple=1.8,
+        ema_period=50,
+        body_ratio_min=0.5,
+        buffer_price=0.00003,
+        stop_padding_price=0.00003,
+        tp_distance_price=0.00080,
+    )
+
+    assert result.signal is not None
+    assert result.signal.side == "BUY"
+    assert result.note == "volume_sweep_reclaim_buy"
+    assert result.stop_price < rates[-2]["low"]
+    assert result.target_price > rates[-2]["close"]
 
 
 def test_evaluate_none_confirmation_confirms_on_next_closed_candle() -> None:

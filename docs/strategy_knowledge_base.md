@@ -855,3 +855,66 @@ Takeaway:
 - `92010` was genuinely too tight and earned a live tuning change
 - `92018` looked tight in the moment, but the broader test says the current version is still the better one
 
+## 2026-04-28 Volume Sweep Reclaim research branch
+
+Hypothesis:
+- user-observed pattern: larger M5 tick volume often appears around sweep candles
+- tested edge: high tick volume should not be traded alone; it needs a liquidity sweep and reclaim
+
+Initial statistical read:
+- high tick volume roughly increases the probability of a sweep, but also increases breakout/continuation frequency
+- raw rule `volume spike -> sweep/reclaim` was negative in the first broad test
+- the only promising variant was mean-reversion context:
+  - buy below EMA50 after sellside sweep/reclaim
+  - sell above EMA50 after buyside sweep/reclaim
+
+Implemented research/demo branch:
+- folder: `live/volume_sweep_reclaim_demo_92025_92028`
+- strategy mode: `volume_sweep_reclaim`
+- branches:
+  - `92025` EURUSD M5
+  - `92026` GBPUSD M5
+  - `92027` USDCHF M5
+  - `92028` NZDUSD M5
+
+Core rules:
+- previous liquidity window: `20` M5 candles
+- tick volume must be at least `1.8x` prior `20` candle volume SMA
+- reclaim candle body ratio must be at least `0.50`
+- EMA context: trade against EMA50 location
+- SL: behind sweep wick by `0.3` pip
+- TP: fixed `8` pip target through custom TP risk context
+- max hold: `12` M5 bars
+- session: `12:00-18:00 UTC`
+
+Backtest window:
+- `2025-08-25 -> 2026-04-28`
+- dry-run research profile, `0.01` max lot
+
+Results:
+- `92025` EURUSD M5:
+  - `7` trades
+  - `+23.0` pips
+  - pip PF `3.347`
+  - win rate `71.43%`
+- `92026` GBPUSD M5:
+  - `8` trades
+  - `-35.1` pips
+  - pip PF `0.129`
+  - win rate `12.50%`
+- `92027` USDCHF M5:
+  - `3` trades
+  - `-3.1` pips
+  - pip PF `0.640`
+  - win rate `33.33%`
+- `92028` NZDUSD M5:
+  - `6` trades
+  - `+12.5` pips
+  - pip PF `2.582`
+  - win rate `66.67%`
+
+Decision:
+- not ready for live money because trade count is too small
+- EURUSD and NZDUSD are worth monitoring in demo/research only
+- GBPUSD and USDCHF do not currently validate this edge
+- this strategy should not be merged into the active top live branches until it produces a larger validated sample

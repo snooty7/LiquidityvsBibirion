@@ -62,6 +62,7 @@ class TrendRetestReclaimSignalResult:
     signal: Optional[SweepSignal]
     note: str
     stop_price: float = 0.0
+    target_price: float = 0.0
     tp_r_multiple: float = 0.0
     risk_pct_override: float = 0.0
     bias_note: str = ""
@@ -775,6 +776,106 @@ def detect_trend_day_acceleration_signal(
         )
 
     return MicroBurstSignalResult(None, "trend_day_accel_wait_break")
+
+
+def detect_volume_sweep_reclaim_signal(
+    rates: Sequence[object],
+    *,
+    lookback_bars: int,
+    volume_sma_period: int,
+    volume_multiple: float,
+    ema_period: int,
+    body_ratio_min: float,
+    buffer_price: float,
+    stop_padding_price: float,
+    tp_distance_price: float,
+) -> TrendRetestReclaimSignalResult:
+    rows = list(rates)
+    needed = max(int(lookback_bars) + 2, int(volume_sma_period) + 2, int(ema_period) + 2)
+    if len(rows) < needed:
+        return TrendRetestReclaimSignalResult(None, "volume_sweep_context_insufficient")
+
+    closed = rows[:-1]
+    if len(closed) < needed - 1:
+        return TrendRetestReclaimSignalResult(None, "volume_sweep_context_insufficient")
+
+    last_closed = closed[-1]
+    prior = closed[-(int(lookback_bars) + 1) : -1]
+    volume_prior = closed[-(int(volume_sma_period) + 1) : -1]
+    if len(prior) < int(lookback_bars) or len(volume_prior) < int(volume_sma_period):
+        return TrendRetestReclaimSignalResult(None, "volume_sweep_context_insufficient")
+
+    volume_sma = sum(_volume(item) for item in volume_prior) / max(len(volume_prior), 1)
+    volume_ratio = _volume(last_closed) / max(volume_sma, 1e-10)
+    if volume_ratio < float(volume_multiple):
+        return TrendRetestReclaimSignalResult(
+            None,
+            "volume_sweep_wait_volume",
+            volume_ratio=float(volume_ratio),
+        )
+
+    body_ratio = candle_body_ratio(last_closed)
+    if body_ratio < float(body_ratio_min):
+        return TrendRetestReclaimSignalResult(
+            None,
+            "volume_sweep_body_too_small",
+            volume_ratio=float(volume_ratio),
+        )
+
+    closes = [_price(item, "close") for item in closed]
+    ema_values = ema(closes, int(ema_period))
+    ema_value = float(ema_values[-1])
+    close_price = _price(last_closed, "close")
+    open_price = _price(last_closed, "open")
+    high_price = _price(last_closed, "high")
+    low_price = _price(last_closed, "low")
+    prior_high = max(_price(item, "high") for item in prior)
+    prior_low = min(_price(item, "low") for item in prior)
+
+    # The tested edge was not "volume follows trend"; it was liquidity grab against EMA50.
+    buy_reclaim = (
+        close_price < ema_value
+        and low_price < prior_low - buffer_price
+        and close_price > prior_low
+        and close_price > open_price
+    )
+    if buy_reclaim:
+        stop_price = float(low_price - stop_padding_price)
+        target_price = float(close_price + tp_distance_price)
+        return TrendRetestReclaimSignalResult(
+            SweepSignal(side="BUY", level=float(prior_low), candle_time=int(last_closed["time"])),
+            "volume_sweep_reclaim_buy",
+            stop_price=stop_price,
+            target_price=target_price,
+            tp_r_multiple=0.0,
+            sweep_level=float(prior_low),
+            volume_ratio=float(volume_ratio),
+        )
+
+    sell_reclaim = (
+        close_price > ema_value
+        and high_price > prior_high + buffer_price
+        and close_price < prior_high
+        and close_price < open_price
+    )
+    if sell_reclaim:
+        stop_price = float(high_price + stop_padding_price)
+        target_price = float(close_price - tp_distance_price)
+        return TrendRetestReclaimSignalResult(
+            SweepSignal(side="SELL", level=float(prior_high), candle_time=int(last_closed["time"])),
+            "volume_sweep_reclaim_sell",
+            stop_price=stop_price,
+            target_price=target_price,
+            tp_r_multiple=0.0,
+            sweep_level=float(prior_high),
+            volume_ratio=float(volume_ratio),
+        )
+
+    return TrendRetestReclaimSignalResult(
+        None,
+        "volume_sweep_wait_reclaim",
+        volume_ratio=float(volume_ratio),
+    )
 
 
 def detect_two_candle_momentum_signal(

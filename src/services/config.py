@@ -459,6 +459,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         "trend_micro_burst_v2",
         "trend_day_acceleration",
         "btc_mtf_trend_retest_reclaim",
+        "volume_sweep_reclaim",
     }
     valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}

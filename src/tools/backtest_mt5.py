@@ -45,6 +45,7 @@ from src.strategy.liquidity import (
     detect_sweep_signal,
     detect_trend_day_acceleration_signal,
     detect_trend_micro_burst_v2_signal,
+    detect_volume_sweep_reclaim_signal,
     evaluate_compression_window,
     evaluate_range_filter,
     evaluate_sweep_significance,
@@ -403,6 +404,19 @@ def _detect_signal_for_cfg(
             weekend_risk_multiplier=cfg.weekend_risk_multiplier,
         )
         signal = trend_retest_result.signal
+    elif cfg.strategy_mode == "volume_sweep_reclaim":
+        trend_retest_result = detect_volume_sweep_reclaim_signal(
+            m5_rates,
+            lookback_bars=cfg.sweep_significance_lookback_bars,
+            volume_sma_period=cfg.volume_sma_period,
+            volume_multiple=cfg.breakout_volume_multiple,
+            ema_period=cfg.ema_slow_period,
+            body_ratio_min=cfg.micro_burst_body_ratio_min,
+            buffer_price=cfg.buffer_pips * pip,
+            stop_padding_price=cfg.buffer_pips * pip,
+            tp_distance_price=cfg.tp_pips * pip,
+        )
+        signal = trend_retest_result.signal
     else:
         levels = extract_pivot_levels(m5_rates, cfg.pivot_len, cfg.max_levels)
         signal = detect_sweep_signal(m5_rates, levels, cfg.buffer_pips * pip)
@@ -579,6 +593,7 @@ def _build_entry_trade(
     risk_pct = float(risk_context.get("risk_pct_override", cfg.risk_pct) or cfg.risk_pct)
     tp_r_multiple = float(risk_context.get("tp_r_multiple", cfg.rr) or cfg.rr)
     custom_sl = risk_context.get("sl_price")
+    custom_tp = risk_context.get("tp_price")
     if custom_sl is None:
         resolved_sl_pips = float(cfg.sl_pips)
         resolved_tp_pips = float(cfg.tp_pips)
@@ -591,12 +606,16 @@ def _build_entry_trade(
     else:
         sl = float(custom_sl)
         resolved_sl_pips = abs(float(entry_price) - sl) / max(pip, 1e-10)
-        tp_distance = abs(float(entry_price) - sl) * tp_r_multiple
-        resolved_tp_pips = tp_distance / max(pip, 1e-10)
-        if entry_side == "BUY":
-            tp = float(entry_price + tp_distance)
+        if custom_tp is not None:
+            tp = float(custom_tp)
+            resolved_tp_pips = abs(tp - float(entry_price)) / max(pip, 1e-10)
         else:
-            tp = float(entry_price - tp_distance)
+            tp_distance = abs(float(entry_price) - sl) * tp_r_multiple
+            resolved_tp_pips = tp_distance / max(pip, 1e-10)
+            if entry_side == "BUY":
+                tp = float(entry_price + tp_distance)
+            else:
+                tp = float(entry_price - tp_distance)
 
     volume = calc_lot_by_risk(
         equity,
@@ -892,6 +911,7 @@ def run_backtest(
                     "trend_micro_burst_v2",
                     "trend_day_acceleration",
                     "btc_mtf_trend_retest_reclaim",
+                    "volume_sweep_reclaim",
                 ):
                     pass
                 else:
@@ -938,6 +958,9 @@ def run_backtest(
                         {
                             "risk": {
                                 "sl_price": float(trend_retest_result.stop_price),
+                                "tp_price": float(trend_retest_result.target_price)
+                                if trend_retest_result.target_price > 0
+                                else None,
                                 "tp_r_multiple": float(trend_retest_result.tp_r_multiple or cfg.rr),
                                 "risk_pct_override": float(trend_retest_result.risk_pct_override or cfg.risk_pct),
                             }
@@ -1091,6 +1114,19 @@ def run_backtest(
                     max_overlap_ratio=cfg.max_overlap_ratio,
                     base_risk_pct=cfg.risk_pct,
                     weekend_risk_multiplier=cfg.weekend_risk_multiplier,
+                )
+                signal = trend_retest_result.signal
+            elif cfg.strategy_mode == "volume_sweep_reclaim":
+                trend_retest_result = detect_volume_sweep_reclaim_signal(
+                    m5_rates,
+                    lookback_bars=cfg.sweep_significance_lookback_bars,
+                    volume_sma_period=cfg.volume_sma_period,
+                    volume_multiple=cfg.breakout_volume_multiple,
+                    ema_period=cfg.ema_slow_period,
+                    body_ratio_min=cfg.micro_burst_body_ratio_min,
+                    buffer_price=cfg.buffer_pips * pip,
+                    stop_padding_price=cfg.buffer_pips * pip,
+                    tp_distance_price=cfg.tp_pips * pip,
                 )
                 signal = trend_retest_result.signal
             else:
