@@ -203,3 +203,80 @@ def test_latest_close_deal_for_position_prefers_direct_position_lookup(monkeypat
     assert deal is not None
     assert deal.price == 1.1560
     assert fake.range_calls == 0
+
+
+class FakeMT5CloseOrderSend(FakeMT5):
+    ORDER_TYPE_BUY = 0
+    ORDER_TYPE_SELL = 1
+    POSITION_TYPE_BUY = 0
+    POSITION_TYPE_SELL = 1
+    TRADE_ACTION_DEAL = 1
+    ORDER_TIME_GTC = 0
+    ORDER_FILLING_FOK = 0
+    ORDER_FILLING_IOC = 1
+    ORDER_FILLING_RETURN = 2
+    TRADE_RETCODE_DONE = 10009
+    TRADE_RETCODE_DONE_PARTIAL = 10010
+    TRADE_RETCODE_INVALID_FILL = 10030
+    TRADE_RETCODE_PRICE_CHANGED = 10020
+
+    def __init__(self, results) -> None:
+        super().__init__()
+        self.results = list(results)
+        self.requests = []
+
+    def symbol_info(self, symbol):
+        return SimpleNamespace(name=symbol, visible=True, select=True, digits=5, point=0.00001)
+
+    def symbol_info_tick(self, symbol):
+        return SimpleNamespace(
+            bid=1.10001 + len(self.requests) * 0.00001,
+            ask=1.10003 + len(self.requests) * 0.00001,
+        )
+
+    def order_send(self, request):
+        self.requests.append(dict(request))
+        if self.results:
+            return self.results.pop(0)
+        return None
+
+    def last_error(self):
+        return (-1, "Terminal: Call failed")
+
+
+def test_close_position_retries_after_none_result(monkeypatch) -> None:
+    fake = FakeMT5CloseOrderSend([
+        None,
+        SimpleNamespace(retcode=FakeMT5CloseOrderSend.TRADE_RETCODE_DONE, order=123, deal=456),
+    ])
+    monkeypatch.setattr(mt5_adapter, "mt5", fake)
+
+    result = mt5_adapter.MT5Adapter(default_deviation=20).close_position_market_with_fallback(
+        symbol="EURUSD",
+        position=SimpleNamespace(type=FakeMT5CloseOrderSend.POSITION_TYPE_BUY, ticket=10, volume=0.1),
+        magic=92014,
+        reason="adverse_close_exit 1bars",
+    )
+
+    assert result.ok is True
+    assert result.retcode == FakeMT5CloseOrderSend.TRADE_RETCODE_DONE
+    assert len(fake.requests) == 2
+    assert fake.shutdown_calls == 1
+    assert fake.initialize_calls == 1
+
+
+def test_close_position_returns_last_error_payload_when_mt5_returns_none(monkeypatch) -> None:
+    fake = FakeMT5CloseOrderSend([None, None, None, None, None, None, None, None, None])
+    monkeypatch.setattr(mt5_adapter, "mt5", fake)
+
+    result = mt5_adapter.MT5Adapter(default_deviation=20).close_position_market_with_fallback(
+        symbol="EURUSD",
+        position=SimpleNamespace(type=FakeMT5CloseOrderSend.POSITION_TYPE_SELL, ticket=11, volume=0.1),
+        magic=92014,
+        reason="adverse_close_exit 1bars",
+    )
+
+    assert result.ok is False
+    assert result.raw["last_error"] == (-1, "Terminal: Call failed")
+    assert result.raw["request"]["position"] == 11
+    assert result.raw["request"]["volume"] == 0.1

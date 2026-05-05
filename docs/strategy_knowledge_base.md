@@ -855,6 +855,50 @@ Takeaway:
 - `92010` was genuinely too tight and earned a live tuning change
 - `92018` looked tight in the moment, but the broader test says the current version is still the better one
 
+## 2026-05-05 92008 / 92014 repair pass
+
+Context:
+- `92008 EURUSD M30` was repeatedly showing profitable pending-only setups that expired before confirmation.
+- `92014 EURUSD M1` was opening trades, but live risk closes were failing with `RISK_CLOSE_FAIL` because MT5 returned `None` on close attempts; trades then reached broker SL instead of the bot's early exit.
+
+Validation window:
+- `2026-01-07 -> 2026-05-04`
+- branch-only backtests with the current config sizing baseline
+
+`92008 EURUSD M30`:
+- baseline:
+  - `trades 52`
+  - `net +62.10`
+  - `PF 1.124`
+- tested `confirm_expiry_bars = 8` with pending refresh enabled:
+  - `trades 54`
+  - `net +139.10`
+  - `PF 1.268`
+- looser displacement variants degraded PF and net.
+- decision:
+  - promote `92008` to `confirm_expiry_bars = 8`
+  - enable `refresh_pending_on_newer_signal = true`
+  - keep displacement strictness unchanged
+
+`92014 EURUSD M1`:
+- baseline:
+  - `trades 242`
+  - `net -49.90`
+  - `PF 0.795`
+- tested `early_exit_consecutive_adverse_closes = 1`:
+  - `trades 260`
+  - `net +1.30`
+  - `PF 1.009`
+- `rr = 1.0` variant degraded the result.
+- decision:
+  - promote `92014` to `early_exit_consecutive_adverse_closes = 1`
+  - keep `rr = 1.5`
+  - separately harden the MT5 close fallback so early exits can actually execute live
+
+Implementation note:
+- `MT5Adapter.close_position_market_with_fallback` now retries on `None`, invalid fill, requote, price-change, price-off, timeout, and connection retcodes.
+- Close attempts refresh tick price, widen deviation steps, reinitialize MT5 after `None`, and log `mt5.last_error()` payload when no result is returned.
+
 ## 2026-04-28 Volume Sweep Reclaim research branch
 
 Hypothesis:

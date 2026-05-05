@@ -197,6 +197,35 @@ class MT5Adapter:
         modes = [mt5.ORDER_FILLING_FOK, mt5.ORDER_FILLING_IOC, getattr(mt5, "ORDER_FILLING_RETURN", 2)]
         return list(dict.fromkeys(modes))
 
+    def _last_error_payload(self, *, request: Optional[dict] = None) -> dict:
+        try:
+            last_error = mt5.last_error()
+        except Exception as exc:  # pragma: no cover - defensive around MT5 bindings
+            last_error = f"last_error_unavailable:{exc}"
+
+        payload = {"last_error": last_error}
+        if request is not None:
+            payload["request"] = {
+                key: value
+                for key, value in request.items()
+                if key not in {"action", "type", "type_time", "type_filling"}
+            }
+        return payload
+
+    @staticmethod
+    def _retryable_trade_retcode(retcode: Optional[int]) -> bool:
+        if mt5 is None or retcode is None:
+            return False
+        retryable = {
+            int(getattr(mt5, "TRADE_RETCODE_REQUOTE", 10004)),
+            int(getattr(mt5, "TRADE_RETCODE_TIMEOUT", 10012)),
+            int(getattr(mt5, "TRADE_RETCODE_INVALID_PRICE", 10015)),
+            int(getattr(mt5, "TRADE_RETCODE_PRICE_CHANGED", 10020)),
+            int(getattr(mt5, "TRADE_RETCODE_PRICE_OFF", 10021)),
+            int(getattr(mt5, "TRADE_RETCODE_CONNECTION", 10031)),
+        }
+        return int(retcode) in retryable
+
     def send_market_order_with_fallback(
         self,
         symbol: str,
@@ -339,48 +368,79 @@ class MT5Adapter:
     ) -> CloseResult:
         self._ensure_mt5()
 
-        tick = self.symbol_tick(symbol)
-        deviation = self.default_deviation if deviation is None else int(deviation)
-
         close_side = mt5.ORDER_TYPE_SELL if int(position.type) == mt5.POSITION_TYPE_BUY else mt5.ORDER_TYPE_BUY
-        close_price = float(tick.bid if close_side == mt5.ORDER_TYPE_SELL else tick.ask)
+        deviation = self.default_deviation if deviation is None else int(deviation)
+        deviation_steps = list(dict.fromkeys([deviation, max(deviation * 2, 50), max(deviation * 5, 100)]))
         invalid_fill_retcode = int(getattr(mt5, "TRADE_RETCODE_INVALID_FILL", 10030))
+        done_retcodes = {
+            int(getattr(mt5, "TRADE_RETCODE_DONE", 10009)),
+            int(getattr(mt5, "TRADE_RETCODE_DONE_PARTIAL", 10010)),
+        }
 
         last_result = None
-        for fill_type in self._fill_modes():
-            request = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": symbol,
-                "volume": float(position.volume),
-                "type": close_side,
-                "position": int(position.ticket),
-                "price": close_price,
-                "deviation": deviation,
-                "magic": int(magic),
-                "comment": f"CLOSE:{reason}"[:31],
-                "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": fill_type,
-            }
-            result = mt5.order_send(request)
-            last_result = result
+        last_request = None
+        last_error_payload: Optional[dict] = None
 
-            if result is None:
-                break
+        self.ensure_symbol(symbol)
+        for current_deviation in deviation_steps:
+            for fill_type in self._fill_modes():
+                tick = self.symbol_tick(symbol)
+                close_price = float(tick.bid if close_side == mt5.ORDER_TYPE_SELL else tick.ask)
+                request = {
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": float(position.volume),
+                    "type": close_side,
+                    "position": int(position.ticket),
+                    "price": close_price,
+                    "deviation": int(current_deviation),
+                    "magic": int(magic),
+                    "comment": f"CLOSE:{reason}"[:31],
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": fill_type,
+                }
+                last_request = request
+                result = mt5.order_send(request)
+                last_result = result
 
-            retcode = getattr(result, "retcode", None)
-            if retcode != invalid_fill_retcode:
-                break
+                if result is None:
+                    last_error_payload = self._last_error_payload(request=request)
+                    self._reinitialize()
+                    self.ensure_symbol(symbol)
+                    continue
+
+                retcode = getattr(result, "retcode", None)
+                if retcode in done_retcodes:
+                    return CloseResult(
+                        ok=True,
+                        retcode=retcode,
+                        order=getattr(result, "order", None),
+                        deal=getattr(result, "deal", None),
+                        price=close_price,
+                        raw=result,
+                    )
+                if retcode == invalid_fill_retcode or self._retryable_trade_retcode(retcode):
+                    continue
+                return CloseResult(
+                    ok=False,
+                    retcode=retcode,
+                    order=getattr(result, "order", None),
+                    deal=getattr(result, "deal", None),
+                    price=close_price,
+                    raw=result,
+                )
 
         retcode = getattr(last_result, "retcode", None) if last_result is not None else None
-        is_done = retcode == mt5.TRADE_RETCODE_DONE
+        close_price = float(last_request.get("price", 0.0)) if last_request is not None else 0.0
+        raw = last_result if last_result is not None else (last_error_payload or self._last_error_payload(request=last_request))
 
         return CloseResult(
-            ok=bool(is_done),
+            ok=False,
             retcode=retcode,
             order=getattr(last_result, "order", None) if last_result is not None else None,
             deal=getattr(last_result, "deal", None) if last_result is not None else None,
             price=close_price,
-            raw=last_result,
+            raw=raw,
         )
 
     def modify_position_protection(
