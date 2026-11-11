@@ -1,0 +1,1354 @@
+{
+  "1": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 163,
+          "net_pnl": -212.7179754946871,
+          "return_pct": -2.1271797549468707,
+          "gross_pnl": 89.23236783994506,
+          "spread_cost": 228.08156903493963,
+          "commission_cost": 45.64000000000001,
+          "slippage_cost": 28.228774299692603,
+          "win_rate_pct": 41.104294478527606,
+          "profit_factor": 0.749301696775707,
+          "profit_factor_note": "",
+          "avg_r": -0.14921785458302667,
+          "max_realized_drawdown": 272.758310603007
+        },
+        "buy_metrics": {
+          "trades": 87,
+          "net_pnl": -136.53907087502407,
+          "return_pct": -1.3653907087502406,
+          "gross_pnl": -48.83751136513105,
+          "spread_cost": 48.27466770576266,
+          "commission_cost": 24.360000000000003,
+          "slippage_cost": 15.066891804130407,
+          "win_rate_pct": 41.37931034482759,
+          "profit_factor": 0.6956479315850216,
+          "profit_factor_note": "",
+          "avg_r": -0.17944935245250923,
+          "max_realized_drawdown": 189.13128977784072
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 143,
+          "net_pnl": -239.28665540982254,
+          "return_pct": -2.3928665540982252,
+          "gross_pnl": 42.90600510885951,
+          "spread_cost": 217.38753950729534,
+          "commission_cost": 40.040000000000006,
+          "slippage_cost": 24.76512101138676,
+          "win_rate_pct": 39.16083916083916,
+          "profit_factor": 0.6878154453874084,
+          "profit_factor_note": "",
+          "avg_r": -0.19133157515753693,
+          "max_realized_drawdown": 263.00541109224287
+        },
+        "buy_metrics": {
+          "trades": 67,
+          "net_pnl": -163.1077507901595,
+          "return_pct": -1.6310775079015953,
+          "gross_pnl": -95.16387409621659,
+          "spread_cost": 37.58063817811838,
+          "commission_cost": 18.76,
+          "slippage_cost": 11.603238515824566,
+          "win_rate_pct": 37.3134328358209,
+          "profit_factor": 0.5550934737662372,
+          "profit_factor_note": "",
+          "avg_r": -0.2783581882666081,
+          "max_realized_drawdown": 174.30078191968641
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 124,
+          "net_pnl": -108.88547603587463,
+          "return_pct": -1.0888547603587464,
+          "gross_pnl": 154.9551889855567,
+          "spread_cost": 207.64601463393515,
+          "commission_cost": 34.720000000000006,
+          "slippage_cost": 21.47465038749621,
+          "win_rate_pct": 43.54838709677419,
+          "profit_factor": 0.8260372262518263,
+          "profit_factor_note": "",
+          "avg_r": -0.10040433727245965,
+          "max_realized_drawdown": 162.26552799062483
+        },
+        "buy_metrics": {
+          "trades": 48,
+          "net_pnl": -32.7065714162116,
+          "return_pct": -0.32706571416211605,
+          "gross_pnl": 16.885309780480597,
+          "spread_cost": 27.839113304758197,
+          "commission_cost": 13.440000000000001,
+          "slippage_cost": 8.312767891934017,
+          "win_rate_pct": 47.91666666666667,
+          "profit_factor": 0.8553016417978917,
+          "profit_factor_note": "",
+          "avg_r": -0.07791085808583244,
+          "max_realized_drawdown": 54.52252067367044
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 87,
+      "thresholds": {
+        "q25": 0.04659465638756012,
+        "q50": 0.16088485401273037
+      }
+    }
+  },
+  "2": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 161,
+          "net_pnl": -165.18217777203807,
+          "return_pct": -1.6518217777203807,
+          "gross_pnl": 136.77100922194379,
+          "spread_cost": 228.9907780231199,
+          "commission_cost": 45.080000000000005,
+          "slippage_cost": 27.882408970862016,
+          "win_rate_pct": 41.61490683229814,
+          "profit_factor": 0.7993779141769326,
+          "profit_factor_note": "",
+          "avg_r": -0.11731175081485526,
+          "max_realized_drawdown": 304.95038056879093
+        },
+        "buy_metrics": {
+          "trades": 86,
+          "net_pnl": -105.47585227520517,
+          "return_pct": -1.0547585227520517,
+          "gross_pnl": -21.258172056995047,
+          "spread_cost": 45.24397107849505,
+          "commission_cost": 24.080000000000002,
+          "slippage_cost": 14.893709139715115,
+          "win_rate_pct": 41.86046511627907,
+          "profit_factor": 0.7511149714793471,
+          "profit_factor_note": "",
+          "avg_r": -0.14023576790239395,
+          "max_realized_drawdown": 217.19573277908785
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 141,
+          "net_pnl": -175.03873057109791,
+          "return_pct": -1.7503873057109791,
+          "gross_pnl": 107.71961726628352,
+          "spread_cost": 218.85959215482532,
+          "commission_cost": 39.480000000000004,
+          "slippage_cost": 24.418755682556178,
+          "win_rate_pct": 40.42553191489361,
+          "profit_factor": 0.7609501038438009,
+          "profit_factor_note": "",
+          "avg_r": -0.1419447215785621,
+          "max_realized_drawdown": 266.4197610078227
+        },
+        "buy_metrics": {
+          "trades": 66,
+          "net_pnl": -115.33240507426503,
+          "return_pct": -1.15332405074265,
+          "gross_pnl": -50.30956401265532,
+          "spread_cost": 35.112785210200464,
+          "commission_cost": 18.48,
+          "slippage_cost": 11.430055851409275,
+          "win_rate_pct": 39.39393939393939,
+          "profit_factor": 0.653313211741666,
+          "profit_factor_note": "",
+          "avg_r": -0.19980742274229454,
+          "max_realized_drawdown": 178.6651132181196
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 120,
+          "net_pnl": -34.206139325477636,
+          "return_pct": -0.34206139325477636,
+          "gross_pnl": 228.4712300298499,
+          "spread_cost": 208.2954496254925,
+          "commission_cost": 33.6,
+          "slippage_cost": 20.781919729835046,
+          "win_rate_pct": 45.0,
+          "profit_factor": 0.9412806367914739,
+          "profit_factor_note": "",
+          "avg_r": -0.03259320132015465,
+          "max_realized_drawdown": 157.45149846296408
+        },
+        "buy_metrics": {
+          "trades": 45,
+          "net_pnl": 25.500186171355256,
+          "return_pct": 0.25500186171355255,
+          "gross_pnl": 70.44204875091104,
+          "spread_cost": 24.548642680867648,
+          "commission_cost": 12.600000000000001,
+          "slippage_cost": 7.793219898688141,
+          "win_rate_pct": 51.11111111111111,
+          "profit_factor": 1.1393608908105448,
+          "profit_factor_note": "",
+          "avg_r": 0.06479403740371684,
+          "max_realized_drawdown": 54.52252067367044
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 86,
+      "thresholds": {
+        "q25": 0.04908048865917583,
+        "q50": 0.16289538805320547
+      }
+    }
+  },
+  "3": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 161,
+          "net_pnl": -264.28595748368735,
+          "return_pct": -2.6428595748368733,
+          "gross_pnl": 26.32376499109288,
+          "spread_cost": 217.64731350391827,
+          "commission_cost": 45.080000000000005,
+          "slippage_cost": 27.882408970862016,
+          "win_rate_pct": 38.50931677018634,
+          "profit_factor": 0.6977700869877184,
+          "profit_factor_note": "",
+          "avg_r": -0.187694876083902,
+          "max_realized_drawdown": 304.95038056879093
+        },
+        "buy_metrics": {
+          "trades": 82,
+          "net_pnl": -207.44283326840534,
+          "return_pct": -2.0744283326840534,
+          "gross_pnl": -129.9735896436922,
+          "spread_cost": 40.308265142659224,
+          "commission_cost": 22.96,
+          "slippage_cost": 14.200978482053946,
+          "win_rate_pct": 36.58536585365854,
+          "profit_factor": 0.5365026960947682,
+          "profit_factor_note": "",
+          "avg_r": -0.28926027046608954,
+          "max_realized_drawdown": 229.12953630335141
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 141,
+          "net_pnl": -242.88303935578745,
+          "return_pct": -2.4288303935578743,
+          "gross_pnl": 29.311165952261174,
+          "spread_cost": 208.2954496254925,
+          "commission_cost": 39.480000000000004,
+          "slippage_cost": 24.418755682556178,
+          "win_rate_pct": 37.5886524822695,
+          "profit_factor": 0.6862859285116026,
+          "profit_factor_note": "",
+          "avg_r": -0.19696192542660496,
+          "max_realized_drawdown": 271.8952409402791
+        },
+        "buy_metrics": {
+          "trades": 62,
+          "net_pnl": -186.03991514050546,
+          "return_pct": -1.8603991514050546,
+          "gross_pnl": -126.98618868252393,
+          "spread_cost": 30.956401264233453,
+          "commission_cost": 17.360000000000003,
+          "slippage_cost": 10.737325193748106,
+          "win_rate_pct": 33.87096774193548,
+          "profit_factor": 0.46436279387300045,
+          "profit_factor_note": "",
+          "avg_r": -0.34309836473971644,
+          "max_realized_drawdown": 193.60938736627395
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 123,
+          "net_pnl": -114.27720829547367,
+          "return_pct": -1.1427720829547368,
+          "gross_pnl": 140.75421050350454,
+          "spread_cost": 199.28995107589733,
+          "commission_cost": 34.440000000000005,
+          "slippage_cost": 21.301467723080922,
+          "win_rate_pct": 41.46341463414634,
+          "profit_factor": 0.8207209112515947,
+          "profit_factor_note": "",
+          "avg_r": -0.10623282137972016,
+          "max_realized_drawdown": 175.6761302333216
+        },
+        "buy_metrics": {
+          "trades": 44,
+          "net_pnl": -57.43408408019167,
+          "return_pct": -0.5743408408019166,
+          "gross_pnl": -15.543144131280572,
+          "spread_cost": 21.950902714638268,
+          "commission_cost": 12.32,
+          "slippage_cost": 7.62003723427285,
+          "win_rate_pct": 43.18181818181818,
+          "profit_factor": 0.727196666693368,
+          "profit_factor_note": "",
+          "avg_r": -0.14925236723674312,
+          "max_realized_drawdown": 74.49636143220596
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 82,
+      "thresholds": {
+        "q25": 0.038416506934315135,
+        "q50": 0.1585120360155965
+      }
+    }
+  },
+  "4": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 158,
+          "net_pnl": -138.4080737758469,
+          "return_pct": -1.384080737758469,
+          "gross_pnl": 146.16616876647456,
+          "spread_cost": 212.97138156470538,
+          "commission_cost": 44.24,
+          "slippage_cost": 27.36286097761614,
+          "win_rate_pct": 41.139240506329116,
+          "profit_factor": 0.8296074140315313,
+          "profit_factor_note": "",
+          "avg_r": -0.10016328111294341,
+          "max_realized_drawdown": 283.05098411039035
+        },
+        "buy_metrics": {
+          "trades": 76,
+          "net_pnl": -158.87362687796357,
+          "return_pct": -1.5887362687796356,
+          "gross_pnl": -88.6695241806436,
+          "spread_cost": 35.762220201757806,
+          "commission_cost": 21.28,
+          "slippage_cost": 13.161882495562194,
+          "win_rate_pct": 39.473684210526315,
+          "profit_factor": 0.5956241707466999,
+          "profit_factor_note": "",
+          "avg_r": -0.23902450234498995,
+          "max_realized_drawdown": 181.79788111006746
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 141,
+          "net_pnl": -142.61027665933452,
+          "return_pct": -1.4261027665933452,
+          "gross_pnl": 126.07697969430447,
+          "spread_cost": 204.78850067108283,
+          "commission_cost": 39.480000000000004,
+          "slippage_cost": 24.418755682556178,
+          "win_rate_pct": 39.71631205673759,
+          "profit_factor": 0.8071246185802361,
+          "profit_factor_note": "",
+          "avg_r": -0.11564741099644035,
+          "max_realized_drawdown": 268.22047625223604
+        },
+        "buy_metrics": {
+          "trades": 59,
+          "net_pnl": -163.07582976145116,
+          "return_pct": -1.6307582976145116,
+          "gross_pnl": -108.7587132528137,
+          "spread_cost": 27.57933930813526,
+          "commission_cost": 16.520000000000003,
+          "slippage_cost": 10.21777720050223,
+          "win_rate_pct": 35.59322033898305,
+          "profit_factor": 0.49036817914745184,
+          "profit_factor_note": "",
+          "avg_r": -0.3160398086927502,
+          "max_realized_drawdown": 163.07582976139201
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 125,
+          "net_pnl": -46.21357752091551,
+          "return_pct": -0.4621357752091551,
+          "gross_pnl": 207.73260596611743,
+          "spread_cost": 197.29835043512145,
+          "commission_cost": 35.0,
+          "slippage_cost": 21.647833051911505,
+          "win_rate_pct": 42.4,
+          "profit_factor": 0.9266376811616128,
+          "profit_factor_note": "",
+          "avg_r": -0.04227306930695343,
+          "max_realized_drawdown": 182.4707061522713
+        },
+        "buy_metrics": {
+          "trades": 43,
+          "net_pnl": -66.67913062303217,
+          "return_pct": -0.6667913062303217,
+          "gross_pnl": -27.103086981000747,
+          "spread_cost": 20.089189072173877,
+          "commission_cost": 12.040000000000001,
+          "slippage_cost": 7.446854569857558,
+          "win_rate_pct": 41.86046511627907,
+          "profit_factor": 0.6832840744782572,
+          "profit_factor_note": "",
+          "avg_r": -0.1773069168777524,
+          "max_realized_drawdown": 101.05841278085973
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 76,
+      "thresholds": {
+        "q25": 0.028301653962456715,
+        "q50": 0.14327823091278163
+      }
+    }
+  },
+  "5": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 158,
+          "net_pnl": -161.70114213970294,
+          "return_pct": -1.6170114213970292,
+          "gross_pnl": 106.33415595095812,
+          "spread_cost": 196.432437113045,
+          "commission_cost": 44.24,
+          "slippage_cost": 27.36286097761614,
+          "win_rate_pct": 40.50632911392405,
+          "profit_factor": 0.8044387744263892,
+          "profit_factor_note": "",
+          "avg_r": -0.11702003007897853,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "buy_metrics": {
+          "trades": 81,
+          "net_pnl": -146.72208338746807,
+          "return_pct": -1.4672208338746808,
+          "gross_pnl": -73.73251937482577,
+          "spread_cost": 36.281768195003686,
+          "commission_cost": 22.680000000000003,
+          "slippage_cost": 14.027795817638655,
+          "win_rate_pct": 39.50617283950617,
+          "profit_factor": 0.6508470973077337,
+          "profit_factor_note": "",
+          "avg_r": -0.20711648698205068,
+          "max_realized_drawdown": 185.8319677879772
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 140,
+          "net_pnl": -135.14319608609895,
+          "return_pct": -1.3514319608609895,
+          "gross_pnl": 116.50863748536051,
+          "spread_cost": 188.20626055331863,
+          "commission_cost": 39.2,
+          "slippage_cost": 24.245573018140885,
+          "win_rate_pct": 40.714285714285715,
+          "profit_factor": 0.8140115365955715,
+          "profit_factor_note": "",
+          "avg_r": -0.1103749080622558,
+          "max_realized_drawdown": 256.01077802303735
+        },
+        "buy_metrics": {
+          "trades": 63,
+          "net_pnl": -120.16413733386406,
+          "return_pct": -1.2016413733386406,
+          "gross_pnl": -63.55803784042339,
+          "spread_cost": 28.055591635277313,
+          "commission_cost": 17.64,
+          "slippage_cost": 10.910507858163399,
+          "win_rate_pct": 39.682539682539684,
+          "profit_factor": 0.6244724420521761,
+          "profit_factor_note": "",
+          "avg_r": -0.2180913939965605,
+          "max_realized_drawdown": 137.26085898599013
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 124,
+          "net_pnl": -67.14845391178788,
+          "return_pct": -0.6714845391178788,
+          "gross_pnl": 170.32515045241522,
+          "spread_cost": 181.27895397670696,
+          "commission_cost": 34.720000000000006,
+          "slippage_cost": 21.47465038749621,
+          "win_rate_pct": 41.935483870967744,
+          "profit_factor": 0.8943195449432547,
+          "profit_factor_note": "",
+          "avg_r": -0.061918230597275165,
+          "max_realized_drawdown": 191.58302203745006
+        },
+        "buy_metrics": {
+          "trades": 47,
+          "net_pnl": -52.169395159553005,
+          "return_pct": -0.52169395159553,
+          "gross_pnl": -9.741524873368673,
+          "spread_cost": 21.12828505866563,
+          "commission_cost": 13.160000000000002,
+          "slippage_cost": 8.139585227518726,
+          "win_rate_pct": 42.5531914893617,
+          "profit_factor": 0.7719446055147405,
+          "profit_factor_note": "",
+          "avg_r": -0.12691768696020464,
+          "max_realized_drawdown": 119.42304455121666
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 81,
+      "thresholds": {
+        "q25": 0.005498278717409125,
+        "q50": 0.1419938242180935
+      }
+    }
+  },
+  "6": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 169,
+          "net_pnl": -129.4951742650882,
+          "return_pct": -1.294951742650882,
+          "gross_pnl": 121.57423041950283,
+          "spread_cost": 174.48153439840675,
+          "commission_cost": 47.32000000000001,
+          "slippage_cost": 29.267870286184355,
+          "win_rate_pct": 40.23668639053255,
+          "profit_factor": 0.8555807055450164,
+          "profit_factor_note": "",
+          "avg_r": -0.08761351104343283,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "buy_metrics": {
+          "trades": 90,
+          "net_pnl": -150.75743170110218,
+          "return_pct": -1.5075743170110218,
+          "gross_pnl": -71.91410139846552,
+          "spread_cost": 38.05689050526043,
+          "commission_cost": 25.200000000000003,
+          "slippage_cost": 15.586439797376283,
+          "win_rate_pct": 38.88888888888889,
+          "profit_factor": 0.6865195905922177,
+          "profit_factor_note": "",
+          "avg_r": -0.19153159515953355,
+          "max_realized_drawdown": 198.97678832743077
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 148,
+          "net_pnl": -127.68496687884347,
+          "return_pct": -1.2768496687884348,
+          "gross_pnl": 104.68892063901595,
+          "spread_cost": 165.30285318439627,
+          "commission_cost": 41.440000000000005,
+          "slippage_cost": 25.631034333463223,
+          "win_rate_pct": 39.86486486486486,
+          "profit_factor": 0.8378219278304988,
+          "profit_factor_note": "",
+          "avg_r": -0.09864663098744368,
+          "max_realized_drawdown": 256.01077802303735
+        },
+        "buy_metrics": {
+          "trades": 69,
+          "net_pnl": -148.94722431485746,
+          "return_pct": -1.4894722431485747,
+          "gross_pnl": -88.7994111789524,
+          "spread_cost": 28.87820929124995,
+          "commission_cost": 19.32,
+          "slippage_cost": 11.949603844655151,
+          "win_rate_pct": 37.68115942028986,
+          "profit_factor": 0.5991378685345982,
+          "profit_factor_note": "",
+          "avg_r": -0.24682408092984834,
+          "max_realized_drawdown": 174.10452959254508
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 130,
+          "net_pnl": -43.67367190546728,
+          "return_pct": -0.4367367190546728,
+          "gross_pnl": 173.52902974409756,
+          "spread_cost": 158.28895527557694,
+          "commission_cost": 36.400000000000006,
+          "slippage_cost": 22.513746373987964,
+          "win_rate_pct": 41.53846153846154,
+          "profit_factor": 0.9347036587132875,
+          "profit_factor_note": "",
+          "avg_r": -0.03841320639758442,
+          "max_realized_drawdown": 200.69533792262882
+        },
+        "buy_metrics": {
+          "trades": 51,
+          "net_pnl": -64.93592934148127,
+          "return_pct": -0.6493592934148127,
+          "gross_pnl": -19.959302073870774,
+          "spread_cost": 21.86431138243062,
+          "commission_cost": 14.280000000000001,
+          "slippage_cost": 8.832315885179893,
+          "win_rate_pct": 41.17647058823529,
+          "profit_factor": 0.7434448575121361,
+          "profit_factor_note": "",
+          "avg_r": -0.1455858241118401,
+          "max_realized_drawdown": 132.1608217517114
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 90,
+      "thresholds": {
+        "q25": 0.0,
+        "q50": 0.13432595388168905
+      }
+    }
+  },
+  "7": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 169,
+          "net_pnl": -147.41958003207057,
+          "return_pct": -1.4741958003207056,
+          "gross_pnl": 115.07988050392972,
+          "spread_cost": 185.91159024981602,
+          "commission_cost": 47.32000000000001,
+          "slippage_cost": 29.267870286184355,
+          "win_rate_pct": 40.828402366863905,
+          "profit_factor": 0.8339025750405193,
+          "profit_factor_note": "",
+          "avg_r": -0.09974075927121383,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "buy_metrics": {
+          "trades": 91,
+          "net_pnl": -171.55957743431463,
+          "return_pct": -1.7155957743431463,
+          "gross_pnl": -93.21556912154678,
+          "spread_cost": 37.10438585097632,
+          "commission_cost": 25.480000000000004,
+          "slippage_cost": 15.759622461791576,
+          "win_rate_pct": 38.46153846153847,
+          "profit_factor": 0.6498979318279386,
+          "profit_factor_note": "",
+          "avg_r": -0.21556476770755753,
+          "max_realized_drawdown": 225.6946399964745
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 150,
+          "net_pnl": -171.2808589860438,
+          "return_pct": -1.712808589860438,
+          "gross_pnl": 74.55513703075488,
+          "spread_cost": 177.85859635450493,
+          "commission_cost": 42.00000000000001,
+          "slippage_cost": 25.977399662293806,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.7849380564691338,
+          "profit_factor_note": "",
+          "avg_r": -0.13056349834985514,
+          "max_realized_drawdown": 249.83655972629822
+        },
+        "buy_metrics": {
+          "trades": 72,
+          "net_pnl": -195.42085638828783,
+          "return_pct": -1.9542085638828781,
+          "gross_pnl": -133.74031259472162,
+          "spread_cost": 29.051391955665242,
+          "commission_cost": 20.160000000000004,
+          "slippage_cost": 12.469151837901027,
+          "win_rate_pct": 36.11111111111111,
+          "profit_factor": 0.5101057434769544,
+          "profit_factor_note": "",
+          "avg_r": -0.31034347634765097,
+          "max_realized_drawdown": 217.7076910420783
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 131,
+          "net_pnl": -61.27193834699649,
+          "return_pct": -0.6127193834699649,
+          "gross_pnl": 168.67991514046938,
+          "spread_cost": 170.58492444906267,
+          "commission_cost": 36.68000000000001,
+          "slippage_cost": 22.686929038403257,
+          "win_rate_pct": 42.74809160305343,
+          "profit_factor": 0.9071272789270332,
+          "profit_factor_note": "",
+          "avg_r": -0.053480385458414444,
+          "max_realized_drawdown": 191.58302203745006
+        },
+        "buy_metrics": {
+          "trades": 53,
+          "net_pnl": -85.41193574924054,
+          "return_pct": -0.8541193574924053,
+          "gross_pnl": -39.61553448500711,
+          "spread_cost": 21.777720050222975,
+          "commission_cost": 14.840000000000002,
+          "slippage_cost": 9.178681214010478,
+          "win_rate_pct": 41.509433962264154,
+          "profit_factor": 0.6742730362231333,
+          "profit_factor_note": "",
+          "avg_r": -0.18426671772839415,
+          "max_realized_drawdown": 144.1480339437676
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 91,
+      "thresholds": {
+        "q25": 0.011261894761672539,
+        "q50": 0.1419938242180935
+      }
+    }
+  },
+  "8": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 165,
+          "net_pnl": -87.937022124116,
+          "return_pct": -0.8793702212411599,
+          "gross_pnl": 167.4243408234529,
+          "spread_cost": 180.58622331904579,
+          "commission_cost": 46.2,
+          "slippage_cost": 28.575139628523186,
+          "win_rate_pct": 42.42424242424242,
+          "profit_factor": 0.8955601536498644,
+          "profit_factor_note": "",
+          "avg_r": -0.060938535853605924,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "buy_metrics": {
+          "trades": 93,
+          "net_pnl": -158.8278079404409,
+          "return_pct": -1.588278079404409,
+          "gross_pnl": -80.14027795819216,
+          "spread_cost": 36.541542191626625,
+          "commission_cost": 26.040000000000003,
+          "slippage_cost": 16.10598779062216,
+          "win_rate_pct": 39.784946236559136,
+          "profit_factor": 0.6758796863761612,
+          "profit_factor_note": "",
+          "avg_r": -0.1952755179389079,
+          "max_realized_drawdown": 233.82853790529225
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 146,
+          "net_pnl": -99.76210590122687,
+          "return_pct": -0.9976210590122688,
+          "gross_pnl": 139.06567952545188,
+          "spread_cost": 172.6631164220462,
+          "commission_cost": 40.88,
+          "slippage_cost": 25.284669004632637,
+          "win_rate_pct": 42.465753424657535,
+          "profit_factor": 0.865504734563174,
+          "profit_factor_note": "",
+          "avg_r": -0.07812984402551922,
+          "max_realized_drawdown": 238.44062778710577
+        },
+        "buy_metrics": {
+          "trades": 74,
+          "net_pnl": -170.65289171755177,
+          "return_pct": -1.7065289171755178,
+          "gross_pnl": -108.49893925619318,
+          "spread_cost": 28.618435294627012,
+          "commission_cost": 20.720000000000002,
+          "slippage_cost": 12.815517166731611,
+          "win_rate_pct": 39.189189189189186,
+          "profit_factor": 0.5621948105381533,
+          "profit_factor_note": "",
+          "avg_r": -0.2636854321648549,
+          "max_realized_drawdown": 216.72927306571728
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 126,
+          "net_pnl": -11.380792310713817,
+          "return_pct": -0.11380792310713816,
+          "gross_pnl": 210.97978092390537,
+          "spread_cost": 165.25955751829244,
+          "commission_cost": 35.28,
+          "slippage_cost": 21.821015716326798,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 0.9814699212753367,
+          "profit_factor_note": "",
+          "avg_r": -0.01032776049035652,
+          "max_realized_drawdown": 184.78844611850036
+        },
+        "buy_metrics": {
+          "trades": 54,
+          "net_pnl": -82.27157812703871,
+          "return_pct": -0.822715781270387,
+          "gross_pnl": -36.584837857739686,
+          "spread_cost": 21.214876390873275,
+          "commission_cost": 15.120000000000001,
+          "slippage_cost": 9.35186387842577,
+          "win_rate_pct": 42.592592592592595,
+          "profit_factor": 0.6862491042571895,
+          "profit_factor_note": "",
+          "avg_r": -0.1742048624862663,
+          "max_realized_drawdown": 145.48735593363563
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 93,
+      "thresholds": {
+        "q25": 0.017025510805935954,
+        "q50": 0.15074664848988986
+      }
+    }
+  },
+  "9": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 164,
+          "net_pnl": -91.89999740229008,
+          "return_pct": -0.9189999740229009,
+          "gross_pnl": 159.19816426372708,
+          "spread_cost": 176.77620470190936,
+          "commission_cost": 45.92,
+          "slippage_cost": 28.401956964107892,
+          "win_rate_pct": 42.68292682926829,
+          "profit_factor": 0.8896593109514492,
+          "profit_factor_note": "",
+          "avg_r": -0.06407311760446363,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "buy_metrics": {
+          "trades": 92,
+          "net_pnl": -145.73229077370894,
+          "return_pct": -1.4573229077370895,
+          "gross_pnl": -69.87920509158579,
+          "spread_cost": 34.16028055591636,
+          "commission_cost": 25.76,
+          "slippage_cost": 15.932805126206867,
+          "win_rate_pct": 41.30434782608695,
+          "profit_factor": 0.691116021424669,
+          "profit_factor_note": "",
+          "avg_r": -0.18112240206631078,
+          "max_realized_drawdown": 233.82853790529225
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 147,
+          "net_pnl": -119.04890332080471,
+          "return_pct": -1.190489033208047,
+          "gross_pnl": 117.63432480405994,
+          "spread_cost": 170.0653764558168,
+          "commission_cost": 41.160000000000004,
+          "slippage_cost": 25.45785166904793,
+          "win_rate_pct": 42.17687074829932,
+          "profit_factor": 0.8414508031346054,
+          "profit_factor_note": "",
+          "avg_r": -0.09260027345593712,
+          "max_realized_drawdown": 238.44062778710577
+        },
+        "buy_metrics": {
+          "trades": 75,
+          "net_pnl": -172.88119669222357,
+          "return_pct": -1.7288119669222355,
+          "gross_pnl": -111.44304455125294,
+          "spread_cost": 27.44945230982379,
+          "commission_cost": 21.000000000000004,
+          "slippage_cost": 12.988699831146903,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.5564781568571268,
+          "profit_factor_note": "",
+          "avg_r": -0.2635667986798842,
+          "max_realized_drawdown": 225.84158895089604
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 127,
+          "net_pnl": -15.73058492447292,
+          "return_pct": -0.1573058492447292,
+          "gross_pnl": 204.48543100833217,
+          "spread_cost": 162.66181755206307,
+          "commission_cost": 35.56,
+          "slippage_cost": 21.994198380742088,
+          "win_rate_pct": 44.881889763779526,
+          "profit_factor": 0.9743876376022539,
+          "profit_factor_note": "",
+          "avg_r": -0.014162677165375654,
+          "max_realized_drawdown": 182.4707061522713
+        },
+        "buy_metrics": {
+          "trades": 55,
+          "net_pnl": -69.56287829589178,
+          "return_pct": -0.6956287829589178,
+          "gross_pnl": -24.5919383469807,
+          "spread_cost": 20.045893406070054,
+          "commission_cost": 15.400000000000002,
+          "slippage_cost": 9.525046542841062,
+          "win_rate_pct": 45.45454545454545,
+          "profit_factor": 0.7251642606173048,
+          "profit_factor_note": "",
+          "avg_r": -0.14461690369038663,
+          "max_realized_drawdown": 143.16961596740657
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 92,
+      "thresholds": {
+        "q25": 0.014143702783804248,
+        "q50": 0.14327823091278163
+      }
+    }
+  },
+  "10": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 161,
+          "net_pnl": -40.966911720167,
+          "return_pct": -0.40966911720167,
+          "gross_pnl": 190.11126986185658,
+          "spread_cost": 158.11577261116165,
+          "commission_cost": 45.080000000000005,
+          "slippage_cost": 27.882408970862016,
+          "win_rate_pct": 43.47826086956522,
+          "profit_factor": 0.949099643799319,
+          "profit_factor_note": "",
+          "avg_r": -0.02909454400100507,
+          "max_realized_drawdown": 231.44411222231247
+        },
+        "buy_metrics": {
+          "trades": 91,
+          "net_pnl": -159.09042559641313,
+          "return_pct": -1.5909042559641313,
+          "gross_pnl": -85.94189721610407,
+          "spread_cost": 31.90890591851756,
+          "commission_cost": 25.480000000000004,
+          "slippage_cost": 15.759622461791576,
+          "win_rate_pct": 40.65934065934066,
+          "profit_factor": 0.6648024456461814,
+          "profit_factor_note": "",
+          "avg_r": -0.19989726689154144,
+          "max_realized_drawdown": 215.60390613493473
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 143,
+          "net_pnl": -56.18928345675289,
+          "return_pct": -0.5618928345675289,
+          "gross_pnl": 160.0640775858067,
+          "spread_cost": 151.4482400311729,
+          "commission_cost": 40.040000000000006,
+          "slippage_cost": 24.76512101138676,
+          "win_rate_pct": 43.35664335664335,
+          "profit_factor": 0.9212728856846849,
+          "profit_factor_note": "",
+          "avg_r": -0.04492847330889038,
+          "max_realized_drawdown": 198.48441529197953
+        },
+        "buy_metrics": {
+          "trades": 73,
+          "net_pnl": -174.31279733299903,
+          "return_pct": -1.74312797332999,
+          "gross_pnl": -115.98908949215394,
+          "spread_cost": 25.241373338528817,
+          "commission_cost": 20.44,
+          "slippage_cost": 12.642334502316318,
+          "win_rate_pct": 39.726027397260275,
+          "profit_factor": 0.545461172770743,
+          "profit_factor_note": "",
+          "avg_r": -0.2730301559745175,
+          "max_realized_drawdown": 199.8439632852278
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 125,
+          "net_pnl": 14.833311685476387,
+          "return_pct": 0.14833311685476389,
+          "gross_pnl": 216.69480884961024,
+          "spread_cost": 145.21366411222238,
+          "commission_cost": 35.0,
+          "slippage_cost": 21.647833051911505,
+          "win_rate_pct": 44.800000000000004,
+          "profit_factor": 1.024658070319898,
+          "profit_factor_note": "",
+          "avg_r": 0.013568514851463152,
+          "max_realized_drawdown": 151.62680954232383
+        },
+        "buy_metrics": {
+          "trades": 55,
+          "net_pnl": -103.29020219076975,
+          "return_pct": -1.0329020219076974,
+          "gross_pnl": -59.35835822835042,
+          "spread_cost": 19.0067974195783,
+          "commission_cost": 15.400000000000002,
+          "slippage_cost": 9.525046542841062,
+          "win_rate_pct": 41.81818181818181,
+          "profit_factor": 0.6193213389292429,
+          "profit_factor_note": "",
+          "avg_r": -0.21473391539155567,
+          "max_realized_drawdown": 143.16961596740657
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 91,
+      "thresholds": {
+        "q25": 0.003510299801780712,
+        "q50": 0.1419938242180935
+      }
+    }
+  },
+  "11": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 156,
+          "net_pnl": 27.454779408553627,
+          "return_pct": 0.2745477940855363,
+          "gross_pnl": 228.68770836036552,
+          "spread_cost": 130.53643330302637,
+          "commission_cost": 43.68000000000001,
+          "slippage_cost": 27.016495648785558,
+          "win_rate_pct": 44.871794871794876,
+          "profit_factor": 1.0365906871794677,
+          "profit_factor_note": "",
+          "avg_r": 0.02012322416855028,
+          "max_realized_drawdown": 129.9903511278153
+        },
+        "buy_metrics": {
+          "trades": 94,
+          "net_pnl": -133.8664346019111,
+          "return_pct": -1.338664346019111,
+          "gross_pnl": -59.358358228356146,
+          "spread_cost": 31.908905918517558,
+          "commission_cost": 26.320000000000004,
+          "slippage_cost": 16.279170455037452,
+          "win_rate_pct": 41.48936170212766,
+          "profit_factor": 0.7180376274960116,
+          "profit_factor_note": "",
+          "avg_r": -0.16283510848958857,
+          "max_realized_drawdown": 181.42908689434444
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 139,
+          "net_pnl": 1.0418998138035218,
+          "return_pct": 0.01041899813803522,
+          "gross_pnl": 188.33614755160494,
+          "spread_cost": 124.30185738407587,
+          "commission_cost": 38.92,
+          "slippage_cost": 24.07239035372559,
+          "win_rate_pct": 44.60431654676259,
+          "profit_factor": 1.0015590052287957,
+          "profit_factor_note": "",
+          "avg_r": 0.0008570681672277159,
+          "max_realized_drawdown": 94.75620989735762
+        },
+        "buy_metrics": {
+          "trades": 77,
+          "net_pnl": -160.2793141966612,
+          "return_pct": -1.602793141966612,
+          "gross_pnl": -99.70991903711672,
+          "spread_cost": 25.674329999567046,
+          "commission_cost": 21.560000000000002,
+          "slippage_cost": 13.335065159977487,
+          "win_rate_pct": 40.25974025974026,
+          "profit_factor": 0.5919114080292317,
+          "profit_factor_note": "",
+          "avg_r": -0.23800767133857814,
+          "max_realized_drawdown": 180.28000952500224
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 117,
+          "net_pnl": 96.21778932326708,
+          "return_pct": 0.9621778932326708,
+          "gross_pnl": 266.4415292029051,
+          "spread_cost": 117.2013681430489,
+          "commission_cost": 32.760000000000005,
+          "slippage_cost": 20.26237173658917,
+          "win_rate_pct": 47.008547008547005,
+          "profit_factor": 1.1819509452095593,
+          "profit_factor_note": "",
+          "avg_r": 0.09403157654224745,
+          "max_realized_drawdown": 66.12323591805944
+        },
+        "buy_metrics": {
+          "trades": 55,
+          "net_pnl": -65.10342468719764,
+          "return_pct": -0.6510342468719764,
+          "gross_pnl": -21.60453738581654,
+          "spread_cost": 18.573840758540072,
+          "commission_cost": 15.400000000000002,
+          "slippage_cost": 9.525046542841062,
+          "win_rate_pct": 43.63636363636363,
+          "profit_factor": 0.7429355607414897,
+          "profit_factor_note": "",
+          "avg_r": -0.1353459765976767,
+          "max_realized_drawdown": 124.94498419704905
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 94,
+      "thresholds": {
+        "q25": 0.006866036251863238,
+        "q50": 0.13432595388168905
+      }
+    }
+  },
+  "12": {
+    "selected": "off",
+    "threshold": 0.0,
+    "rejections": {
+      "q25": [
+        "training BUY net not positive",
+        "training total net not positive and improved"
+      ],
+      "q50": [
+        "training BUY net not positive"
+      ]
+    },
+    "training": {
+      "off": {
+        "metrics": {
+          "trades": 150,
+          "net_pnl": 127.93548945747897,
+          "return_pct": 1.2793548945747897,
+          "gross_pnl": 285.4916222885825,
+          "spread_cost": 89.57873316880982,
+          "commission_cost": 42.00000000000001,
+          "slippage_cost": 25.977399662293806,
+          "win_rate_pct": 48.0,
+          "profit_factor": 1.18915838024664,
+          "profit_factor_note": "",
+          "avg_r": 0.09752231023100197,
+          "max_realized_drawdown": 74.78805645752618
+        },
+        "buy_metrics": {
+          "trades": 92,
+          "net_pnl": -50.3086426808823,
+          "return_pct": -0.503086426808823,
+          "gross_pnl": 22.210676711246496,
+          "spread_cost": 30.826514265921983,
+          "commission_cost": 25.76,
+          "slippage_cost": 15.932805126206867,
+          "win_rate_pct": 44.565217391304344,
+          "profit_factor": 0.8852233516841658,
+          "profit_factor_note": "",
+          "avg_r": -0.0625257597933882,
+          "max_realized_drawdown": 123.03745161704501
+        }
+      },
+      "q25": {
+        "metrics": {
+          "trades": 133,
+          "net_pnl": 101.52260986272886,
+          "return_pct": 1.0152260986272885,
+          "gross_pnl": 245.26994847813341,
+          "spread_cost": 83.47404424817077,
+          "commission_cost": 37.24,
+          "slippage_cost": 23.03329436723384,
+          "win_rate_pct": 48.1203007518797,
+          "profit_factor": 1.1708186596925974,
+          "profit_factor_note": "",
+          "avg_r": 0.08728012059850455,
+          "max_realized_drawdown": 67.48246352338538
+        },
+        "buy_metrics": {
+          "trades": 75,
+          "net_pnl": -76.72152227563241,
+          "return_pct": -0.767215222756324,
+          "gross_pnl": -18.01099709920261,
+          "spread_cost": 24.72182534528294,
+          "commission_cost": 21.000000000000004,
+          "slippage_cost": 12.988699831146903,
+          "win_rate_pct": 44.0,
+          "profit_factor": 0.7846757389810494,
+          "profit_factor_note": "",
+          "avg_r": -0.11696613861387874,
+          "max_realized_drawdown": 131.00069013288157
+        }
+      },
+      "q50": {
+        "metrics": {
+          "trades": 112,
+          "net_pnl": 155.80716456680668,
+          "return_pct": 1.5580716456680668,
+          "gross_pnl": 283.3268389833976,
+          "spread_cost": 76.76321600207821,
+          "commission_cost": 31.360000000000003,
+          "slippage_cost": 19.396458414512708,
+          "win_rate_pct": 49.107142857142854,
+          "profit_factor": 1.3231389286975186,
+          "profit_factor_note": "",
+          "avg_r": 0.1590646251767811,
+          "max_realized_drawdown": 65.28007187079311
+        },
+        "buy_metrics": {
+          "trades": 54,
+          "net_pnl": -22.43696757155459,
+          "return_pct": -0.2243696757155459,
+          "gross_pnl": 20.045893406061527,
+          "spread_cost": 18.010997099190373,
+          "commission_cost": 15.120000000000001,
+          "slippage_cost": 9.35186387842577,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 0.9080997907648363,
+          "profit_factor_note": "",
+          "avg_r": -0.04750885955263943,
+          "max_realized_drawdown": 92.61733991424626
+        }
+      }
+    },
+    "fit": {
+      "buy_observations": 92,
+      "thresholds": {
+        "q25": 0.021602561066214936,
+        "q50": 0.1662191082544294
+      }
+    }
+  }
+}

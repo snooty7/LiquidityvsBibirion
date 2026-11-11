@@ -276,6 +276,27 @@ the frozen selections, using:
 python -m src.tools.complete_usdchf_alignment --history history/mt5_20261111/USDCHF_extended.json --study-dir reports/usdchf_confirmation_alignment
 ```
 
+## Training-derived USDCHF long-entry filter
+
+The profit-first follow-up uses USDCHF M30 with explicit M1 confirmation. It fits
+two BUY-only H4 trend-strength thresholds from each preceding 365-day training
+window, then ranks full strategy replays by net profit after execution costs.
+Minimum sample and drawdown constraints remain mandatory; the unfiltered model
+is the fallback. The filter defaults to `off`; active profiles and risk settings
+are unchanged. Live and replay share the filter and the same closed-bar entry
+bias context. Both baseline and candidate are rerun after that context alignment.
+
+The frozen plan, training decisions, cost stress and promotion outcome are in
+[the long-entry filter report](reports/usdchf_long_filter/README.md). The dates were
+previously examined, so this study is not untouched future validation.
+
+```powershell
+python -m src.tools.research_long_filter --history history/mt5_20261111/USDCHF_extended.json --output reports/usdchf_long_filter --workers 6
+python -m src.tools.render_long_filter_report reports/usdchf_long_filter/report.json
+```
+
+These commands use saved history and block broker initialization and trading.
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.
