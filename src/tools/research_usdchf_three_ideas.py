@@ -121,6 +121,7 @@ def make_plan(history_path: Path) -> tuple[dict, AppConfig, list[Variant]]:
     plan = {
         "registered_at_utc": datetime.now(timezone.utc).isoformat(),
         "study": "usdchf_three_ideas", "baseline_branch": source.branch_id,
+        "registration_amendment": "Initial registration is retained in initial_registration.json. Before any replay, JSON tuple/list normalization was fixed in protocol comparison; hypotheses, costs, selection, dates and gates were not changed.",
         "objective": "maximize net profit after costs subject to unchanged sample/drawdown and runtime risk guards",
         "variants": [{"name": v.name, "family": v.family, "hypothesis": v.hypothesis,
                       "settings": asdict(v.settings)} for v in models],
@@ -151,6 +152,8 @@ def make_plan(history_path: Path) -> tuple[dict, AppConfig, list[Variant]]:
 
 def register(plan: dict, output: Path) -> dict:
     """Keep the original registration; refuse to silently change a frozen protocol."""
+    # JSON represents dataclass tuples as arrays; compare the persisted representation.
+    plan = json.loads(json.dumps(plan, allow_nan=False))
     output.mkdir(parents=True, exist_ok=True)
     path = output / "plan.json"
     if path.exists():

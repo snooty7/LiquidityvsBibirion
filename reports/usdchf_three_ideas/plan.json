@@ -1,7 +1,8 @@
 {
-  "registered_at_utc": "2026-11-11T18:04:38.611480+00:00",
+  "registered_at_utc": "2026-11-11T18:05:15.011678+00:00",
   "study": "usdchf_three_ideas",
   "baseline_branch": "92024-USDCHF-M30-3c27c3d9",
+  "registration_amendment": "Initial registration is retained in initial_registration.json. Before any replay, JSON tuple/list normalization was fixed in protocol comparison; hypotheses, costs, selection, dates and gates were not changed.",
   "objective": "maximize net profit after costs subject to unchanged sample/drawdown and runtime risk guards",
   "variants": [
     {
@@ -785,7 +786,7 @@
     "slippage_pips": 0.4
   },
   "history_sha256": "8748d7a5373716b692d9e9168c2c2fe315911b643e07afb8bec74fa0b031a6a3",
-  "replay_code_sha256": "7bfe4cf1f967a834b82b97974c517c32e47677ffd1308777c2fa903b447a30c3",
+  "replay_code_sha256": "81ad08d4be461773f879e6ef94c68fdb7691ddcadcc8886aedb941875124c870",
   "risk_runtime": {
     "daily_loss_limit_usd": 150.0,
     "close_positions_on_daily_loss": true,

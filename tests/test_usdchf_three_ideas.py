@@ -171,3 +171,9 @@ def test_registration_preserves_original_time_and_refuses_protocol_changes(tmp_p
     assert study.register(dict(original, registered_at_utc="second"), tmp_path) == original
     with pytest.raises(ValueError, match="Frozen study differs"):
         study.register(dict(original, costs={"commission": 0}), tmp_path)
+
+
+def test_registration_normalizes_dataclass_tuples_without_changing_protocol(tmp_path):
+    plan = {"registered_at_utc": "first", "sessions": ("05:00-12:00", "13:00-20:00")}
+    study.register(plan, tmp_path)
+    assert study.register(plan, tmp_path)["sessions"] == list(plan["sessions"])
