@@ -42,6 +42,13 @@ def candidates(base: SymbolConfig) -> list[Candidate]:
     return [Candidate(name, replace(base, **changes), hypothesis) for name, changes, hypothesis in definitions]
 
 
+def confirmation_candidates(base: SymbolConfig) -> list[Candidate]:
+    """Reconstruct the previously published M1-fed model explicitly, without raising risk."""
+    return [Candidate("baseline", base, "Faithful configured M5 confirmation"),
+            Candidate("m1_alignment", replace(base, cisd_timeframe="M1", cisd_lookback_bars=300),
+                      "Explicit M1 confirmation with enough history for the full setup expiry; reconstruct previously known M1-fed behavior")]
+
+
 def training_score(metrics: dict) -> float:
     """Penalize realized drawdown rather than select on net profit alone."""
     return metrics["net_pnl"] - 0.5 * metrics["max_realized_drawdown"]
@@ -142,12 +149,14 @@ def _replay(task: tuple) -> tuple[str, dict]:
 
 
 def run_study(history_path: Path, output: Path, workers: int = 6, train_days: int = 365,
-              development_folds: int = 6) -> dict:
+              development_folds: int = 6, study: str = "exits") -> dict:
     """Register the protocol, run training, lock selections, then evaluate tests and stress."""
     _forbid_broker()
     source = next(branch for branch in discover_branches(default_config_paths())
                   if branch.branch_id == "92024-USDCHF-M30-3c27c3d9")
-    variants = candidates(source.symbol)
+    if study not in {"exits", "confirmation_alignment"}:
+        raise ValueError("Unsupported study")
+    variants = candidates(source.symbol) if study == "exits" else confirmation_candidates(source.symbol)
     app = source.config
     folds = study_folds(train_days)
     if not 1 <= development_folds < len(folds):
@@ -166,6 +175,7 @@ def run_study(history_path: Path, output: Path, workers: int = 6, train_days: in
     cache.mkdir(exist_ok=True)
     plan = {
         "registered_at_utc": datetime.now(timezone.utc).isoformat(),
+        "study": study,
         "baseline_branch": source.branch_id, "source_configs": source.sources,
         "history_sha256": history_hash, "replay_code_sha256": code_hash,
         "costs": asdict(base_costs), "stress_costs": asdict(stress_costs),
@@ -179,10 +189,11 @@ def run_study(history_path: Path, output: Path, workers: int = 6, train_days: in
         "confirmation_amendment": "Before any alternative OOS testing, six later test folds were reserved because the known baseline had only 14 trades in three folds. Minimum 20 trades and all hypotheses/risk/cost/test-date rules remain unchanged.",
         "promotion_rule": "fixed candidate must improve aggregate and positive holdout net, maintain drawdown <=1.25 baseline, have >=20 holdout trades and remain positive/not worse under doubled assumed costs",
         "caveat": "These dates and baseline were previously examined. Confirmation folds are reserved within this study, not genuinely new unseen market data.",
+        "alignment_caveat": ("Both M5 and M1 historical outcomes were known before this reconstruction. The original eight-configuration study did not produce a promotable upgrade. This two-model check is not a fresh discovery or untouched holdout." if study == "confirmation_alignment" else None),
         "broker_connections": False, "trading_calls": False,
     }
     (output/"plan.json").write_text(json.dumps(plan, indent=2, allow_nan=False), encoding="utf-8")
-    print("Registered eight hypotheses; training first", flush=True)
+    print(f"Registered {len(variants)} configurations for {study}; training first", flush=True)
     results = {}
     def task(name: str, fold, phase: str, costs: ExecutionCosts) -> tuple:
         cfg = next(v.settings for v in variants if v.name == name)
@@ -244,10 +255,11 @@ def main() -> None:
     parser.add_argument("--workers",type=int,default=6)
     parser.add_argument("--train-days",type=int,default=365)
     parser.add_argument("--development-folds",type=int,default=6)
+    parser.add_argument("--study",choices=["exits","confirmation_alignment"],default="exits")
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("--workers must be positive")
-    run_study(args.history,args.output,args.workers,args.train_days,args.development_folds)
+    run_study(args.history,args.output,args.workers,args.train_days,args.development_folds,args.study)
 
 
 if __name__ == "__main__":

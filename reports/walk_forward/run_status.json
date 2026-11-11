@@ -1,5 +1,5 @@
 {
-  "status": "partial_or_unavailable",
+  "status": "legacy_confirmation_timeframe_bug",
   "historical_data_downloaded": true,
   "comparison_executed": true,
   "branch_profiles": 30,
@@ -10,5 +10,6 @@
     "ok": 696,
     "error": 0,
     "unavailable": 24
-  }
+  },
+  "valid_for_non_m1_confirmation": false
 }

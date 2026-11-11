@@ -13,7 +13,7 @@ from src.services.config import AppConfig, load_config
 from src.strategy.confirmations import ConfirmationResult
 from src.strategy.liquidity import SweepSignal
 from src.tools import backtest_mt5 as b
-from src.tools.research_usdchf_m30 import candidates, select_training, select_fixed, promotion_checks, study_folds
+from src.tools.research_usdchf_m30 import candidates, confirmation_candidates, select_training, select_fixed, promotion_checks, study_folds
 
 
 @pytest.fixture
@@ -95,6 +95,17 @@ def test_candidates_do_not_increase_risk_or_widen_initial_stop(app):
     assert next(v for v in variants if v.name=="fixed_2r").settings.trailing_stop_mode=="off"
 
 
+def test_alignment_changes_only_confirmation_timeframe_and_context(app):
+    base=app.symbols[0]
+    variants=confirmation_candidates(base)
+    assert len(variants)==2
+    aligned=variants[1].settings
+    assert aligned.cisd_timeframe=="M1"
+    assert aligned.cisd_lookback_bars==300
+    assert replace(aligned,cisd_timeframe=base.cisd_timeframe,
+                   cisd_lookback_bars=base.cisd_lookback_bars)==base
+
+
 def test_training_selection_rejects_small_samples_and_excess_drawdown():
     values={"baseline":metrics(),"good":metrics(20,6),"tiny":metrics(100,1,5),"risky":metrics(100,20)}
     assert select_training(values)=="good"
@@ -134,3 +145,26 @@ def test_promotion_fails_when_confirmation_or_stress_fails_even_if_total_profit_
     failed=promotion_checks(metrics(10),metrics(100),metrics(4),metrics(-1),metrics(2),metrics(-1),"good")
     assert not failed["holdout_net_positive_and_improved"]
     assert not failed["stress_net_positive_and_not_worse"]
+
+
+def test_offline_study_blocks_adapter_and_raw_broker_trading_interfaces(monkeypatch):
+    from src.execution import mt5_adapter
+    from src.tools.research_usdchf_m30 import _forbid_broker
+    called=[]
+    fake=NS(initialize=lambda *a,**k:called.append("initialize"),
+            order_send=lambda *a,**k:called.append("order_send"),
+            order_check=lambda *a,**k:called.append("order_check"))
+    monkeypatch.setattr(mt5_adapter,"mt5",fake)
+    names=("initialize","send_market_order_with_price_protection","send_market_order_with_fallback",
+           "close_position_market_with_fallback","modify_position_protection")
+    # Register restoration before the guard deliberately replaces class methods.
+    for name in names:
+        monkeypatch.setattr(MT5Adapter,name,getattr(MT5Adapter,name))
+    _forbid_broker()
+    for name in names:
+        with pytest.raises(RuntimeError,match="forbids"):
+            getattr(MT5Adapter(),name)()
+    for name in ("initialize","order_send","order_check"):
+        with pytest.raises(RuntimeError,match="forbids"):
+            getattr(fake,name)()
+    assert called==[]

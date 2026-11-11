@@ -229,6 +229,43 @@ are not modeled. Drawdown is realized cash-flow drawdown rather than intratrade
 equity drawdown. Native branch risk percentages differ and remain visible in the
 report. None of these reports constitutes evidence of guaranteed profitability.
 
+## Focused USDCHF M30 improvement study
+
+```powershell
+python -m src.tools.research_usdchf_m30 --history history/mt5_20261111/USDCHF_extended.json --train-days 365 --development-folds 6 --workers 6 --output reports/usdchf_m30_improvement
+```
+
+This tool is offline-only and actively blocks broker initialization and trading
+methods. Eight frozen configurations vary exits or confirmation strictness while
+keeping risk, initial stop distance and lot limits constant. It registers the
+protocol before replay, locks selections from training data, and evaluates them
+with historical spread, commission, slippage and a higher-cost stress scenario.
+The fixed nomination uses only the first six training windows; the later six
+test windows are its reserved confirmation period. Its full twelve-window
+aggregate is descriptive, since development windows overlap nomination training.
+The separate adaptive track selects using only each fold's preceding training.
+All promotion gates must pass; otherwise the baseline is retained.
+
+The initial 90-day sample-size diagnostic and a pre-test confirmation amendment
+are retained for audit. Overlapping training windows are not independent samples,
+and the market dates/baseline were examined previously. This is historical
+research, not evidence of guaranteed future performance.
+
+**Backtest fidelity correction:** confirmation now uses `cisd_timeframe` for
+displacement/CISD modes and the setup timeframe for C3/C4, matching live behavior.
+Earlier all-branch results that fed M1 into a configured M5 confirmation are
+marked legacy and must not be used to promote those settings. The focused study
+establishes a corrected baseline before comparing alternatives.
+
+See [the focused study](reports/usdchf_m30_improvement/README.md) and
+[the initial diagnostic](reports/usdchf_m30_initial_90d/README.md).
+The separate `--study confirmation_alignment` mode compares the configured M5
+baseline with explicit M1 confirmation and full setup-expiry context. It
+reconstructs previously known behavior rather than discovering a new untouched
+edge. Its results are kept in
+[the confirmation-alignment report](reports/usdchf_confirmation_alignment/README.md),
+alongside the unsuccessful exit/strictness study.
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.
