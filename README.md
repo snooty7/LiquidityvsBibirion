@@ -414,6 +414,28 @@ python -m src.tools.research_loss_reduction --workers 4
 python -m src.tools.complete_loss_reduction --workers 4
 ```
 
+## Spread-0.9 cost resilience
+
+[The cost-resilience study](reports/usdchf_spread_resilience/README.md) keeps the
+EUR20,000 continuous account, 0.5% entry risk, 0.9-pip spread cap and all original
+runtime guards. It freezes four isolated changes: later trailing activation,
+a larger trailing gap, stronger displacement confirmation, or fresher setup
+expiry. An existing stop can only improve; there is no position-size increase.
+
+Only the earlier-year doubled-cost results nominate a fixed candidate before
+later/full outcomes. Every hypothesis is retained in the report. Full-history
+results are descriptive because the same dates were examined in prior work.
+Success includes positive net with normal and doubled commission/slippage,
+plus mean net winning trades in EUR100-200. Swap/financing remains excluded.
+
+```powershell
+python -m src.tools.research_spread_resilience --workers 4
+python -m src.tools.render_spread_resilience reports/usdchf_spread_resilience/report.json
+```
+
+These research commands block broker initialization/orders and do not alter
+active configurations or approve live deployment.
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.
