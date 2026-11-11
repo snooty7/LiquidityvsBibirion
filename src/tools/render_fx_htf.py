@@ -50,6 +50,8 @@ def render(report: dict) -> str:
              "## All nine independent accounts: twelve test windows", "",
              "| Pair | Model | Trades | Net EUR | Return | PF | Realized DD EUR | Overnight trades |",
              "|---|---|---:|---:|---:|---:|---:|---:|"]
+    if all(comparison[s][n]["aggregate"]["metrics"]["net_pnl"] <= 0 for s in SYMBOLS for n in MODELS[1:]):
+        lines[4:4] = ["**Neither new fixed model produced positive full-period net on any of the three pairs.**", ""]
     for row in ranks:
         symbol, name = row["symbol"], row["model"]
         record = comparison[symbol][name]["aggregate"]

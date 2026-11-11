@@ -1,0 +1,2073 @@
+{
+  "selections": {
+    "EURUSD": {
+      "fixed": "baseline",
+      "fixed_diagnostics": {
+        "htf_trend_pullback": {
+          "net_sum": -75.04089728988076,
+          "drawdown_sum": 389.9777872427385,
+          "windows_with_20_trades": 6,
+          "rejections": [
+            "development-training net sum not positive and improved"
+          ]
+        },
+        "htf_range_retest": {
+          "net_sum": -140.4481899146684,
+          "drawdown_sum": 217.8304847927211,
+          "windows_with_20_trades": 0,
+          "rejections": [
+            "fewer than four development-training windows with 20 trades",
+            "development-training net sum not positive and improved"
+          ]
+        }
+      },
+      "adaptive": {
+        "1": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "2": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "3": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "4": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "5": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "6": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "7": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "8": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "9": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "10": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "11": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "12": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        }
+      }
+    },
+    "GBPUSD": {
+      "fixed": "baseline",
+      "fixed_diagnostics": {
+        "htf_trend_pullback": {
+          "net_sum": -0.33646504663688237,
+          "drawdown_sum": 703.1985689816647,
+          "windows_with_20_trades": 6,
+          "rejections": [
+            "development-training net sum not positive and improved"
+          ]
+        },
+        "htf_range_retest": {
+          "net_sum": -235.4660454319486,
+          "drawdown_sum": 363.47921643298287,
+          "windows_with_20_trades": 0,
+          "rejections": [
+            "fewer than four development-training windows with 20 trades",
+            "development-training net sum not positive and improved"
+          ]
+        }
+      },
+      "adaptive": {
+        "1": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades"
+            ]
+          }
+        },
+        "2": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades"
+            ]
+          }
+        },
+        "3": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "4": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "5": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "6": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "7": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "8": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "9": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "10": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "11": {
+          "selected": "htf_trend_pullback",
+          "rejections": {
+            "htf_trend_pullback": [],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "12": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        }
+      }
+    },
+    "USDCHF": {
+      "fixed": "baseline",
+      "fixed_diagnostics": {
+        "htf_trend_pullback": {
+          "net_sum": -527.188375979645,
+          "drawdown_sum": 753.346892669786,
+          "windows_with_20_trades": 6,
+          "rejections": [
+            "development-training net sum not positive and improved"
+          ]
+        },
+        "htf_range_retest": {
+          "net_sum": 19.016890505246344,
+          "drawdown_sum": 168.52601723165026,
+          "windows_with_20_trades": 0,
+          "rejections": [
+            "fewer than four development-training windows with 20 trades"
+          ]
+        }
+      },
+      "adaptive": {
+        "1": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "2": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "3": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades"
+            ]
+          }
+        },
+        "4": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades"
+            ]
+          }
+        },
+        "5": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades"
+            ]
+          }
+        },
+        "6": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "7": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "8": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "9": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "10": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "11": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        },
+        "12": {
+          "selected": "baseline",
+          "rejections": {
+            "htf_trend_pullback": [
+              "training net not positive and improved",
+              "training drawdown exceeds 1.25 baseline"
+            ],
+            "htf_range_retest": [
+              "fewer than 20 training trades",
+              "training net not positive and improved"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "training": {
+    "EURUSD": {
+      "1": {
+        "baseline": {
+          "trades": 159,
+          "net_pnl": -318.6892846195315,
+          "return_pct": -3.1868928461953154,
+          "gross_pnl": -222.3394090178225,
+          "spread_cost": 12.214469864964759,
+          "commission_cost": 55.650000000000006,
+          "slippage_cost": 28.485405736744383,
+          "win_rate_pct": 38.9937106918239,
+          "profit_factor": 0.6395856738613344,
+          "profit_factor_note": "",
+          "avg_r": -0.22014743819655433,
+          "max_realized_drawdown": 365.9031699026091
+        },
+        "htf_trend_pullback": {
+          "trades": 67,
+          "net_pnl": -19.979467971880492,
+          "return_pct": -0.1997946797188049,
+          "gross_pnl": 23.166928083431646,
+          "spread_cost": 7.617141723907912,
+          "commission_cost": 23.450000000000003,
+          "slippage_cost": 12.079254331404263,
+          "win_rate_pct": 46.26865671641791,
+          "profit_factor": 0.940222877599268,
+          "profit_factor_note": "",
+          "avg_r": -0.03275310033977666,
+          "max_realized_drawdown": 82.30750851853372
+        },
+        "htf_range_retest": {
+          "trades": 8,
+          "net_pnl": -26.23735915047729,
+          "return_pct": -0.2623735915047729,
+          "gross_pnl": -21.499269836110194,
+          "spread_cost": 0.4957902897218167,
+          "commission_cost": 2.8000000000000003,
+          "slippage_cost": 1.4422990246452851,
+          "win_rate_pct": 37.5,
+          "profit_factor": 0.4502188790255905,
+          "profit_factor_note": "",
+          "avg_r": -0.36022465346524446,
+          "max_realized_drawdown": 26.237359150472912
+        }
+      },
+      "2": {
+        "baseline": {
+          "trades": 162,
+          "net_pnl": -313.609513764787,
+          "return_pct": -3.13609513764787,
+          "gross_pnl": -213.82083040350918,
+          "spread_cost": 14.06241549029153,
+          "commission_cost": 56.7,
+          "slippage_cost": 29.026267870986363,
+          "win_rate_pct": 38.88888888888889,
+          "profit_factor": 0.6528255413369118,
+          "profit_factor_note": "",
+          "avg_r": -0.2126265603226036,
+          "max_realized_drawdown": 347.98798159247053
+        },
+        "htf_trend_pullback": {
+          "trades": 66,
+          "net_pnl": -26.795891250588667,
+          "return_pct": -0.2679589125058867,
+          "gross_pnl": 15.955432960203307,
+          "spread_cost": 7.752357257468407,
+          "commission_cost": 23.1,
+          "slippage_cost": 11.898966953323603,
+          "win_rate_pct": 45.45454545454545,
+          "profit_factor": 0.9203762397649283,
+          "profit_factor_note": "",
+          "avg_r": -0.044593090308924874,
+          "max_realized_drawdown": 63.368757098798596
+        },
+        "htf_range_retest": {
+          "trades": 9,
+          "net_pnl": -35.78201543259017,
+          "return_pct": -0.35782015432590175,
+          "gross_pnl": -30.513638740142415,
+          "spread_cost": 0.4957902897218167,
+          "commission_cost": 3.1500000000000004,
+          "slippage_cost": 1.6225864027259458,
+          "win_rate_pct": 33.33333333333333,
+          "profit_factor": 0.3751823991879921,
+          "profit_factor_note": "",
+          "avg_r": -0.4366822992298275,
+          "max_realized_drawdown": 38.17862512845022
+        }
+      },
+      "3": {
+        "baseline": {
+          "trades": 157,
+          "net_pnl": -317.98928461953557,
+          "return_pct": -3.1798928461953557,
+          "gross_pnl": -220.85203814866105,
+          "spread_cost": 14.06241549029153,
+          "commission_cost": 54.95,
+          "slippage_cost": 28.12483098058306,
+          "win_rate_pct": 38.21656050955414,
+          "profit_factor": 0.6441322274997284,
+          "profit_factor_note": "",
+          "avg_r": -0.22246215110036638,
+          "max_realized_drawdown": 355.2818184684438
+        },
+        "htf_trend_pullback": {
+          "trades": 64,
+          "net_pnl": -1.1711612309391848,
+          "return_pct": -0.011711612309391847,
+          "gross_pnl": 36.012403771674954,
+          "spread_cost": 3.245172805451891,
+          "commission_cost": 22.400000000000002,
+          "slippage_cost": 11.538392197162281,
+          "win_rate_pct": 48.4375,
+          "profit_factor": 0.9962817168872393,
+          "profit_factor_note": "",
+          "avg_r": -0.0020099257424661503,
+          "max_realized_drawdown": 61.07538040635154
+        },
+        "htf_range_retest": {
+          "trades": 9,
+          "net_pnl": -20.682947518335006,
+          "return_pct": -0.20682947518335004,
+          "gross_pnl": -15.41457082588725,
+          "spread_cost": 0.4957902897218167,
+          "commission_cost": 3.1500000000000004,
+          "slippage_cost": 1.6225864027259458,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 0.5666067607464127,
+          "profit_factor_note": "",
+          "avg_r": -0.2524138723871371,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "4": {
+        "baseline": {
+          "trades": 157,
+          "net_pnl": -308.6143409593378,
+          "return_pct": -3.086143409593378,
+          "gross_pnl": -210.17001099737854,
+          "spread_cost": 15.279355292335989,
+          "commission_cost": 54.95,
+          "slippage_cost": 28.21497466962339,
+          "win_rate_pct": 39.490445859872615,
+          "profit_factor": 0.6470844955527015,
+          "profit_factor_note": "",
+          "avg_r": -0.21590353345515975,
+          "max_realized_drawdown": 345.73716218633126
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": -29.479052409472914,
+          "return_pct": -0.29479052409472917,
+          "gross_pnl": 11.448248508189812,
+          "spread_cost": 4.867759208177837,
+          "commission_cost": 23.8,
+          "slippage_cost": 12.259541709484925,
+          "win_rate_pct": 47.05882352941176,
+          "profit_factor": 0.9142072231071968,
+          "profit_factor_note": "",
+          "avg_r": -0.04761545136855868,
+          "max_realized_drawdown": 61.07538040635154
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -18.959642670406836,
+          "return_pct": -0.18959642670406837,
+          "gross_pnl": -13.160978599878419,
+          "spread_cost": 0.4957902897218167,
+          "commission_cost": 3.5000000000000004,
+          "slippage_cost": 1.8028737808066064,
+          "win_rate_pct": 50.0,
+          "profit_factor": 0.6027171202395611,
+          "profit_factor_note": "",
+          "avg_r": -0.20824445544544595,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "5": {
+        "baseline": {
+          "trades": 148,
+          "net_pnl": -261.29393332958387,
+          "return_pct": -2.612939333295839,
+          "gross_pnl": -171.45329655456456,
+          "spread_cost": 11.44824850812195,
+          "commission_cost": 51.800000000000004,
+          "slippage_cost": 26.592388266897444,
+          "win_rate_pct": 40.54054054054054,
+          "profit_factor": 0.6817892319912462,
+          "profit_factor_note": "",
+          "avg_r": -0.19391477923458203,
+          "max_realized_drawdown": 290.1736361258154
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": -12.8475417815311,
+          "return_pct": -0.128475417815311,
+          "gross_pnl": 28.891052337494592,
+          "spread_cost": 5.67905240954081,
+          "commission_cost": 23.8,
+          "slippage_cost": 12.259541709484925,
+          "win_rate_pct": 47.05882352941176,
+          "profit_factor": 0.9626098468032958,
+          "profit_factor_note": "",
+          "avg_r": -0.02075173558521305,
+          "max_realized_drawdown": 61.07538040635154
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -18.959642670406836,
+          "return_pct": -0.18959642670406837,
+          "gross_pnl": -13.160978599878419,
+          "spread_cost": 0.4957902897218167,
+          "commission_cost": 3.5000000000000004,
+          "slippage_cost": 1.8028737808066064,
+          "win_rate_pct": 50.0,
+          "profit_factor": 0.6027171202395611,
+          "profit_factor_note": "",
+          "avg_r": -0.20824445544544595,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "6": {
+        "baseline": {
+          "trades": 142,
+          "net_pnl": -199.2483801177688,
+          "return_pct": -1.9924838011776878,
+          "gross_pnl": -112.04860547699148,
+          "spread_cost": 11.989110642363931,
+          "commission_cost": 49.7,
+          "slippage_cost": 25.51066399841348,
+          "win_rate_pct": 41.54929577464789,
+          "profit_factor": 0.7423772765703998,
+          "profit_factor_note": "",
+          "avg_r": -0.15411671872810995,
+          "max_realized_drawdown": 256.78371779597
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": 15.232217354531599,
+          "return_pct": 0.152322173545316,
+          "gross_pnl": 56.9708114735573,
+          "spread_cost": 5.67905240954081,
+          "commission_cost": 23.8,
+          "slippage_cost": 12.259541709484925,
+          "win_rate_pct": 48.529411764705884,
+          "profit_factor": 1.0455968446915234,
+          "profit_factor_note": "",
+          "avg_r": 0.024603535235988412,
+          "max_realized_drawdown": 61.07538040635154
+        },
+        "htf_range_retest": {
+          "trades": 9,
+          "net_pnl": -19.826582472452262,
+          "return_pct": -0.1982658247245226,
+          "gross_pnl": -14.24270286836335,
+          "spread_cost": 0.8112932013629728,
+          "commission_cost": 3.1500000000000004,
+          "slippage_cost": 1.6225864027259458,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 0.48660759833770756,
+          "profit_factor_note": "",
+          "avg_r": -0.241962827282631,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "7": {
+        "baseline": {
+          "trades": 147,
+          "net_pnl": -171.0706753563702,
+          "return_pct": -1.7107067535637022,
+          "gross_pnl": -79.28137451082249,
+          "spread_cost": 13.837056267690704,
+          "commission_cost": 51.45,
+          "slippage_cost": 26.502244577857116,
+          "win_rate_pct": 44.21768707482993,
+          "profit_factor": 0.7762049344805132,
+          "profit_factor_note": "",
+          "avg_r": -0.1278208008350805,
+          "max_realized_drawdown": 201.55181504299617
+        },
+        "htf_trend_pullback": {
+          "trades": 65,
+          "net_pnl": 46.43528133852047,
+          "return_pct": 0.4643528133852047,
+          "gross_pnl": 86.98865992398568,
+          "spread_cost": 6.0846990102222955,
+          "commission_cost": 22.750000000000004,
+          "slippage_cost": 11.718679575242941,
+          "win_rate_pct": 49.23076923076923,
+          "profit_factor": 1.1474259204250181,
+          "profit_factor_note": "",
+          "avg_r": 0.07846536938320879,
+          "max_realized_drawdown": 61.07538040635154
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -29.37123875456514,
+          "return_pct": -0.2937123875456514,
+          "gross_pnl": -23.25707177239557,
+          "spread_cost": 0.8112932013629728,
+          "commission_cost": 3.5000000000000004,
+          "slippage_cost": 1.8028737808066064,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.39017545588120867,
+          "profit_factor_note": "",
+          "avg_r": -0.32260089108901707,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "8": {
+        "baseline": {
+          "trades": 150,
+          "net_pnl": -143.31976670798014,
+          "return_pct": -1.4331976670798015,
+          "gross_pnl": -47.640939657662,
+          "spread_cost": 16.135720338219127,
+          "commission_cost": 52.50000000000001,
+          "slippage_cost": 27.043106712099096,
+          "win_rate_pct": 46.0,
+          "profit_factor": 0.8103984377726147,
+          "profit_factor_note": "",
+          "avg_r": -0.10494412541243407,
+          "max_realized_drawdown": 166.30008698848724
+        },
+        "htf_trend_pullback": {
+          "trades": 69,
+          "net_pnl": -5.039537923379797,
+          "return_pct": -0.050395379233797964,
+          "gross_pnl": 37.634990174408046,
+          "spread_cost": 6.0846990102222955,
+          "commission_cost": 24.150000000000002,
+          "slippage_cost": 12.439829087565585,
+          "win_rate_pct": 46.3768115942029,
+          "profit_factor": 0.9853445347980436,
+          "profit_factor_note": "",
+          "avg_r": -0.008022041899730768,
+          "max_realized_drawdown": 61.07538040635154
+        },
+        "htf_range_retest": {
+          "trades": 12,
+          "net_pnl": -16.36939802043224,
+          "return_pct": -0.1636939802043224,
+          "gross_pnl": -9.194656282101347,
+          "spread_cost": 0.8112932013629728,
+          "commission_cost": 4.2,
+          "slippage_cost": 2.1634485369679277,
+          "win_rate_pct": 41.66666666666667,
+          "profit_factor": 0.7163413229395874,
+          "profit_factor_note": "",
+          "avg_r": -0.14982861386127963,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "9": {
+        "baseline": {
+          "trades": 143,
+          "net_pnl": -96.65428723370268,
+          "return_pct": -0.9665428723370266,
+          "gross_pnl": -6.445273766235613,
+          "spread_cost": 14.377918401932684,
+          "commission_cost": 50.050000000000004,
+          "slippage_cost": 25.781095065534473,
+          "win_rate_pct": 48.95104895104895,
+          "profit_factor": 0.8610736576986774,
+          "profit_factor_note": "",
+          "avg_r": -0.07423836252845005,
+          "max_realized_drawdown": 129.05991039700166
+        },
+        "htf_trend_pullback": {
+          "trades": 67,
+          "net_pnl": -62.932935799598056,
+          "return_pct": -0.6293293579959806,
+          "gross_pnl": -22.535922260015994,
+          "spread_cost": 4.867759208177837,
+          "commission_cost": 23.450000000000003,
+          "slippage_cost": 12.079254331404263,
+          "win_rate_pct": 41.7910447761194,
+          "profit_factor": 0.8266749640078758,
+          "profit_factor_note": "",
+          "avg_r": -0.10316835082005194,
+          "max_realized_drawdown": 112.97274144979747
+        },
+        "htf_range_retest": {
+          "trades": 13,
+          "net_pnl": -14.240446571821929,
+          "return_pct": -0.1424044657182193,
+          "gross_pnl": -6.535417455410374,
+          "spread_cost": 0.8112932013629728,
+          "commission_cost": 4.550000000000001,
+          "slippage_cost": 2.3437359150485886,
+          "win_rate_pct": 46.15384615384615,
+          "profit_factor": 0.7532330614558645,
+          "profit_factor_note": "",
+          "avg_r": -0.12031604721999714,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "10": {
+        "baseline": {
+          "trades": 147,
+          "net_pnl": -101.02902897202804,
+          "return_pct": -1.0102902897202803,
+          "gross_pnl": -8.69886599223834,
+          "spread_cost": 14.377918401932684,
+          "commission_cost": 51.45,
+          "slippage_cost": 26.502244577857116,
+          "win_rate_pct": 47.61904761904761,
+          "profit_factor": 0.8613264058154624,
+          "profit_factor_note": "",
+          "avg_r": -0.07548699602602174,
+          "max_realized_drawdown": 181.50264616780805
+        },
+        "htf_trend_pullback": {
+          "trades": 64,
+          "net_pnl": -73.24104061868303,
+          "return_pct": -0.7324104061868303,
+          "gross_pnl": -34.02924261266146,
+          "spread_cost": 5.273405808859323,
+          "commission_cost": 22.400000000000002,
+          "slippage_cost": 11.538392197162281,
+          "win_rate_pct": 42.1875,
+          "profit_factor": 0.7870916680468619,
+          "profit_factor_note": "",
+          "avg_r": -0.12569495049494644,
+          "max_realized_drawdown": 122.6923977319093
+        },
+        "htf_range_retest": {
+          "trades": 13,
+          "net_pnl": -14.240446571821929,
+          "return_pct": -0.1424044657182193,
+          "gross_pnl": -6.535417455410374,
+          "spread_cost": 0.8112932013629728,
+          "commission_cost": 4.550000000000001,
+          "slippage_cost": 2.3437359150485886,
+          "win_rate_pct": 46.15384615384615,
+          "profit_factor": 0.7532330614558645,
+          "profit_factor_note": "",
+          "avg_r": -0.12031604721999714,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "11": {
+        "baseline": {
+          "trades": 140,
+          "net_pnl": -47.55770097520912,
+          "return_pct": -0.4755770097520913,
+          "gross_pnl": 39.437863955290034,
+          "spread_cost": 12.755331999206739,
+          "commission_cost": 49.00000000000001,
+          "slippage_cost": 25.24023293129249,
+          "win_rate_pct": 48.57142857142857,
+          "profit_factor": 0.9297272290701184,
+          "profit_factor_note": "",
+          "avg_r": -0.037310933521811016,
+          "max_realized_drawdown": 181.50264616780805
+        },
+        "htf_trend_pullback": {
+          "trades": 64,
+          "net_pnl": -86.44709106309087,
+          "return_pct": -0.8644709106309088,
+          "gross_pnl": -47.235293057069306,
+          "spread_cost": 5.273405808859323,
+          "commission_cost": 22.400000000000002,
+          "slippage_cost": 11.538392197162281,
+          "win_rate_pct": 42.1875,
+          "profit_factor": 0.7487022876112891,
+          "profit_factor_note": "",
+          "avg_r": -0.14835893564346134,
+          "max_realized_drawdown": 122.6923977319093
+        },
+        "htf_range_retest": {
+          "trades": 13,
+          "net_pnl": -14.240446571821929,
+          "return_pct": -0.1424044657182193,
+          "gross_pnl": -6.535417455410374,
+          "spread_cost": 0.8112932013629728,
+          "commission_cost": 4.550000000000001,
+          "slippage_cost": 2.3437359150485886,
+          "win_rate_pct": 46.15384615384615,
+          "profit_factor": 0.7532330614558645,
+          "profit_factor_note": "",
+          "avg_r": -0.12031604721999714,
+          "max_realized_drawdown": 38.353625128449494
+        }
+      },
+      "12": {
+        "baseline": {
+          "trades": 149,
+          "net_pnl": -41.37782915952285,
+          "return_pct": -0.4137782915952285,
+          "gross_pnl": 50.39032217370225,
+          "spread_cost": 12.755331999206739,
+          "commission_cost": 52.150000000000006,
+          "slippage_cost": 26.862819334018436,
+          "win_rate_pct": 49.664429530201346,
+          "profit_factor": 0.9413407060082136,
+          "profit_factor_note": "",
+          "avg_r": -0.030501748288807928,
+          "max_realized_drawdown": 173.86731795475498
+        },
+        "htf_trend_pullback": {
+          "trades": 66,
+          "net_pnl": -63.6646600680821,
+          "return_pct": -0.636646600680821,
+          "gross_pnl": -23.7979339065807,
+          "spread_cost": 4.867759208177837,
+          "commission_cost": 23.1,
+          "slippage_cost": 11.898966953323603,
+          "win_rate_pct": 43.93939393939394,
+          "profit_factor": 0.8097960687405938,
+          "profit_factor_note": "",
+          "avg_r": -0.10594922592248615,
+          "max_realized_drawdown": 122.6923977319093
+        },
+        "htf_range_retest": {
+          "trades": 11,
+          "net_pnl": -6.4190951376382195,
+          "return_pct": -0.0641909513763822,
+          "gross_pnl": -0.18028737806947143,
+          "spread_cost": 0.4056466006814864,
+          "commission_cost": 3.8500000000000005,
+          "slippage_cost": 1.983161158887267,
+          "win_rate_pct": 45.45454545454545,
+          "profit_factor": 0.8667226194074995,
+          "profit_factor_note": "",
+          "avg_r": -0.06409504050394142,
+          "max_realized_drawdown": 19.264312564224383
+        }
+      }
+    },
+    "GBPUSD": {
+      "1": {
+        "baseline": {
+          "trades": 129,
+          "net_pnl": -180.09388605927748,
+          "return_pct": -1.8009388605927747,
+          "gross_pnl": -98.52616396976556,
+          "spread_cost": 13.25100283950061,
+          "commission_cost": 45.150000000000006,
+          "slippage_cost": 23.16671925001127,
+          "win_rate_pct": 40.310077519379846,
+          "profit_factor": 0.7452821812827238,
+          "profit_factor_note": "",
+          "avg_r": -0.1533403580473316,
+          "max_realized_drawdown": 228.52425406754264
+        },
+        "htf_trend_pullback": {
+          "trades": 83,
+          "net_pnl": 4.3930071664436,
+          "return_pct": 0.043930071664436,
+          "gross_pnl": 61.25208455410306,
+          "spread_cost": 12.935502771893452,
+          "commission_cost": 29.050000000000004,
+          "slippage_cost": 14.87357461576599,
+          "win_rate_pct": 42.168674698795186,
+          "profit_factor": 1.009700453483188,
+          "profit_factor_note": "",
+          "avg_r": 0.005813411070135264,
+          "max_realized_drawdown": 124.7452393293097
+        },
+        "htf_range_retest": {
+          "trades": 13,
+          "net_pnl": 5.636145039900903,
+          "return_pct": 0.05636145039900903,
+          "gross_pnl": 13.431288592431667,
+          "spread_cost": 0.9014287645918782,
+          "commission_cost": 4.550000000000001,
+          "slippage_cost": 2.3437147879388833,
+          "win_rate_pct": 38.46153846153847,
+          "profit_factor": 1.0738134750028228,
+          "profit_factor_note": "",
+          "avg_r": 0.04761963061701703,
+          "max_realized_drawdown": 57.44244039301702
+        }
+      },
+      "2": {
+        "baseline": {
+          "trades": 132,
+          "net_pnl": -148.28680758989842,
+          "return_pct": -1.4828680758989843,
+          "gross_pnl": -64.40708522995789,
+          "spread_cost": 13.972145851174112,
+          "commission_cost": 46.2,
+          "slippage_cost": 23.707576508766397,
+          "win_rate_pct": 42.42424242424242,
+          "profit_factor": 0.7873988778751599,
+          "profit_factor_note": "",
+          "avg_r": -0.12338881638153398,
+          "max_realized_drawdown": 219.82989701164297
+        },
+        "htf_trend_pullback": {
+          "trades": 80,
+          "net_pnl": 9.58957948356238,
+          "return_pct": 0.0958957948356238,
+          "gross_pnl": 64.8577996124667,
+          "spread_cost": 12.935502771893452,
+          "commission_cost": 28.000000000000004,
+          "slippage_cost": 14.332717357010864,
+          "win_rate_pct": 42.5,
+          "profit_factor": 1.0216372867919747,
+          "profit_factor_note": "",
+          "avg_r": 0.01316608910902273,
+          "max_realized_drawdown": 124.7452393293097
+        },
+        "htf_range_retest": {
+          "trades": 13,
+          "net_pnl": 5.636145039900903,
+          "return_pct": 0.05636145039900903,
+          "gross_pnl": 13.160859963054103,
+          "spread_cost": 0.6310001352143148,
+          "commission_cost": 4.550000000000001,
+          "slippage_cost": 2.3437147879388833,
+          "win_rate_pct": 38.46153846153847,
+          "profit_factor": 1.0738134750028228,
+          "profit_factor_note": "",
+          "avg_r": 0.04761963061701703,
+          "max_realized_drawdown": 59.29844052822591
+        }
+      },
+      "3": {
+        "baseline": {
+          "trades": 129,
+          "net_pnl": -184.4207441293168,
+          "return_pct": -1.8442074412931682,
+          "gross_pnl": -106.4587370981724,
+          "spread_cost": 9.55514490467391,
+          "commission_cost": 45.150000000000006,
+          "slippage_cost": 23.25686212647046,
+          "win_rate_pct": 44.18604651162791,
+          "profit_factor": 0.7202822252037437,
+          "profit_factor_note": "",
+          "avg_r": -0.15702444738649676,
+          "max_realized_drawdown": 219.82989701164297
+        },
+        "htf_trend_pullback": {
+          "trades": 77,
+          "net_pnl": -15.546926127837096,
+          "return_pct": -0.15546926127837096,
+          "gross_pnl": 38.220579618771296,
+          "spread_cost": 13.02564564835264,
+          "commission_cost": 26.950000000000003,
+          "slippage_cost": 13.791860098255738,
+          "win_rate_pct": 41.55844155844156,
+          "profit_factor": 0.9641488735802608,
+          "profit_factor_note": "",
+          "avg_r": -0.02217690947655506,
+          "max_realized_drawdown": 124.7452393293097
+        },
+        "htf_range_retest": {
+          "trades": 11,
+          "net_pnl": -68.84301392706486,
+          "return_pct": -0.6884301392706486,
+          "gross_pnl": -62.64929913912597,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 3.8500000000000005,
+          "slippage_cost": 1.9831432821021322,
+          "win_rate_pct": 18.181818181818183,
+          "profit_factor": 0.19857876826569837,
+          "profit_factor_note": "",
+          "avg_r": -0.6874077182717622,
+          "max_realized_drawdown": 68.8430139270622
+        }
+      },
+      "4": {
+        "baseline": {
+          "trades": 135,
+          "net_pnl": -218.79189390170026,
+          "return_pct": -2.1879189390170026,
+          "gross_pnl": -129.7606706628667,
+          "spread_cost": 17.442646594852842,
+          "commission_cost": 47.25000000000001,
+          "slippage_cost": 24.338576643980712,
+          "win_rate_pct": 45.18518518518518,
+          "profit_factor": 0.6823004533098324,
+          "profit_factor_note": "",
+          "avg_r": -0.17801011184441654,
+          "max_realized_drawdown": 218.79189390165266
+        },
+        "htf_trend_pullback": {
+          "trades": 75,
+          "net_pnl": -31.79378690216634,
+          "return_pct": -0.3179378690216634,
+          "gross_pnl": 20.82300446214611,
+          "spread_cost": 12.935502771893452,
+          "commission_cost": 26.250000000000004,
+          "slippage_cost": 13.431288592418985,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.9266837017028785,
+          "profit_factor_note": "",
+          "avg_r": -0.04656163366326048,
+          "max_realized_drawdown": 108.59352210752331
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -59.29844052822851,
+          "return_pct": -0.5929844052822851,
+          "gross_pnl": -53.635011493208005,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 3.5000000000000004,
+          "slippage_cost": 1.8028575291837565,
+          "win_rate_pct": 20.0,
+          "profit_factor": 0.22340111429891069,
+          "profit_factor_note": "",
+          "avg_r": -0.6513141089108239,
+          "max_realized_drawdown": 59.29844052822591
+        }
+      },
+      "5": {
+        "baseline": {
+          "trades": 139,
+          "net_pnl": -213.25089241434137,
+          "return_pct": -2.1325089241434134,
+          "gross_pnl": -120.6562401404873,
+          "spread_cost": 18.884932618199848,
+          "commission_cost": 48.650000000000006,
+          "slippage_cost": 25.059719655654217,
+          "win_rate_pct": 43.16546762589928,
+          "profit_factor": 0.710413680673592,
+          "profit_factor_note": "",
+          "avg_r": -0.16850906581655395,
+          "max_realized_drawdown": 257.6593309143227
+        },
+        "htf_trend_pullback": {
+          "trades": 76,
+          "net_pnl": 12.026222562836836,
+          "return_pct": 0.12026222562836834,
+          "gross_pnl": 65.26344255652685,
+          "spread_cost": 12.935502771893452,
+          "commission_cost": 26.6,
+          "slippage_cost": 13.70171722179655,
+          "win_rate_pct": 42.10526315789473,
+          "profit_factor": 1.0283565228225602,
+          "profit_factor_note": "",
+          "avg_r": 0.017380523710374685,
+          "max_realized_drawdown": 105.85752129623143
+        },
+        "htf_range_retest": {
+          "trades": 9,
+          "net_pnl": -49.75386712939217,
+          "return_pct": -0.4975386712939217,
+          "gross_pnl": -44.62072384729004,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 3.1500000000000004,
+          "slippage_cost": 1.6225717762653808,
+          "win_rate_pct": 22.22222222222222,
+          "profit_factor": 0.2553155591987551,
+          "profit_factor_note": "",
+          "avg_r": -0.607199697469677,
+          "max_realized_drawdown": 49.75386712938962
+        }
+      },
+      "6": {
+        "baseline": {
+          "trades": 143,
+          "net_pnl": -199.3266034162741,
+          "return_pct": -1.9932660341627413,
+          "gross_pnl": -101.54595033113416,
+          "spread_cost": 21.949790417812235,
+          "commission_cost": 50.050000000000004,
+          "slippage_cost": 25.780862667327717,
+          "win_rate_pct": 43.35664335664335,
+          "profit_factor": 0.7361616175019919,
+          "profit_factor_note": "",
+          "avg_r": -0.15310044139019144,
+          "max_realized_drawdown": 270.0645479333016
+        },
+        "htf_trend_pullback": {
+          "trades": 76,
+          "net_pnl": 20.995438770523737,
+          "return_pct": 0.20995438770523736,
+          "gross_pnl": 74.23265876421375,
+          "spread_cost": 12.935502771893452,
+          "commission_cost": 26.6,
+          "slippage_cost": 13.70171722179655,
+          "win_rate_pct": 42.10526315789473,
+          "profit_factor": 1.0495049576502749,
+          "profit_factor_note": "",
+          "avg_r": 0.030343004168944122,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 11,
+          "net_pnl": -68.84301392706486,
+          "return_pct": -0.6884301392706486,
+          "gross_pnl": -62.64929913912597,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 3.8500000000000005,
+          "slippage_cost": 1.9831432821021322,
+          "win_rate_pct": 18.181818181818183,
+          "profit_factor": 0.19857876826569837,
+          "profit_factor_note": "",
+          "avg_r": -0.6874077182717622,
+          "max_realized_drawdown": 68.8430139270622
+        }
+      },
+      "7": {
+        "baseline": {
+          "trades": 155,
+          "net_pnl": -181.66695587490997,
+          "return_pct": -1.8166695587490997,
+          "gross_pnl": -76.44115923723926,
+          "spread_cost": 23.031504935322488,
+          "commission_cost": 54.25000000000001,
+          "slippage_cost": 27.944291702348224,
+          "win_rate_pct": 43.87096774193549,
+          "profit_factor": 0.7790167524096482,
+          "profit_factor_note": "",
+          "avg_r": -0.12873346374949876,
+          "max_realized_drawdown": 270.0645479333016
+        },
+        "htf_trend_pullback": {
+          "trades": 73,
+          "net_pnl": 70.81273493494157,
+          "return_pct": 0.7081273493494158,
+          "gross_pnl": 123.18024068154996,
+          "spread_cost": 13.656645783566955,
+          "commission_cost": 25.55,
+          "slippage_cost": 13.160859963041423,
+          "win_rate_pct": 45.20547945205479,
+          "profit_factor": 1.183486189621174,
+          "profit_factor_note": "",
+          "avg_r": 0.1065456496678162,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 12,
+          "net_pnl": -52.6968675350315,
+          "return_pct": -0.526968675350315,
+          "gross_pnl": -45.97286699417424,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 4.2,
+          "slippage_cost": 2.1634290350205077,
+          "win_rate_pct": 25.0,
+          "profit_factor": 0.38654068031932737,
+          "profit_factor_note": "",
+          "avg_r": -0.4823372112210378,
+          "max_realized_drawdown": 59.47344052822518
+        }
+      },
+      "8": {
+        "baseline": {
+          "trades": 155,
+          "net_pnl": -204.4280321808559,
+          "return_pct": -2.044280321808559,
+          "gross_pnl": -99.112092666726,
+          "spread_cost": 23.121647811781674,
+          "commission_cost": 54.25000000000001,
+          "slippage_cost": 27.944291702348224,
+          "win_rate_pct": 43.87096774193549,
+          "profit_factor": 0.7513297328495082,
+          "profit_factor_note": "",
+          "avg_r": -0.1448624960075647,
+          "max_realized_drawdown": 235.69953914434882
+        },
+        "htf_trend_pullback": {
+          "trades": 69,
+          "net_pnl": 17.360794609520735,
+          "return_pct": 0.17360794609520735,
+          "gross_pnl": 67.96772885029237,
+          "spread_cost": 14.017217289403707,
+          "commission_cost": 24.150000000000002,
+          "slippage_cost": 12.43971695136792,
+          "win_rate_pct": 46.3768115942029,
+          "profit_factor": 1.0485894185965658,
+          "profit_factor_note": "",
+          "avg_r": 0.027635525183057338,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 14,
+          "net_pnl": -48.033366385707716,
+          "return_pct": -0.4803336638570772,
+          "gross_pnl": -39.888222833176954,
+          "spread_cost": 0.7211430116735026,
+          "commission_cost": 4.9,
+          "slippage_cost": 2.524000540857259,
+          "win_rate_pct": 35.714285714285715,
+          "profit_factor": 0.44082983214590177,
+          "profit_factor_note": "",
+          "avg_r": -0.3768445190946762,
+          "max_realized_drawdown": 60.38544079865642
+        }
+      },
+      "9": {
+        "baseline": {
+          "trades": 163,
+          "net_pnl": -240.3104678413724,
+          "return_pct": -2.403104678413724,
+          "gross_pnl": -132.55509983307923,
+          "spread_cost": 21.31879028259792,
+          "commission_cost": 57.050000000000004,
+          "slippage_cost": 29.38657772569523,
+          "win_rate_pct": 42.944785276073624,
+          "profit_factor": 0.7267187448798321,
+          "profit_factor_note": "",
+          "avg_r": -0.16193185780224642,
+          "max_realized_drawdown": 254.7013284804434
+        },
+        "htf_trend_pullback": {
+          "trades": 70,
+          "net_pnl": 1.4160769820831687,
+          "return_pct": 0.014160769820831687,
+          "gross_pnl": 51.832153964099675,
+          "spread_cost": 13.296074277730204,
+          "commission_cost": 24.500000000000004,
+          "slippage_cost": 12.620002704286295,
+          "win_rate_pct": 48.57142857142857,
+          "profit_factor": 1.0040720978743545,
+          "profit_factor_note": "",
+          "avg_r": 0.0022219589817171347,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 15,
+          "net_pnl": -57.577939784544064,
+          "return_pct": -0.5757793978454406,
+          "gross_pnl": -48.90251047909492,
+          "spread_cost": 0.7211430116735026,
+          "commission_cost": 5.250000000000001,
+          "slippage_cost": 2.7042862937756347,
+          "win_rate_pct": 33.33333333333333,
+          "profit_factor": 0.39674684893131157,
+          "profit_factor_note": "",
+          "avg_r": -0.42161113861377414,
+          "max_realized_drawdown": 65.09151304816805
+        }
+      },
+      "10": {
+        "baseline": {
+          "trades": 161,
+          "net_pnl": -156.4085928695424,
+          "return_pct": -1.5640859286954238,
+          "gross_pnl": -50.79551088459624,
+          "spread_cost": 20.237075765087667,
+          "commission_cost": 56.35000000000001,
+          "slippage_cost": 29.02600621985848,
+          "win_rate_pct": 43.47826086956522,
+          "profit_factor": 0.8181851520199461,
+          "profit_factor_note": "",
+          "avg_r": -0.106704306315623,
+          "max_realized_drawdown": 220.1632498758554
+        },
+        "htf_trend_pullback": {
+          "trades": 75,
+          "net_pnl": 18.145366656223636,
+          "return_pct": 0.18145366656223638,
+          "gross_pnl": 76.5763735521537,
+          "spread_cost": 18.65957542705188,
+          "commission_cost": 26.250000000000004,
+          "slippage_cost": 13.521431468878173,
+          "win_rate_pct": 45.33333333333333,
+          "profit_factor": 1.0468817134282817,
+          "profit_factor_note": "",
+          "avg_r": 0.02657367986809579,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 15,
+          "net_pnl": -57.577939784544064,
+          "return_pct": -0.5757793978454406,
+          "gross_pnl": -48.90251047909492,
+          "spread_cost": 0.7211430116735026,
+          "commission_cost": 5.250000000000001,
+          "slippage_cost": 2.7042862937756347,
+          "win_rate_pct": 33.33333333333333,
+          "profit_factor": 0.39674684893131157,
+          "profit_factor_note": "",
+          "avg_r": -0.42161113861377414,
+          "max_realized_drawdown": 65.09151304816805
+        }
+      },
+      "11": {
+        "baseline": {
+          "trades": 158,
+          "net_pnl": -134.1750169016386,
+          "return_pct": -1.341750169016386,
+          "gross_pnl": -30.873935187121063,
+          "spread_cost": 19.515932753414162,
+          "commission_cost": 55.300000000000004,
+          "slippage_cost": 28.485148961103352,
+          "win_rate_pct": 41.77215189873418,
+          "profit_factor": 0.8457417299429002,
+          "profit_factor_note": "",
+          "avg_r": -0.09327425429241722,
+          "max_realized_drawdown": 203.58303623731808
+        },
+        "htf_trend_pullback": {
+          "trades": 74,
+          "net_pnl": 80.42352278368705,
+          "return_pct": 0.8042352278368704,
+          "gross_pnl": 137.963672420862,
+          "spread_cost": 18.299003921215128,
+          "commission_cost": 25.900000000000002,
+          "slippage_cost": 13.341145715959797,
+          "win_rate_pct": 47.2972972972973,
+          "profit_factor": 1.219131648159566,
+          "profit_factor_note": "",
+          "avg_r": 0.11937093256634619,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 15,
+          "net_pnl": -57.577939784544064,
+          "return_pct": -0.5757793978454406,
+          "gross_pnl": -49.263081984931674,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 5.250000000000001,
+          "slippage_cost": 2.7042862937756347,
+          "win_rate_pct": 33.33333333333333,
+          "profit_factor": 0.39674684893131157,
+          "profit_factor_note": "",
+          "avg_r": -0.42161113861377414,
+          "max_realized_drawdown": 74.63608644700435
+        }
+      },
+      "12": {
+        "baseline": {
+          "trades": 162,
+          "net_pnl": -182.53945553686884,
+          "return_pct": -1.8253945553686886,
+          "gross_pnl": -76.75665930484108,
+          "spread_cost": 19.876504259250915,
+          "commission_cost": 56.7,
+          "slippage_cost": 29.206291972776853,
+          "win_rate_pct": 42.592592592592595,
+          "profit_factor": 0.792415986011079,
+          "profit_factor_note": "",
+          "avg_r": -0.12376246485749569,
+          "max_realized_drawdown": 203.58303623731808
+        },
+        "htf_trend_pullback": {
+          "trades": 77,
+          "net_pnl": -15.591997566062943,
+          "return_pct": -0.15591997566062943,
+          "gross_pnl": 41.15022310369863,
+          "spread_cost": 15.91021769504665,
+          "commission_cost": 26.950000000000003,
+          "slippage_cost": 13.882002974714926,
+          "win_rate_pct": 44.15584415584416,
+          "profit_factor": 0.9605673056641353,
+          "profit_factor_note": "",
+          "avg_r": -0.02224120162004978,
+          "max_realized_drawdown": 114.51180758998089
+        },
+        "htf_range_retest": {
+          "trades": 12,
+          "net_pnl": -65.09151304816996,
+          "return_pct": -0.6509151304816996,
+          "gross_pnl": -58.3675125073127,
+          "spread_cost": 0.3605715058367513,
+          "commission_cost": 4.2,
+          "slippage_cost": 2.1634290350205077,
+          "win_rate_pct": 25.0,
+          "profit_factor": 0.24225106388020337,
+          "profit_factor_note": "",
+          "avg_r": -0.5957860561055325,
+          "max_realized_drawdown": 65.09151304816805
+        }
+      }
+    },
+    "USDCHF": {
+      "1": {
+        "baseline": {
+          "trades": 163,
+          "net_pnl": -212.7179754946871,
+          "return_pct": -2.1271797549468707,
+          "gross_pnl": 89.23236783994506,
+          "spread_cost": 228.08156903493963,
+          "commission_cost": 45.64000000000001,
+          "slippage_cost": 28.228774299692603,
+          "win_rate_pct": 41.104294478527606,
+          "profit_factor": 0.749301696775707,
+          "profit_factor_note": "",
+          "avg_r": -0.14921785458302667,
+          "max_realized_drawdown": 272.758310603007
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": -94.6775286833917,
+          "return_pct": -0.9467752868339169,
+          "gross_pnl": 10.001298869970203,
+          "spread_cost": 73.9489977053297,
+          "commission_cost": 19.040000000000003,
+          "slippage_cost": 11.689829848032213,
+          "win_rate_pct": 36.76470588235294,
+          "profit_factor": 0.7544638106579907,
+          "profit_factor_note": "",
+          "avg_r": -0.15919968549798155,
+          "max_realized_drawdown": 151.82622591673498
+        },
+        "htf_range_retest": {
+          "trades": 12,
+          "net_pnl": -12.322202883493835,
+          "return_pct": -0.12322202883493835,
+          "gross_pnl": 0.3463653288281101,
+          "spread_cost": 7.230376239338443,
+          "commission_cost": 3.3600000000000003,
+          "slippage_cost": 2.0781919729835043,
+          "win_rate_pct": 41.66666666666667,
+          "profit_factor": 0.8068202727141093,
+          "profit_factor_note": "",
+          "avg_r": -0.11741168316833915,
+          "max_realized_drawdown": 36.589263540714455
+        }
+      },
+      "2": {
+        "baseline": {
+          "trades": 161,
+          "net_pnl": -165.18217777203807,
+          "return_pct": -1.6518217777203807,
+          "gross_pnl": 136.77100922194379,
+          "spread_cost": 228.9907780231199,
+          "commission_cost": 45.080000000000005,
+          "slippage_cost": 27.882408970862016,
+          "win_rate_pct": 41.61490683229814,
+          "profit_factor": 0.7993779141769326,
+          "profit_factor_note": "",
+          "avg_r": -0.11731175081485526,
+          "max_realized_drawdown": 304.95038056879093
+        },
+        "htf_trend_pullback": {
+          "trades": 71,
+          "net_pnl": -113.44193445037504,
+          "return_pct": -1.1344193445037505,
+          "gross_pnl": -6.7974195783137485,
+          "spread_cost": 74.55513703078323,
+          "commission_cost": 19.880000000000003,
+          "slippage_cost": 12.209377841278089,
+          "win_rate_pct": 35.2112676056338,
+          "profit_factor": 0.723858218037749,
+          "profit_factor_note": "",
+          "avg_r": -0.182691978803534,
+          "max_realized_drawdown": 146.5267723080433
+        },
+        "htf_range_retest": {
+          "trades": 13,
+          "net_pnl": -1.34532969650013,
+          "return_pct": -0.013453296965001301,
+          "gross_pnl": 12.209377841275336,
+          "spread_cost": 7.663332900376673,
+          "commission_cost": 3.6400000000000006,
+          "slippage_cost": 2.2513746373987966,
+          "win_rate_pct": 46.15384615384615,
+          "profit_factor": 0.9789087692893257,
+          "profit_factor_note": "",
+          "avg_r": -0.011832856054860307,
+          "max_realized_drawdown": 36.589263540714455
+        }
+      },
+      "3": {
+        "baseline": {
+          "trades": 161,
+          "net_pnl": -264.28595748368735,
+          "return_pct": -2.6428595748368733,
+          "gross_pnl": 26.32376499109288,
+          "spread_cost": 217.64731350391827,
+          "commission_cost": 45.080000000000005,
+          "slippage_cost": 27.882408970862016,
+          "win_rate_pct": 38.50931677018634,
+          "profit_factor": 0.6977700869877184,
+          "profit_factor_note": "",
+          "avg_r": -0.187694876083902,
+          "max_realized_drawdown": 304.95038056879093
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": -80.51984586744207,
+          "return_pct": -0.8051984586744207,
+          "gross_pnl": 21.084989392548394,
+          "spread_cost": 70.87500541195827,
+          "commission_cost": 19.040000000000003,
+          "slippage_cost": 11.689829848032213,
+          "win_rate_pct": 36.76470588235294,
+          "profit_factor": 0.7907338258479928,
+          "profit_factor_note": "",
+          "avg_r": -0.13539362842168678,
+          "max_realized_drawdown": 124.17451357314894
+        },
+        "htf_range_retest": {
+          "trades": 12,
+          "net_pnl": 7.766986188679944,
+          "return_pct": 0.07766986188679945,
+          "gross_pnl": 20.21907607048277,
+          "spread_cost": 7.013897908819328,
+          "commission_cost": 3.3600000000000003,
+          "slippage_cost": 2.0781919729835043,
+          "win_rate_pct": 50.0,
+          "profit_factor": 1.1420602308375465,
+          "profit_factor_note": "",
+          "avg_r": 0.07400745874584931,
+          "max_realized_drawdown": 27.476947655535696
+        }
+      },
+      "4": {
+        "baseline": {
+          "trades": 158,
+          "net_pnl": -138.4080737758469,
+          "return_pct": -1.384080737758469,
+          "gross_pnl": 146.16616876647456,
+          "spread_cost": 212.97138156470538,
+          "commission_cost": 44.24,
+          "slippage_cost": 27.36286097761614,
+          "win_rate_pct": 41.139240506329116,
+          "profit_factor": 0.8296074140315313,
+          "profit_factor_note": "",
+          "avg_r": -0.10016328111294341,
+          "max_realized_drawdown": 283.05098411039035
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": -73.07299129758427,
+          "return_pct": -0.7307299129758427,
+          "gross_pnl": 16.27917045502427,
+          "spread_cost": 58.53574057236871,
+          "commission_cost": 19.040000000000003,
+          "slippage_cost": 11.776421180239858,
+          "win_rate_pct": 36.76470588235294,
+          "profit_factor": 0.8098952271240335,
+          "profit_factor_note": "",
+          "avg_r": -0.12287178800235046,
+          "max_realized_drawdown": 100.05249945878313
+        },
+        "htf_range_retest": {
+          "trades": 11,
+          "net_pnl": 16.879302073860018,
+          "return_pct": 0.1687930207386002,
+          "gross_pnl": 27.92570463696345,
+          "spread_cost": 6.061393254535222,
+          "commission_cost": 3.08,
+          "slippage_cost": 1.9050093085682125,
+          "win_rate_pct": 54.54545454545454,
+          "profit_factor": 1.370472277005056,
+          "profit_factor_note": "",
+          "avg_r": 0.17545510351032434,
+          "max_realized_drawdown": 18.364631770356937
+        }
+      },
+      "5": {
+        "baseline": {
+          "trades": 158,
+          "net_pnl": -161.70114213970294,
+          "return_pct": -1.6170114213970292,
+          "gross_pnl": 106.33415595095812,
+          "spread_cost": 196.432437113045,
+          "commission_cost": 44.24,
+          "slippage_cost": 27.36286097761614,
+          "win_rate_pct": 40.50632911392405,
+          "profit_factor": 0.8044387744263892,
+          "profit_factor_note": "",
+          "avg_r": -0.11702003007897853,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "htf_trend_pullback": {
+          "trades": 68,
+          "net_pnl": -91.73342338833214,
+          "return_pct": -0.9173342338833215,
+          "gross_pnl": -3.4203576222153527,
+          "spread_cost": 57.49664458587696,
+          "commission_cost": 19.040000000000003,
+          "slippage_cost": 11.776421180239858,
+          "win_rate_pct": 36.76470588235294,
+          "profit_factor": 0.7613487376292714,
+          "profit_factor_note": "",
+          "avg_r": -0.15424919044847735,
+          "max_realized_drawdown": 110.75728276394875
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": 25.99161795904009,
+          "return_pct": 0.2599161795904009,
+          "gross_pnl": 35.978698532274706,
+          "spread_cost": 5.4552539290816995,
+          "commission_cost": 2.8000000000000003,
+          "slippage_cost": 1.7318266441529204,
+          "win_rate_pct": 60.0,
+          "profit_factor": 1.7130903462563198,
+          "profit_factor_note": "",
+          "avg_r": 0.29719227722769437,
+          "max_realized_drawdown": 18.364631770356937
+        }
+      },
+      "6": {
+        "baseline": {
+          "trades": 169,
+          "net_pnl": -129.4951742650882,
+          "return_pct": -1.294951742650882,
+          "gross_pnl": 121.57423041950283,
+          "spread_cost": 174.48153439840675,
+          "commission_cost": 47.32000000000001,
+          "slippage_cost": 29.267870286184355,
+          "win_rate_pct": 40.23668639053255,
+          "profit_factor": 0.8555807055450164,
+          "profit_factor_note": "",
+          "avg_r": -0.08761351104343283,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "htf_trend_pullback": {
+          "trades": 69,
+          "net_pnl": -73.74265229251978,
+          "return_pct": -0.7374265229251978,
+          "gross_pnl": 14.2875698142473,
+          "spread_cost": 56.76061826211197,
+          "commission_cost": 19.32,
+          "slippage_cost": 11.949603844655151,
+          "win_rate_pct": 39.130434782608695,
+          "profit_factor": 0.8034946273006399,
+          "profit_factor_note": "",
+          "avg_r": -0.12220074903144722,
+          "max_realized_drawdown": 120.00959864912693
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -17.95348313633974,
+          "return_pct": -0.17953483136339743,
+          "gross_pnl": -8.789020219077766,
+          "spread_cost": 4.632636273109062,
+          "commission_cost": 2.8000000000000003,
+          "slippage_cost": 1.7318266441529204,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.6716260468695522,
+          "profit_factor_note": "",
+          "avg_r": -0.20528297029704684,
+          "max_realized_drawdown": 31.141278953971778
+        }
+      },
+      "7": {
+        "baseline": {
+          "trades": 169,
+          "net_pnl": -147.41958003207057,
+          "return_pct": -1.4741958003207056,
+          "gross_pnl": 115.07988050392972,
+          "spread_cost": 185.91159024981602,
+          "commission_cost": 47.32000000000001,
+          "slippage_cost": 29.267870286184355,
+          "win_rate_pct": 40.828402366863905,
+          "profit_factor": 0.8339025750405193,
+          "profit_factor_note": "",
+          "avg_r": -0.09974075927121383,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "htf_trend_pullback": {
+          "trades": 63,
+          "net_pnl": -95.65879031910217,
+          "return_pct": -0.9565879031910217,
+          "gross_pnl": -8.91890721740067,
+          "spread_cost": 58.18937524353813,
+          "commission_cost": 17.64,
+          "slippage_cost": 10.910507858163399,
+          "win_rate_pct": 39.682539682539684,
+          "profit_factor": 0.7176717256802928,
+          "profit_factor_note": "",
+          "avg_r": -0.17361551783751997,
+          "max_realized_drawdown": 120.00959864912693
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -17.95348313633974,
+          "return_pct": -0.17953483136339743,
+          "gross_pnl": -8.789020219077766,
+          "spread_cost": 4.632636273109062,
+          "commission_cost": 2.8000000000000003,
+          "slippage_cost": 1.7318266441529204,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.6716260468695522,
+          "profit_factor_note": "",
+          "avg_r": -0.20528297029704684,
+          "max_realized_drawdown": 31.141278953971778
+        }
+      },
+      "8": {
+        "baseline": {
+          "trades": 165,
+          "net_pnl": -87.937022124116,
+          "return_pct": -0.8793702212411599,
+          "gross_pnl": 167.4243408234529,
+          "spread_cost": 180.58622331904579,
+          "commission_cost": 46.2,
+          "slippage_cost": 28.575139628523186,
+          "win_rate_pct": 42.42424242424242,
+          "profit_factor": 0.8955601536498644,
+          "profit_factor_note": "",
+          "avg_r": -0.060938535853605924,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "htf_trend_pullback": {
+          "trades": 65,
+          "net_pnl": -34.08950946011723,
+          "return_pct": -0.3408950946011723,
+          "gross_pnl": 43.59873576653557,
+          "spread_cost": 48.23137203965884,
+          "commission_cost": 18.200000000000003,
+          "slippage_cost": 11.256873186993982,
+          "win_rate_pct": 46.15384615384615,
+          "profit_factor": 0.890557821855344,
+          "profit_factor_note": "",
+          "avg_r": -0.05996690022850869,
+          "max_realized_drawdown": 84.8329713815292
+        },
+        "htf_range_retest": {
+          "trades": 10,
+          "net_pnl": -17.95348313633974,
+          "return_pct": -0.17953483136339743,
+          "gross_pnl": -9.135385547908351,
+          "spread_cost": 4.2862709442784785,
+          "commission_cost": 2.8000000000000003,
+          "slippage_cost": 1.7318266441529204,
+          "win_rate_pct": 40.0,
+          "profit_factor": 0.6716260468695522,
+          "profit_factor_note": "",
+          "avg_r": -0.20528297029704684,
+          "max_realized_drawdown": 40.25359483915054
+        }
+      },
+      "9": {
+        "baseline": {
+          "trades": 164,
+          "net_pnl": -91.89999740229008,
+          "return_pct": -0.9189999740229009,
+          "gross_pnl": 159.19816426372708,
+          "spread_cost": 176.77620470190936,
+          "commission_cost": 45.92,
+          "slippage_cost": 28.401956964107892,
+          "win_rate_pct": 42.68292682926829,
+          "profit_factor": 0.8896593109514492,
+          "profit_factor_note": "",
+          "avg_r": -0.06407311760446363,
+          "max_realized_drawdown": 280.51264060261747
+        },
+        "htf_trend_pullback": {
+          "trades": 60,
+          "net_pnl": -48.0594709269727,
+          "return_pct": -0.48059470926972697,
+          "gross_pnl": 23.1631813655328,
+          "spread_cost": 44.031692427588006,
+          "commission_cost": 16.8,
+          "slippage_cost": 10.390959864917523,
+          "win_rate_pct": 45.0,
+          "profit_factor": 0.8361196840539872,
+          "profit_factor_note": "",
+          "avg_r": -0.09158660066008881,
+          "max_realized_drawdown": 84.8329713815292
+        },
+        "htf_range_retest": {
+          "trades": 8,
+          "net_pnl": -40.25359483915808,
+          "return_pct": -0.40253594839158086,
+          "gross_pnl": -33.55414123046432,
+          "spread_cost": 3.073992293371434,
+          "commission_cost": 2.24,
+          "slippage_cost": 1.3854613153223363,
+          "win_rate_pct": 25.0,
+          "profit_factor": 0.26375110809051655,
+          "profit_factor_note": "",
+          "avg_r": -0.5753324752475397,
+          "max_realized_drawdown": 40.25359483915054
+        }
+      },
+      "10": {
+        "baseline": {
+          "trades": 161,
+          "net_pnl": -40.966911720167,
+          "return_pct": -0.40966911720167,
+          "gross_pnl": 190.11126986185658,
+          "spread_cost": 158.11577261116165,
+          "commission_cost": 45.080000000000005,
+          "slippage_cost": 27.882408970862016,
+          "win_rate_pct": 43.47826086956522,
+          "profit_factor": 0.949099643799319,
+          "profit_factor_note": "",
+          "avg_r": -0.02909454400100507,
+          "max_realized_drawdown": 231.44411222231247
+        },
+        "htf_trend_pullback": {
+          "trades": 63,
+          "net_pnl": -60.589300775005064,
+          "return_pct": -0.6058930077500506,
+          "gross_pnl": 12.166082175161604,
+          "spread_cost": 44.20487509200329,
+          "commission_cost": 17.64,
+          "slippage_cost": 10.910507858163399,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 0.7998053087637318,
+          "profit_factor_note": "",
+          "avg_r": -0.10996629577245615,
+          "max_realized_drawdown": 84.8329713815292
+        },
+        "htf_range_retest": {
+          "trades": 7,
+          "net_pnl": -31.141278953978006,
+          "return_pct": -0.3114127895397801,
+          "gross_pnl": -25.501147335153057,
+          "spread_cost": 2.4678529679179118,
+          "commission_cost": 1.9600000000000002,
+          "slippage_cost": 1.2122786509070442,
+          "win_rate_pct": 28.57142857142857,
+          "profit_factor": 0.3165013297086198,
+          "profit_factor_note": "",
+          "avg_r": -0.5086775954738488,
+          "max_realized_drawdown": 33.00583625578656
+        }
+      },
+      "11": {
+        "baseline": {
+          "trades": 156,
+          "net_pnl": 27.454779408553627,
+          "return_pct": 0.2745477940855363,
+          "gross_pnl": 228.68770836036552,
+          "spread_cost": 130.53643330302637,
+          "commission_cost": 43.68000000000001,
+          "slippage_cost": 27.016495648785558,
+          "win_rate_pct": 44.871794871794876,
+          "profit_factor": 1.0365906871794677,
+          "profit_factor_note": "",
+          "avg_r": 0.02012322416855028,
+          "max_realized_drawdown": 129.9903511278153
+        },
+        "htf_trend_pullback": {
+          "trades": 60,
+          "net_pnl": -42.73410399620171,
+          "return_pct": -0.4273410399620171,
+          "gross_pnl": 25.84751266397059,
+          "spread_cost": 41.3906567952548,
+          "commission_cost": 16.8,
+          "slippage_cost": 10.390959864917523,
+          "win_rate_pct": 45.0,
+          "profit_factor": 0.8497538353589842,
+          "profit_factor_note": "",
+          "avg_r": -0.08143808580860233,
+          "max_realized_drawdown": 77.67148374245699
+        },
+        "htf_range_retest": {
+          "trades": 7,
+          "net_pnl": -31.141278953978006,
+          "return_pct": -0.3114127895397801,
+          "gross_pnl": -25.501147335153057,
+          "spread_cost": 2.4678529679179118,
+          "commission_cost": 1.9600000000000002,
+          "slippage_cost": 1.2122786509070442,
+          "win_rate_pct": 28.57142857142857,
+          "profit_factor": 0.3165013297086198,
+          "profit_factor_note": "",
+          "avg_r": -0.5086775954738488,
+          "max_realized_drawdown": 33.00583625578656
+        }
+      },
+      "12": {
+        "baseline": {
+          "trades": 150,
+          "net_pnl": 127.93548945747897,
+          "return_pct": 1.2793548945747897,
+          "gross_pnl": 285.4916222885825,
+          "spread_cost": 89.57873316880982,
+          "commission_cost": 42.00000000000001,
+          "slippage_cost": 25.977399662293806,
+          "win_rate_pct": 48.0,
+          "profit_factor": 1.18915838024664,
+          "profit_factor_note": "",
+          "avg_r": 0.09752231023100197,
+          "max_realized_drawdown": 74.78805645752618
+        },
+        "htf_trend_pullback": {
+          "trades": 61,
+          "net_pnl": -68.90491232628828,
+          "return_pct": -0.6890491232628828,
+          "gross_pnl": -16.668831449984026,
+          "spread_cost": 24.59193834697147,
+          "commission_cost": 17.080000000000002,
+          "slippage_cost": 10.564142529332814,
+          "win_rate_pct": 44.26229508196721,
+          "profit_factor": 0.7713328428959656,
+          "profit_factor_note": "",
+          "avg_r": -0.1291589644538438,
+          "max_realized_drawdown": 109.93750876733066
+        },
+        "htf_range_retest": {
+          "trades": 9,
+          "net_pnl": -22.392710741656124,
+          "return_pct": -0.22392710741656127,
+          "gross_pnl": -15.24007446854707,
+          "spread_cost": 3.073992293371434,
+          "commission_cost": 2.5200000000000005,
+          "slippage_cost": 1.5586439797376284,
+          "win_rate_pct": 44.44444444444444,
+          "profit_factor": 0.5085176803829906,
+          "profit_factor_note": "",
+          "avg_r": -0.2844908910891232,
+          "max_realized_drawdown": 33.14583625578598
+        }
+      }
+    }
+  }
+}

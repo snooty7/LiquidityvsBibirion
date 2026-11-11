@@ -1,0 +1,49 @@
+{
+  "passed": true,
+  "all_replays_present": 270,
+  "accounts_audited_separately": {
+    "EURUSD": {
+      "passed": true,
+      "test_rows_recomputed": 54,
+      "test_trade_records": 335,
+      "checks": [
+        "test boundaries",
+        "all cost components reconcile",
+        "per-side commission",
+        "unchanged maximum lot",
+        "side eligibility",
+        "stops never widened",
+        "every test row and aggregate independently recomputed"
+      ]
+    },
+    "GBPUSD": {
+      "passed": true,
+      "test_rows_recomputed": 54,
+      "test_trade_records": 389,
+      "checks": [
+        "test boundaries",
+        "all cost components reconcile",
+        "per-side commission",
+        "unchanged maximum lot",
+        "side eligibility",
+        "stops never widened",
+        "every test row and aggregate independently recomputed"
+      ]
+    },
+    "USDCHF": {
+      "passed": true,
+      "test_rows_recomputed": 54,
+      "test_trade_records": 309,
+      "checks": [
+        "test boundaries",
+        "all cost components reconcile",
+        "per-side commission",
+        "unchanged maximum lot",
+        "side eligibility",
+        "stops never widened",
+        "every test row and aggregate independently recomputed"
+      ]
+    }
+  },
+  "no_portfolio_return_inferred": true
+}
