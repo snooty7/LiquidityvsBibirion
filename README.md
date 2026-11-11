@@ -297,6 +297,30 @@ python -m src.tools.render_long_filter_report reports/usdchf_long_filter/report.
 
 These commands use saved history and block broker initialization and trading.
 
+## USDCHF direction, spread and exit comparison
+
+The next frozen study compares three separate ideas on USDCHF M30 / M1:
+BUY-only versus SELL-only setups, stricter entry spread caps (1.2 or 0.9 pips),
+and tighter trailing gaps (0.75R or 0.5R with the original 1R activation).
+Each idea has two predeclared settings plus the common baseline; no combinations
+are created after observing results. Position sizing, initial stops, daily loss
+and portfolio guards are preserved. Active configurations are unchanged.
+
+See [the three-idea comparison](reports/usdchf_three_ideas/README.md) for all
+cost-aware results, the descriptive profit winner, frozen training nominations,
+promotion gates and independently audited test trades. Historical winners are
+kept separate from evidence supporting a training-selected upgrade.
+
+```powershell
+python -m src.tools.research_usdchf_three_ideas --history history/mt5_20261111/USDCHF_extended.json --output reports/usdchf_three_ideas --workers 6
+python -m src.tools.render_usdchf_three_ideas reports/usdchf_three_ideas/report.json
+```
+
+Replay now defaults to the configured `trade_side_filter`, matching live.
+`backtest_mt5 --side` is an explicit research override. Live and replay share
+the same finite, nonnegative spread-cap check, including arithmetic tolerance
+at the exact boundary. All study models are rerun with these corrections.
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.

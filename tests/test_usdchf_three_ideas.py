@@ -13,6 +13,8 @@ from src.services.config import AppConfig, load_config
 from src.strategy.liquidity import SweepSignal
 from src.tools import backtest_mt5 as replay
 from src.tools import research_usdchf_three_ideas as study
+from src.tools import render_usdchf_three_ideas as reporting
+from src.tools.walk_forward import trade_metrics
 
 
 @pytest.fixture(autouse=True)
@@ -177,3 +179,48 @@ def test_registration_normalizes_dataclass_tuples_without_changing_protocol(tmp_
     plan = {"registered_at_utc": "first", "sessions": ("05:00-12:00", "13:00-20:00")}
     study.register(plan, tmp_path)
     assert study.register(plan, tmp_path)["sessions"] == list(plan["sessions"])
+
+
+def audit_fixture(app):
+    cfg = app.symbols[0]
+    info = SymbolTradeInfo(5, .00001, .01, 100, .01, 1, .00001)
+    costs = ExecutionCosts()
+    stamp = int(datetime(2026, 1, 5, tzinfo=timezone.utc).timestamp())
+    opened = replay._build_entry_trade(cfg, app.runtime, info, 10000, "BUY", stamp, 1.1, "key", "test",
+                                       costs=costs, spread_pips=1)
+    trade = replay._close_trade(cfg, opened, stamp+60, 1.1, "end_of_test", info, spread_pips=1)
+    m, empty = trade_metrics([trade], 10000), trade_metrics([], 10000)
+    report = {"plan": {"variants": [{"name": "baseline", "settings": asdict(cfg)}],
+                       "costs": asdict(costs), "stress_costs": asdict(ExecutionCosts("historical", 2, 7, .4))},
+              "rows": [{"phase": "test", "fold": 1, "name": "baseline", "scenario": "base",
+                        "start": trade.entry_time_utc, "end_exclusive": trade.exit_time_utc, "metrics": m}],
+              "comparison": {"baseline": {"aggregate": {"metrics": m},
+                                          "confirmation": {"metrics": empty},
+                                          "stress_confirmation": {"metrics": empty}}}}
+    return report, [{"fold": 1, "name": "baseline", "scenario": "base", **asdict(trade)}]
+
+
+def test_report_audit_independently_reconstructs_costs_and_metrics(app):
+    report, trades = audit_fixture(app)
+    assert reporting.audit(report, trades)["passed"]
+
+
+@pytest.mark.parametrize("corruption", ["pnl", "stop", "volume", "metrics", "boundary", "direction", "commission"])
+def test_report_audit_rejects_cost_risk_boundary_and_metric_corruption(app, corruption):
+    report, trades = audit_fixture(app)
+    if corruption == "pnl":
+        trades[0]["pnl_money"] += 1
+    elif corruption == "stop":
+        trades[0]["exit_sl"] -= .001
+    elif corruption == "volume":
+        trades[0]["volume"] = .06
+    elif corruption == "metrics":
+        report["rows"][0]["metrics"]["net_pnl"] += 1
+    elif corruption == "boundary":
+        trades[0]["entry_time_utc"] = "2025-01-01T00:00:00+00:00"
+    elif corruption == "direction":
+        report["plan"]["variants"][0]["settings"]["trade_side_filter"] = "sell"
+    else:
+        report["plan"]["costs"]["commission_per_lot"] = 0
+    with pytest.raises(ValueError):
+        reporting.audit(report, trades)
