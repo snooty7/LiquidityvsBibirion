@@ -39,6 +39,7 @@ from src.strategy.confirmations import (
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
+    spread_within_limit,
     bias_context_count,
     evaluate_long_entry_filter,
     long_entry_context_count,
@@ -731,13 +732,17 @@ def run_backtest(
     end_utc: datetime,
     *,
     initial_equity: float,
-    side_mode: str = "both",
+    side_mode: Optional[str] = None,
     trades_csv: Optional[Path] = None,
     commission_per_lot: float = 0.0,
     costs: Optional[ExecutionCosts] = None,
     history: Optional[HistoricalData] = None,
     end_exclusive: bool = False,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
+    # Match live settings unless the caller explicitly requests a research override.
+    side_mode = str(cfg.trade_side_filter if side_mode is None else side_mode).lower()
+    if side_mode not in {"both", "buy", "sell"}:
+        raise ValueError("Trade side filter must be both, buy or sell")
     if not math.isfinite(commission_per_lot) or commission_per_lot < 0:
         raise ValueError("Commission per lot must be finite and nonnegative.")
     evaluation_end = end_utc if end_exclusive else end_utc + timedelta(days=1)
@@ -934,7 +939,7 @@ def run_backtest(
 
                 current_m1_bar = closed_m1[-1]
                 spread_pips = costs.spread(current_m1_bar, symbol_info) if costs is not None else _spread_pips(current_m1_bar, pip, point)
-                if spread_pips > cfg.max_spread_pips:
+                if not spread_within_limit(spread_pips, cfg.max_spread_pips):
                     pending = None
                     continue
 
@@ -1110,7 +1115,7 @@ def run_backtest(
 
                     current_m1_bar = closed_m1[-1] if closed_m1 else closed_m5[-1]
                     spread_pips = costs.spread(current_m1_bar, symbol_info) if costs is not None else _spread_pips(current_m1_bar, pip, point)
-                    if spread_pips > cfg.max_spread_pips:
+                    if not spread_within_limit(spread_pips, cfg.max_spread_pips):
                         continue
 
                     if cfg.use_bias_filter:
@@ -1362,7 +1367,8 @@ def main() -> None:
     parser.add_argument("--start", required=True, help="UTC start date/time, e.g. 2026-02-26 or 2026-02-26T00:00:00")
     parser.add_argument("--end", required=True, help="UTC end date/time, e.g. 2026-03-27 or 2026-03-27T23:59:59")
     parser.add_argument("--initial-equity", type=float, default=100000.0, help="Initial equity for lot sizing")
-    parser.add_argument("--side", choices=["both", "buy", "sell"], default="both", help="Trade side filter")
+    parser.add_argument("--side", choices=["both", "buy", "sell"], default=None,
+                        help="Explicit research override; defaults to configured trade_side_filter")
     parser.add_argument("--trades-csv", default="", help="Optional output CSV path for trades")
     parser.add_argument("--commission-per-lot", type=float, default=0.0,
                         help="Commission per lot per side in account currency; charged at entry and exit")
@@ -1383,7 +1389,7 @@ def main() -> None:
         start_utc=start_utc,
         end_utc=end_utc,
         initial_equity=float(args.initial_equity),
-        side_mode=str(args.side).lower(),
+        side_mode=args.side,
         trades_csv=trades_csv,
         commission_per_lot=args.commission_per_lot,
     )

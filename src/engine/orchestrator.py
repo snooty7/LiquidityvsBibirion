@@ -51,6 +51,7 @@ from src.strategy.confirmations import (
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
+    spread_within_limit,
     bias_context_count,
     evaluate_long_entry_filter,
     long_entry_context_count,
@@ -2590,7 +2591,7 @@ def process_symbol(
             log_event(log_file, {**base_row, "event": "SKIP_COOLDOWN", "message": message})
         return
 
-    if spread > cfg.max_spread_pips:
+    if not spread_within_limit(spread, cfg.max_spread_pips):
         message = f"spread={spread:.2f}>{cfg.max_spread_pips:.2f}"
         if entry_setup is not None:
             cancel_entry_setup(

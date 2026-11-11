@@ -5,6 +5,14 @@ from dataclasses import dataclass
 import math
 
 
+def spread_within_limit(spread_pips: float, limit_pips: float) -> bool:
+    """Fail closed on invalid quotes; tolerate only arithmetic noise at the cap."""
+    return (math.isfinite(spread_pips) and math.isfinite(limit_pips)
+            and spread_pips >= 0 and limit_pips >= 0
+            and (spread_pips <= limit_pips or math.isclose(spread_pips, limit_pips,
+                                                        rel_tol=0, abs_tol=1e-9)))
+
+
 def _price(bar: object, field: str) -> float:
     if isinstance(bar, dict):
         return float(bar[field])
