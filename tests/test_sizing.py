@@ -1,4 +1,6 @@
-from src.risk.sizing import SymbolTradeInfo, calc_lot_by_risk, calc_position_risk_money
+import pytest
+
+from src.risk.sizing import RiskSizingError, SymbolTradeInfo, calc_lot_by_risk, calc_position_risk_money
 
 
 def test_calc_lot_by_risk_respects_max_and_step() -> None:
@@ -23,7 +25,7 @@ def test_calc_lot_by_risk_respects_max_and_step() -> None:
     assert lot == 0.1
 
 
-def test_calc_lot_by_risk_handles_broker_fallback() -> None:
+def test_calc_lot_by_risk_rejects_missing_broker_valuation() -> None:
     info = SymbolTradeInfo(
         digits=5,
         point=0.00001,
@@ -34,18 +36,11 @@ def test_calc_lot_by_risk_handles_broker_fallback() -> None:
         trade_tick_size=0.0,
     )
 
-    lot = calc_lot_by_risk(
-        equity=10000.0,
-        sl_pips=10.0,
-        risk_pct=1.0,
-        symbol_info=info,
-        max_lot=1.0,
-    )
-
-    assert lot >= 0.01
+    with pytest.raises(RiskSizingError, match="valuation"):
+        calc_lot_by_risk(10000.0, 10.0, 1.0, info, 1.0)
 
 
-def test_calc_lot_by_risk_respects_branch_min_lot() -> None:
+def test_calc_lot_by_risk_rejects_unaffordable_branch_min_lot() -> None:
     info = SymbolTradeInfo(
         digits=5,
         point=0.00001,
@@ -56,16 +51,8 @@ def test_calc_lot_by_risk_respects_branch_min_lot() -> None:
         trade_tick_size=0.00001,
     )
 
-    lot = calc_lot_by_risk(
-        equity=100.0,
-        sl_pips=10.0,
-        risk_pct=0.5,
-        symbol_info=info,
-        max_lot=0.20,
-        min_lot=0.20,
-    )
-
-    assert lot == 0.20
+    with pytest.raises(RiskSizingError, match="Minimum"):
+        calc_lot_by_risk(100.0, 10.0, 0.5, info, 0.20, min_lot=0.20)
 
 
 def test_calc_position_risk_money() -> None:

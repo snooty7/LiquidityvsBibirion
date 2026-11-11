@@ -14,7 +14,7 @@ import time
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
-from src.execution.mt5_adapter import MT5Adapter
+from src.execution.mt5_adapter import MT5Adapter, CloseResult, HistoryUnavailableError
 from src.notifications.push import send_push_notification
 from src.persistence.maintenance import archive_and_prune_events
 from src.persistence.models import (
@@ -35,7 +35,10 @@ from src.persistence.models import (
 )
 from src.persistence.recovery import bootstrap_recovery, build_pending_setup_record, compute_setup_expiry
 from src.persistence.repository import SQLiteRepository
-from src.risk.sizing import SymbolTradeInfo, calc_lot_by_risk, calc_position_risk_money
+from src.risk.sizing import (
+    SymbolTradeInfo, RiskSizingError, calc_lot_by_risk, calc_position_risk_money,
+    daily_loss_limit_hit, projected_risk_message, valid_entry_protection,
+)
 from src.services.config import AppConfig, SymbolConfig, load_config
 from src.services.news_calendar import NewsCalendar
 from src.strategy.confirmations import (
@@ -951,16 +954,23 @@ def apply_daily_loss_guard(
                 payload={"day_key": day_key},
             )
 
-    if global_state.daily_loss_reached:
-        return True
-
-    realized = adapter.realized_pnl_today(bot_magics(app_config), now_utc)
-    global_state.daily_realized_pnl = float(realized)
-    save_guard_state(repo, global_state)
-
-    trigger_level = -abs(app_config.runtime.daily_loss_limit_usd)
-    if realized > trigger_level:
-        return False
+    realized = global_state.daily_realized_pnl
+    if not global_state.daily_loss_reached:
+        try:
+            realized = adapter.realized_pnl_today(bot_magics(app_config), now_utc)
+            if not math.isfinite(realized):
+                raise HistoryUnavailableError("Daily realized P&L is not finite.")
+        except HistoryUnavailableError as exc:
+            emit_event(log_file=log_file, repo=repo, app_config=app_config,
+                       event_type="DAILY_LOSS_HISTORY_UNAVAILABLE", symbol="ALL",
+                       message=f"entries blocked: {exc}")
+            # Unknown P&L blocks entries but does not falsely latch the loss guard.
+            # The main loop still manages existing positions and retries history.
+            return True
+        global_state.daily_realized_pnl = float(realized)
+        save_guard_state(repo, global_state)
+        if not daily_loss_limit_hit(realized, app_config.runtime.daily_loss_limit_usd):
+            return False
 
     global_state.daily_loss_reached = True
     save_guard_state(repo, global_state)
@@ -989,19 +999,34 @@ def apply_daily_loss_guard(
     if not app_config.runtime.close_positions_on_daily_loss:
         return True
 
+    retries = {retry.ticket: retry for retry in repo.list_risk_retries()}
+    now_ts = time.time()
     for cfg in app_config.symbols:
         for position in adapter.positions_get(cfg.symbol, magic=cfg.magic):
-            result = adapter.close_position_market_with_fallback(
-                symbol=cfg.symbol,
-                position=position,
-                magic=cfg.magic,
-                reason="daily_loss",
-                deviation=app_config.runtime.default_deviation,
-            )
             ticket = int(position.ticket)
+            retry = retries.get(ticket)
+            if retry is not None and now_ts < retry.retry_after:
+                continue
+            try:
+                result = adapter.close_position_market_with_fallback(
+                    symbol=cfg.symbol,
+                    position=position,
+                    magic=cfg.magic,
+                    reason="daily_loss",
+                    deviation=app_config.runtime.default_deviation,
+                )
+            except Exception as exc:
+                result = CloseResult(False, None, None, None, 0.0, {"error": str(exc)})
             with repo.transaction():
                 if result.ok:
                     repo.mark_open_position_closed(ticket, "daily_loss_guard_close")
+                    repo.delete_risk_retry(ticket)
+                else:
+                    repo.set_risk_retry(
+                        ticket, cfg.symbol,
+                        now_ts + max(1, app_config.runtime.risk_close_retry_sec),
+                        "daily_loss", str(result.raw),
+                    )
                 emit_event(
                     log_file=log_file,
                     repo=repo,
@@ -1089,6 +1114,17 @@ def manage_symbol_positions(
         current_price = current_exit_price(position, tick)
         current_sl = float(getattr(position, "sl", 0.0) or 0.0)
         current_tp = float(getattr(position, "tp", 0.0) or 0.0)
+        risk_distance = repo.get_position_risk_distance(ticket)
+        if risk_distance is None:
+            risk_distance = position_risk_distance_price(cfg, info, position)
+            if math.isfinite(risk_distance) and risk_distance > 0:
+                risk_distance = repo.ensure_position_risk_distance(ticket, risk_distance)
+                emit_event(
+                    log_file=log_file, repo=repo, app_config=app_config,
+                    event_type="POSITION_RISK_BASELINE_CAPTURED", symbol=cfg.symbol, ticket=ticket,
+                    message="initial risk captured from adverse stop; configured distance used if unavailable",
+                    payload={"distance_price": risk_distance},
+                )
 
         if trailing_mode == "r_multiple":
             desired_sl = compute_r_multiple_trailing_stop(
@@ -1096,7 +1132,7 @@ def manage_symbol_positions(
                 open_price=float(getattr(position, "price_open", 0.0) or 0.0),
                 current_exit_price_value=current_price,
                 current_sl=current_sl,
-                risk_distance_price=position_risk_distance_price(cfg, info, position),
+                risk_distance_price=risk_distance,
                 activation_r=float(trailing_activation_r),
                 gap_r=float(trailing_gap_r),
             )
@@ -1159,7 +1195,7 @@ def manage_symbol_positions(
         loss_limit_money: Optional[float] = None
         loss_guard_mode: Optional[str] = None
 
-        early_exit_reason = resolve_early_exit_reason(adapter, cfg, position, info)
+        early_exit_reason = resolve_early_exit_reason(adapter, cfg, position, info, risk_distance)
         if early_exit_reason is not None:
             reason = early_exit_reason
 
@@ -1167,7 +1203,7 @@ def manage_symbol_positions(
         if reason is None and time_exit_reason is not None:
             reason = time_exit_reason
 
-        loss_limit_money, loss_reason, loss_guard_mode = resolve_loss_guard(runtime, position, info)
+        loss_limit_money, loss_reason, loss_guard_mode = resolve_loss_guard(runtime, position, info, risk_distance)
         if reason is None and loss_limit_money is not None and pnl_money <= -loss_limit_money:
             reason = loss_reason
         if reason is None and runtime.max_profit_per_trade_usd > 0 and pnl_money >= runtime.max_profit_per_trade_usd:
@@ -1301,6 +1337,7 @@ def resolve_loss_guard(
     runtime: Any,
     position: object,
     symbol_info: SymbolTradeInfo,
+    initial_risk_distance: Optional[float] = None,
 ) -> tuple[Optional[float], Optional[str], Optional[str]]:
     mode = str(getattr(runtime, "per_trade_loss_guard_mode", "fixed_usd") or "fixed_usd").lower()
 
@@ -1308,7 +1345,9 @@ def resolve_loss_guard(
         risk_multiple = max(0.0, float(getattr(runtime, "per_trade_loss_risk_multiple", 1.0) or 0.0))
         risk_money = calc_position_risk_money(
             entry_price=float(getattr(position, "price_open", 0.0) or 0.0),
-            stop_price=float(getattr(position, "sl", 0.0) or 0.0),
+            stop_price=(float(position.price_open) + initial_risk_distance
+                        if initial_risk_distance is not None
+                        else float(getattr(position, "sl", 0.0) or 0.0)),
             volume=float(getattr(position, "volume", 0.0) or 0.0),
             symbol_info=symbol_info,
         )
@@ -1331,7 +1370,9 @@ def position_risk_distance_price(
     if position is not None:
         open_price = float(getattr(position, "price_open", 0.0) or 0.0)
         stop_price = float(getattr(position, "sl", 0.0) or 0.0)
-        if open_price > 0 and stop_price > 0 and open_price != stop_price:
+        adverse_stop = (stop_price < open_price if int(getattr(position, "type", 0)) == 0
+                        else stop_price > open_price)
+        if open_price > 0 and stop_price > 0 and adverse_stop:
             return abs(open_price - stop_price)
     return float(cfg.sl_pips * MT5Adapter.pip_size(symbol_info))
 
@@ -1347,6 +1388,7 @@ def resolve_early_exit_reason(
     cfg: SymbolConfig,
     position: object,
     symbol_info: SymbolTradeInfo,
+    initial_risk_distance: Optional[float] = None,
 ) -> Optional[str]:
     adverse_limit = int(getattr(cfg, "early_exit_consecutive_adverse_closes", 0) or 0)
     large_adverse_r = float(getattr(cfg, "early_exit_large_adverse_body_r", 0.0) or 0.0)
@@ -1363,7 +1405,8 @@ def resolve_early_exit_reason(
         return None
 
     side = "BUY" if int(position.type) == 0 else "SELL"
-    risk_distance = abs(float(getattr(position, "price_open", 0.0) or 0.0) - float(getattr(position, "sl", 0.0) or 0.0))
+    risk_distance = (initial_risk_distance if initial_risk_distance is not None
+                     else position_risk_distance_price(cfg, symbol_info, position))
     adverse_count = 0
     for candle in reversed(closed):
         open_price = float(candle["open"])
@@ -1447,7 +1490,10 @@ def compute_r_multiple_trailing_stop(
     return float(desired_sl)
 
 
-def portfolio_caps_message(adapter: MT5Adapter, app_config: AppConfig, cfg: SymbolConfig, equity: float) -> Optional[str]:
+def portfolio_caps_message(
+    adapter: MT5Adapter, app_config: AppConfig, cfg: SymbolConfig, equity: float,
+    proposed_risk_money: float,
+) -> Optional[str]:
     runtime = app_config.runtime
 
     if runtime.max_open_positions_total > 0:
@@ -1457,18 +1503,7 @@ def portfolio_caps_message(adapter: MT5Adapter, app_config: AppConfig, cfg: Symb
 
     if runtime.max_total_open_risk_pct > 0:
         open_risk_money = total_open_risk_money(adapter, app_config)
-        if math.isinf(open_risk_money):
-            return "open position without stop-loss"
-        if equity <= 0:
-            return "invalid equity for portfolio cap"
-
-        open_risk_pct = (open_risk_money / equity) * 100.0
-        projected_risk_pct = open_risk_pct + cfg.risk_pct
-        if projected_risk_pct > runtime.max_total_open_risk_pct:
-            return (
-                f"projected_risk_pct={projected_risk_pct:.2f} "
-                f"cap={runtime.max_total_open_risk_pct:.2f}"
-            )
+        return projected_risk_message(equity, open_risk_money, proposed_risk_money, runtime.max_total_open_risk_pct)
 
     return None
 
@@ -1670,7 +1705,7 @@ def _build_setup_context(
 def _entry_risk_context(entry_setup: Optional[PendingSetup]) -> dict[str, Any]:
     if entry_setup is None:
         return {}
-    return dict(entry_setup.context.get("risk") or {})
+    return dict((entry_setup.context or {}).get("risk") or {})
 
 
 def _resolve_entry_protection(
@@ -2622,12 +2657,7 @@ def process_symbol(
     base_row["sl_pips"] = round(resolved_sl_pips, 5)
     base_row["tp_pips"] = round(resolved_tp_pips, 5)
     base_row["risk_pct"] = round(resolved_risk_pct, 5)
-    protection_invalid = (
-        resolved_sl_pips <= 0
-        or resolved_tp_pips < 0
-        or (entry_side == "BUY" and (sl >= price or tp <= price))
-        or (entry_side == "SELL" and (sl <= price or tp >= price))
-    )
+    protection_invalid = not valid_entry_protection(entry_side, price, sl, tp)
     if protection_invalid:
         message = f"invalid_protection price={price:.5f} sl={sl:.5f} tp={tp:.5f}"
         if entry_setup is not None:
@@ -2716,7 +2746,25 @@ def process_symbol(
             return
 
     equity = adapter.account_equity()
-    cap_message = "" if cfg.ignore_portfolio_cap else portfolio_caps_message(adapter, app_config, cfg, equity)
+    trade_info = SymbolTradeInfo.from_mt5(info)
+    try:
+        volume = calc_lot_by_risk(
+            equity, resolved_sl_pips, resolved_risk_pct, trade_info,
+            cfg.max_lot, min_lot=cfg.min_lot,
+        )
+    except RiskSizingError as exc:
+        message = str(exc)
+        if entry_setup is not None:
+            cancel_entry_setup(repo=repo, app_config=app_config, log_file=log_file,
+                               cfg=cfg, setup=entry_setup, event_type="SKIP_INVALID_RISK",
+                               message=message, csv_row=base_row)
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_INVALID_RISK", "message": message})
+        return
+    proposed_risk = calc_position_risk_money(price, sl, volume, trade_info)
+    cap_message = "" if cfg.ignore_portfolio_cap else portfolio_caps_message(
+        adapter, app_config, cfg, equity, proposed_risk_money=proposed_risk,
+    )
     if cap_message:
         if entry_setup is not None:
             with repo.transaction():
@@ -2750,15 +2798,6 @@ def process_symbol(
             )
         return
 
-    trade_info = SymbolTradeInfo.from_mt5(info)
-    volume = calc_lot_by_risk(
-        equity,
-        resolved_sl_pips,
-        resolved_risk_pct,
-        trade_info,
-        cfg.max_lot,
-        min_lot=cfg.min_lot,
-    )
     trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(
         cfg, app_config.runtime
     )
@@ -2825,6 +2864,9 @@ def process_symbol(
                 if ticket > 0:
                     linked_setup_id = entry_setup.setup_id if entry_setup is not None else None
                     repo.upsert_open_position(position_to_record(cfg, resolved, linked_setup_id))
+                    initial_distance = abs(float(resolved.price_open) - float(resolved.sl))
+                    if float(resolved.sl) > 0 and initial_distance > 0:
+                        repo.ensure_position_risk_distance(ticket, initial_distance)
             if entry_setup is not None:
                 repo.transition_pending_setup(
                     entry_setup.setup_id,

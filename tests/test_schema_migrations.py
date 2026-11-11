@@ -78,3 +78,23 @@ def test_unsupported_schema_version_fails_loudly(tmp_path: Path) -> None:
             raise AssertionError("Expected RuntimeError for unsupported schema version.")
     finally:
         conn.close()
+
+
+def test_v2_database_adds_immutable_risk_baselines_without_losing_state(tmp_path: Path) -> None:
+    db_path = tmp_path / "v2.db"
+    conn = get_connection(str(db_path))
+    try:
+        init_schema(conn)
+        conn.execute("DROP TABLE position_risk_baselines")
+        conn.execute("PRAGMA user_version = 2")
+        conn.execute("INSERT INTO guard_state VALUES (1, '2026-11-11', -60, 1, 1, 'saved')")
+        conn.commit()
+        init_schema(conn)
+        assert _user_version(conn) == CURRENT_SCHEMA_VERSION
+        assert conn.execute("SELECT daily_loss_reached FROM guard_state").fetchone()[0] == 1
+        conn.execute("INSERT INTO position_risk_baselines VALUES (123, 0.001)")
+        conn.commit()
+        init_schema(conn)
+        assert conn.execute("SELECT distance_price FROM position_risk_baselines WHERE ticket=123").fetchone()[0] == .001
+    finally:
+        conn.close()

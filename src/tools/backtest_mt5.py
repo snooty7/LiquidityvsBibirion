@@ -3,14 +3,19 @@ from __future__ import annotations
 import argparse
 import bisect
 import csv
+import math
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Optional, Sequence
 
+from src.backtesting.costs import ExecutionCosts
+from src.backtesting.history import HistoricalData
+
 from src.engine.orchestrator import (
     TIMEFRAME_SECONDS,
+    _resolve_entry_protection,
     compute_r_multiple_trailing_stop,
     effective_trailing_settings,
     resolve_loss_guard,
@@ -19,7 +24,10 @@ from src.engine.orchestrator import (
 )
 from src.execution.mt5_adapter import MT5Adapter
 from src.persistence.recovery import compute_setup_expiry
-from src.risk.sizing import SymbolTradeInfo, calc_lot_by_risk, calc_position_risk_money
+from src.risk.sizing import (
+    SymbolTradeInfo, RiskSizingError, calc_lot_by_risk, calc_position_risk_money,
+    daily_loss_limit_hit, projected_risk_message, valid_entry_protection,
+)
 from src.services.config import AppConfig, RuntimeConfig, SymbolConfig, load_config
 from src.strategy.confirmations import (
     ConfirmationResult,
@@ -79,6 +87,11 @@ class OpenTrade:
     initial_tp: float
     hold_bars: int = 0
     adverse_close_count: int = 0
+    entry_commission_money: float = 0.0
+    exit_commission_money: float = 0.0
+    costs: Optional[ExecutionCosts] = None
+    entry_spread_cost_money: float = 0.0
+    entry_slippage_cost_money: float = 0.0
 
 
 @dataclass
@@ -99,6 +112,10 @@ class ClosedTrade:
     reason: str
     confirm_note: str
     signal_key: str
+    gross_pnl_money: float = 0.0
+    spread_cost_money: float = 0.0
+    commission_cost_money: float = 0.0
+    slippage_cost_money: float = 0.0
 
 
 @dataclass
@@ -134,6 +151,7 @@ class BacktestResult:
     skipped_session: int
     skipped_cooldown: int
     skipped_daily_loss: int
+    skipped_risk: int = 0
 
 
 def _to_utc_datetime(value: str, *, end_of_day: bool = False) -> datetime:
@@ -442,7 +460,13 @@ def _close_trade(
     exit_price: float,
     reason: str,
     symbol_info: SymbolTradeInfo,
+    *,
+    spread_pips: float = 0.0,
 ) -> ClosedTrade:
+    pip = MT5Adapter.pip_size(symbol_info)
+    exit_slippage = (trade.costs.slippage_pips * pip
+                     if trade.costs is not None and reason != "take_profit" else 0.0)
+    exit_price += -exit_slippage if trade.side == "BUY" else exit_slippage
     if trade.side == "BUY":
         pnl_price = float(exit_price) - float(trade.entry_price)
     else:
@@ -453,6 +477,12 @@ def _close_trade(
     if symbol_info.trade_tick_value > 0 and symbol_info.trade_tick_size > 0:
         pvl = symbol_info.trade_tick_value * (pip / symbol_info.trade_tick_size)
     pnl_money = float((pnl_price / pip) * pvl * trade.volume) if pip > 0 and pvl > 0 else 0.0
+    pnl_money -= trade.entry_commission_money + trade.exit_commission_money
+    spread_cost = trade.entry_spread_cost_money + (
+        spread_pips * pvl * trade.volume if trade.side == "SELL" else 0.0
+    )
+    slippage_cost = trade.entry_slippage_cost_money + exit_slippage / pip * pvl * trade.volume
+    commission_cost = trade.entry_commission_money + trade.exit_commission_money
     pnl_r = float(pnl_money / trade.risk_money) if trade.risk_money > 0 else 0.0
 
     return ClosedTrade(
@@ -472,6 +502,10 @@ def _close_trade(
         reason=reason,
         confirm_note=trade.confirm_note,
         signal_key=trade.signal_key,
+        gross_pnl_money=pnl_money + spread_cost + slippage_cost + commission_cost,
+        spread_cost_money=spread_cost,
+        commission_cost_money=commission_cost,
+        slippage_cost_money=slippage_cost,
     )
 
 
@@ -482,10 +516,20 @@ def _apply_open_trade_bar(
     bar: dict,
     symbol_info: SymbolTradeInfo,
 ) -> tuple[OpenTrade, Optional[ClosedTrade]]:
-    high = float(bar["high"])
-    low = float(bar["low"])
-    close_price = float(bar["close"])
+    spread = trade.costs.spread(bar, symbol_info) if trade.costs is not None else 0.0
+    pip = MT5Adapter.pip_size(symbol_info)
+    ask_offset = spread * pip if trade.side == "SELL" else 0.0
+    high = float(bar["high"]) + ask_offset
+    low = float(bar["low"]) + ask_offset
+    close_price = float(bar["close"]) + ask_offset
+    open_price = float(bar["open"]) + ask_offset
     close_time = int(bar["time"]) + TIMEFRAME_SECONDS["M1"]
+
+    def close(price: float, reason: str) -> ClosedTrade:
+        return _close_trade(cfg, trade, close_time, price, reason, symbol_info, spread_pips=spread)
+
+    stop_fill = (min(float(trade.sl), open_price) if trade.side == "BUY"
+                 else max(float(trade.sl), open_price))
 
     hit_sl = False
     hit_tp = False
@@ -493,22 +537,22 @@ def _apply_open_trade_bar(
         hit_sl = low <= float(trade.sl) if trade.sl > 0 else False
         hit_tp = high >= float(trade.tp) if trade.tp > 0 else False
         if hit_sl and hit_tp:
-            return trade, _close_trade(cfg, trade, close_time, float(trade.sl), "stop_loss", symbol_info)
+            return trade, close(stop_fill, "stop_loss")
         if hit_sl:
             reason = "trailing_stop" if trade.sl > trade.entry_price else "stop_loss"
-            return trade, _close_trade(cfg, trade, close_time, float(trade.sl), reason, symbol_info)
+            return trade, close(stop_fill, reason)
         if hit_tp:
-            return trade, _close_trade(cfg, trade, close_time, float(trade.tp), "take_profit", symbol_info)
+            return trade, close(float(trade.tp), "take_profit")
     else:
         hit_sl = high >= float(trade.sl) if trade.sl > 0 else False
         hit_tp = low <= float(trade.tp) if trade.tp > 0 else False
         if hit_sl and hit_tp:
-            return trade, _close_trade(cfg, trade, close_time, float(trade.sl), "stop_loss", symbol_info)
+            return trade, close(stop_fill, "stop_loss")
         if hit_sl:
             reason = "trailing_stop" if trade.sl < trade.entry_price else "stop_loss"
-            return trade, _close_trade(cfg, trade, close_time, float(trade.sl), reason, symbol_info)
+            return trade, close(stop_fill, reason)
         if hit_tp:
-            return trade, _close_trade(cfg, trade, close_time, float(trade.tp), "take_profit", symbol_info)
+            return trade, close(float(trade.tp), "take_profit")
 
     trailing_mode, trailing_activation_r, trailing_gap_r, trailing_remove_tp = effective_trailing_settings(cfg, runtime)
     if trailing_mode == "r_multiple":
@@ -536,15 +580,15 @@ def _apply_open_trade_bar(
     adverse_limit = int(getattr(cfg, "early_exit_consecutive_adverse_closes", 0) or 0)
     large_adverse_r = float(getattr(cfg, "early_exit_large_adverse_body_r", 0.0) or 0.0)
     if adverse_limit > 0 or large_adverse_r > 0:
-        adverse_bar = close_price < float(bar["open"]) if trade.side == "BUY" else close_price > float(bar["open"])
+        adverse_bar = close_price < open_price if trade.side == "BUY" else close_price > open_price
         if adverse_bar:
             trade.adverse_close_count += 1
-            body_size = abs(close_price - float(bar["open"]))
+            body_size = abs(close_price - open_price)
             risk_distance = abs(trade.entry_price - trade.initial_sl)
             if large_adverse_r > 0 and risk_distance > 0 and body_size >= risk_distance * large_adverse_r:
-                return trade, _close_trade(cfg, trade, close_time, close_price, "large_adverse_bar_exit", symbol_info)
+                return trade, close(close_price, "large_adverse_bar_exit")
             if adverse_limit > 0 and trade.adverse_close_count >= adverse_limit:
-                return trade, _close_trade(cfg, trade, close_time, close_price, "adverse_close_exit", symbol_info)
+                return trade, close(close_price, "adverse_close_exit")
         else:
             trade.adverse_close_count = 0
 
@@ -552,28 +596,24 @@ def _apply_open_trade_bar(
     if max_hold_bars > 0:
         trade.hold_bars += 1
         if trade.hold_bars >= max_hold_bars:
-            return trade, _close_trade(cfg, trade, close_time, close_price, "time_exit", symbol_info)
+            return trade, close(close_price, "time_exit")
 
     position = _position_like(trade)
-    loss_limit_money, loss_reason, _ = resolve_loss_guard(runtime, position, symbol_info)
+    loss_limit_money, loss_reason, _ = resolve_loss_guard(runtime, position, symbol_info, abs(trade.entry_price - trade.initial_sl))
+    move = close_price-trade.entry_price if trade.side == "BUY" else trade.entry_price-close_price
+    floating_pnl = move / symbol_info.trade_tick_size * symbol_info.trade_tick_value * trade.volume
     if loss_limit_money is not None:
-        close_trade = _close_trade(cfg, trade, close_time, close_price, "mark_to_close", symbol_info)
-        if close_trade.pnl_money <= -abs(float(loss_limit_money)):
+        close_trade = close(close_price, "mark_to_close")
+        if floating_pnl <= -abs(float(loss_limit_money)):
             close_trade.reason = loss_reason or "max_loss"
             return trade, close_trade
     if runtime.max_profit_per_trade_usd > 0:
-        close_trade = _close_trade(cfg, trade, close_time, close_price, "mark_to_close", symbol_info)
-        if close_trade.pnl_money >= float(runtime.max_profit_per_trade_usd):
+        close_trade = close(close_price, "mark_to_close")
+        if floating_pnl >= float(runtime.max_profit_per_trade_usd):
             close_trade.reason = f"max_profit ${runtime.max_profit_per_trade_usd:.2f}"
             return trade, close_trade
 
     return trade, None
-
-
-def _pending_risk_context(pending: Optional[PendingSetupLite]) -> dict[str, object]:
-    if pending is None or pending.context is None:
-        return {}
-    return dict(pending.context.get("risk") or {})
 
 
 def _build_entry_trade(
@@ -587,56 +627,43 @@ def _build_entry_trade(
     signal_key: str,
     confirm_note: str,
     pending: Optional[PendingSetupLite] = None,
-) -> OpenTrade:
+    *,
+    commission_per_lot: float = 0.0,
+    costs: Optional[ExecutionCosts] = None,
+    spread_pips: float = 0.0,
+) -> Optional[OpenTrade]:
+    if not math.isfinite(commission_per_lot) or commission_per_lot < 0:
+        raise ValueError("Commission per lot must be finite and nonnegative.")
     pip = MT5Adapter.pip_size(symbol_info)
-    risk_context = _pending_risk_context(pending)
-    risk_pct = float(risk_context.get("risk_pct_override", cfg.risk_pct) or cfg.risk_pct)
-    tp_r_multiple = float(risk_context.get("tp_r_multiple", cfg.rr) or cfg.rr)
-    custom_sl = risk_context.get("sl_price")
-    custom_tp = risk_context.get("tp_price")
-    if custom_sl is None:
-        resolved_sl_pips = float(cfg.sl_pips)
-        resolved_tp_pips = float(cfg.tp_pips)
-        if entry_side == "BUY":
-            sl = float(entry_price - resolved_sl_pips * pip)
-            tp = float(entry_price + resolved_tp_pips * pip)
-        else:
-            sl = float(entry_price + resolved_sl_pips * pip)
-            tp = float(entry_price - resolved_tp_pips * pip)
-    else:
-        sl = float(custom_sl)
-        resolved_sl_pips = abs(float(entry_price) - sl) / max(pip, 1e-10)
-        if custom_tp is not None:
-            tp = float(custom_tp)
-            resolved_tp_pips = abs(tp - float(entry_price)) / max(pip, 1e-10)
-        else:
-            tp_distance = abs(float(entry_price) - sl) * tp_r_multiple
-            resolved_tp_pips = tp_distance / max(pip, 1e-10)
-            if entry_side == "BUY":
-                tp = float(entry_price + tp_distance)
-            else:
-                tp = float(entry_price - tp_distance)
-
-    volume = calc_lot_by_risk(
-        equity,
-        resolved_sl_pips,
-        risk_pct,
-        symbol_info,
-        cfg.max_lot,
-        min_lot=cfg.min_lot,
+    quoted_price = entry_price + (spread_pips * pip if costs is not None and entry_side == "BUY" else 0.0)
+    entry_slippage = costs.slippage_pips * pip if costs is not None else 0.0
+    entry_price = quoted_price + (entry_slippage if entry_side == "BUY" else -entry_slippage)
+    sl, tp, resolved_sl_pips, _, risk_pct = _resolve_entry_protection(
+        cfg, pending, entry_side, quoted_price, pip,
     )
+    if costs is not None:
+        resolved_sl_pips = abs(entry_price - sl) / pip
+    if not valid_entry_protection(entry_side, entry_price, sl, tp):
+        return None
+    try:
+        volume = calc_lot_by_risk(
+            equity, resolved_sl_pips, risk_pct, symbol_info, cfg.max_lot, min_lot=cfg.min_lot,
+        )
+    except RiskSizingError:
+        return None
     risk_money = calc_position_risk_money(
         entry_price=entry_price,
         stop_price=sl,
         volume=volume,
         symbol_info=symbol_info,
     )
-    trailing_mode, _, _, _ = effective_trailing_settings(cfg, runtime)
-    if runtime.max_profit_per_trade_usd <= 0 and trailing_mode == "r_multiple":
-        # Matches live config where TP is removed after trailing activation, but not at entry.
-        initial_tp = tp
-    else:
-        initial_tp = tp
+    if not cfg.ignore_portfolio_cap and projected_risk_message(
+        equity, 0.0, risk_money, runtime.max_total_open_risk_pct,
+    ):
+        return None
+    initial_tp = tp
+    pvl = symbol_info.trade_tick_value * pip / symbol_info.trade_tick_size
+    commission = costs.commission_per_lot if costs is not None else commission_per_lot
 
     return OpenTrade(
         side=entry_side,
@@ -650,6 +677,11 @@ def _build_entry_trade(
         confirm_note=confirm_note,
         initial_sl=float(sl),
         initial_tp=float(initial_tp),
+        entry_commission_money=volume * commission,
+        exit_commission_money=volume * commission,
+        costs=costs,
+        entry_spread_cost_money=spread_pips * pvl * volume if costs is not None and entry_side == "BUY" else 0.0,
+        entry_slippage_cost_money=entry_slippage / pip * pvl * volume,
     )
 
 
@@ -661,7 +693,9 @@ def _max_buffer_days(cfg: SymbolConfig) -> int:
         cfg.setup_lookback_bars * (TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600) // 60),
     ]
     max_minutes = max(bars_minutes)
-    return max(7, int(max_minutes / (60 * 24)) + 3)
+    # Calendar fetches must also cover FX weekends; indicator requirements are
+    # measured in trading bars rather than elapsed calendar time.
+    return max(7, math.ceil(max_minutes / (60 * 24) * 7 / 5) + 3)
 
 
 def run_backtest(
@@ -673,21 +707,42 @@ def run_backtest(
     initial_equity: float,
     side_mode: str = "both",
     trades_csv: Optional[Path] = None,
+    commission_per_lot: float = 0.0,
+    costs: Optional[ExecutionCosts] = None,
+    history: Optional[HistoricalData] = None,
+    end_exclusive: bool = False,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
-    adapter = MT5Adapter(default_deviation=app_config.runtime.default_deviation)
-    adapter.initialize()
-    adapter.ensure_symbol(cfg.symbol)
-
+    if not math.isfinite(commission_per_lot) or commission_per_lot < 0:
+        raise ValueError("Commission per lot must be finite and nonnegative.")
+    evaluation_end = end_utc if end_exclusive else end_utc + timedelta(days=1)
     buffer_days = _max_buffer_days(cfg)
     fetch_start = start_utc - timedelta(days=buffer_days)
-    fetch_end = end_utc + timedelta(days=1)
-
-    m1 = _fetch_chunked_rates(adapter, cfg.symbol, "M1", fetch_start, fetch_end)
-    m5 = _fetch_chunked_rates(adapter, cfg.symbol, cfg.timeframe, fetch_start, fetch_end)
-    setup_rates = _fetch_chunked_rates(adapter, cfg.symbol, cfg.setup_timeframe, fetch_start, fetch_end)
-    bias_rates = _fetch_chunked_rates(adapter, cfg.symbol, cfg.bias_timeframe, fetch_start, fetch_end)
-    symbol_info = SymbolTradeInfo.from_mt5(adapter.symbol_info(cfg.symbol))
-    adapter.shutdown()
+    if history is None:
+        adapter = MT5Adapter(default_deviation=app_config.runtime.default_deviation)
+        try:
+            adapter.initialize()
+            adapter.ensure_symbol(cfg.symbol)
+            timeframes = {"M1", cfg.timeframe, cfg.setup_timeframe, cfg.bias_timeframe}
+            rates = {tf: _fetch_chunked_rates(adapter, cfg.symbol, tf, fetch_start, evaluation_end)
+                     for tf in timeframes}
+            symbol_info = SymbolTradeInfo.from_mt5(adapter.symbol_info(cfg.symbol))
+        finally:
+            adapter.shutdown()
+    else:
+        if history.symbol != cfg.symbol:
+            raise ValueError("History symbol does not match branch")
+        rates = {
+            tf: history.bars(tf)[
+                bisect.bisect_left(history.timestamps(tf), int(fetch_start.timestamp())):
+                bisect.bisect_left(history.timestamps(tf), int(evaluation_end.timestamp()))
+            ] for tf in {"M1", cfg.timeframe, cfg.setup_timeframe, cfg.bias_timeframe}
+        }
+        symbol_info = history.symbol_info
+    # No prices beyond the explicit evaluation boundary enter this replay.
+    rates = {tf: [row for row in rows if row["time"] < int(evaluation_end.timestamp())]
+             for tf, rows in rates.items()}
+    m1, m5 = rates["M1"], rates[cfg.timeframe]
+    setup_rates, bias_rates = rates[cfg.setup_timeframe], rates[cfg.bias_timeframe]
 
     if len(m1) < 10 or len(m5) < 10:
         raise RuntimeError("Not enough MT5 historical data for backtest.")
@@ -713,6 +768,24 @@ def run_backtest(
     daily_realized_pnl = 0.0
     daily_loss_reached = False
 
+    def rollover(timestamp: int) -> None:
+        nonlocal current_day, daily_realized_pnl, daily_loss_reached
+        day = datetime.fromtimestamp(timestamp, timezone.utc).strftime("%Y-%m-%d")
+        if current_day != day:
+            current_day = day
+            daily_realized_pnl = 0.0
+            daily_loss_reached = False
+
+    def book_pnl(amount: float) -> None:
+        nonlocal equity, daily_realized_pnl, daily_loss_reached, peak_equity, max_drawdown_money
+        equity += amount
+        daily_realized_pnl += amount
+        daily_loss_reached = daily_loss_reached or daily_loss_limit_hit(
+            daily_realized_pnl, app_config.runtime.daily_loss_limit_usd,
+        )
+        peak_equity = max(peak_equity, equity)
+        max_drawdown_money = max(max_drawdown_money, peak_equity - equity)
+
     skip_sweep_weak = 0
     skip_range_chop = 0
     skip_duplicate_setup = 0
@@ -723,23 +796,18 @@ def run_backtest(
     skip_session = 0
     skip_cooldown = 0
     skip_daily_loss = 0
+    skip_risk = 0
 
     for idx, current_m5 in enumerate(m5):
         decision_time = int(current_m5["time"]) + TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
         if decision_time < int(start_utc.timestamp()):
             previous_m5_close_time = decision_time
             continue
-        if decision_time > int((end_utc + timedelta(days=1)).timestamp()):
+        if decision_time > int(evaluation_end.timestamp()):
             break
 
         if previous_m5_close_time is None:
             previous_m5_close_time = decision_time - TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
-
-        day_key = datetime.fromtimestamp(decision_time, timezone.utc).strftime("%Y-%m-%d")
-        if current_day != day_key:
-            current_day = day_key
-            daily_realized_pnl = 0.0
-            daily_loss_reached = False
 
         m1_start = bisect.bisect_right(m1_times, int(previous_m5_close_time) - TIMEFRAME_SECONDS["M1"])
         m1_end = bisect.bisect_right(m1_times, int(decision_time) - TIMEFRAME_SECONDS["M1"])
@@ -748,18 +816,24 @@ def run_backtest(
 
         if open_trade is not None:
             for bar in interval_m1:
-                open_trade, maybe_closed = _apply_open_trade_bar(cfg, app_config.runtime, open_trade, bar, symbol_info)
+                rollover(int(bar["time"]))
+                if daily_loss_reached and app_config.runtime.close_positions_on_daily_loss:
+                    spread = costs.spread(bar, symbol_info) if costs is not None else 0.0
+                    quote = costs.exit_quote(open_trade.side, float(bar["open"]), spread, pip) if costs is not None else float(bar["open"])
+                    maybe_closed = _close_trade(cfg, open_trade, int(bar["time"]), quote,
+                                                "daily_loss_guard_close", symbol_info, spread_pips=spread)
+                else:
+                    open_trade, maybe_closed = _apply_open_trade_bar(cfg, app_config.runtime, open_trade, bar, symbol_info)
                 if maybe_closed is None:
                     continue
+                rollover(int(datetime.fromisoformat(maybe_closed.exit_time_utc).timestamp()))
                 closed_trades.append(maybe_closed)
-                equity += maybe_closed.pnl_money
-                daily_realized_pnl += maybe_closed.pnl_money
-                peak_equity = max(peak_equity, equity)
-                max_drawdown_money = max(max_drawdown_money, peak_equity - equity)
+                # Entry costs were already booked on their own trading day.
+                book_pnl(maybe_closed.pnl_money + open_trade.entry_commission_money)
                 open_trade = None
-                if daily_realized_pnl <= -abs(float(app_config.runtime.daily_loss_limit_usd)):
-                    daily_loss_reached = True
                 break
+
+        rollover(decision_time)
 
         closed_m1 = _available_closed_bars(
             m1,
@@ -790,6 +864,8 @@ def run_backtest(
             TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600),
             tail_bars=max(cfg.setup_lookback_bars, cfg.ema_slow_period + 3, 120),
         )
+        if end_exclusive and decision_time >= int(evaluation_end.timestamp()):
+            break
         if len(closed_m5) < 3:
             continue
 
@@ -820,7 +896,7 @@ def run_backtest(
                     continue
 
                 current_m1_bar = closed_m1[-1]
-                spread_pips = _spread_pips(current_m1_bar, pip, point)
+                spread_pips = costs.spread(current_m1_bar, symbol_info) if costs is not None else _spread_pips(current_m1_bar, pip, point)
                 if spread_pips > cfg.max_spread_pips:
                     pending = None
                     continue
@@ -875,8 +951,13 @@ def run_backtest(
                     pending.signal_key,
                     str(confirm_result.note),
                     pending,
+                    commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
                 )
-                cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
+                if open_trade is not None:
+                    book_pnl(-open_trade.entry_commission_money)
+                    cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
+                else:
+                    skip_risk += 1
                 pending = None
             elif confirm_result.pending:
                 pending.last_note = str(confirm_result.note)
@@ -986,7 +1067,7 @@ def run_backtest(
                         continue
 
                     current_m1_bar = closed_m1[-1] if closed_m1 else closed_m5[-1]
-                    spread_pips = _spread_pips(current_m1_bar, pip, point)
+                    spread_pips = costs.spread(current_m1_bar, symbol_info) if costs is not None else _spread_pips(current_m1_bar, pip, point)
                     if spread_pips > cfg.max_spread_pips:
                         continue
 
@@ -1037,8 +1118,13 @@ def run_backtest(
                         pending_candidate.signal_key,
                         "confirm=none",
                         pending_candidate,
+                        commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
                     )
-                    cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
+                    if open_trade is not None:
+                        book_pnl(-open_trade.entry_commission_money)
+                        cooldown_until = float(entry_time) + float(cfg.cooldown_sec)
+                    else:
+                        skip_risk += 1
                 else:
                     pending = pending_candidate
         else:
@@ -1137,13 +1223,13 @@ def run_backtest(
 
     if open_trade is not None and last_closed_m1:
         final_close_time = int(last_closed_m1[-1]["time"]) + TIMEFRAME_SECONDS["M1"]
-        final_close_price = float(last_closed_m1[-1]["close"])
-        closed = _close_trade(cfg, open_trade, final_close_time, final_close_price, "end_of_test", symbol_info)
+        final_spread = costs.spread(last_closed_m1[-1], symbol_info) if costs is not None else 0.0
+        final_close_price = (costs.exit_quote(open_trade.side, float(last_closed_m1[-1]["close"]), final_spread, pip)
+                             if costs is not None else float(last_closed_m1[-1]["close"]))
+        closed = _close_trade(cfg, open_trade, final_close_time, final_close_price, "end_of_test", symbol_info, spread_pips=final_spread)
         closed_trades.append(closed)
-        equity += closed.pnl_money
-        daily_realized_pnl += closed.pnl_money
-        peak_equity = max(peak_equity, equity)
-        max_drawdown_money = max(max_drawdown_money, peak_equity - equity)
+        rollover(final_close_time)
+        book_pnl(closed.pnl_money + open_trade.entry_commission_money)
 
     gross_profit = sum(item.pnl_money for item in closed_trades if item.pnl_money > 0)
     gross_loss = abs(sum(item.pnl_money for item in closed_trades if item.pnl_money < 0))
@@ -1189,6 +1275,7 @@ def run_backtest(
         skipped_session=skip_session,
         skipped_cooldown=skip_cooldown,
         skipped_daily_loss=skip_daily_loss,
+        skipped_risk=skip_risk,
     )
 
     if trades_csv is not None:
@@ -1217,7 +1304,7 @@ def _print_summary(result: BacktestResult) -> None:
         f"dup={result.skipped_duplicate_setup} pending_exists={result.skipped_pending_exists} "
         f"confirm_rejected={result.skipped_confirm_rejected} bias={result.skipped_bias} "
         f"ob={result.skipped_order_block} session={result.skipped_session} "
-        f"cooldown={result.skipped_cooldown} daily_loss={result.skipped_daily_loss}"
+        f"cooldown={result.skipped_cooldown} daily_loss={result.skipped_daily_loss} risk={result.skipped_risk}"
     )
 
 
@@ -1230,6 +1317,8 @@ def main() -> None:
     parser.add_argument("--initial-equity", type=float, default=100000.0, help="Initial equity for lot sizing")
     parser.add_argument("--side", choices=["both", "buy", "sell"], default="both", help="Trade side filter")
     parser.add_argument("--trades-csv", default="", help="Optional output CSV path for trades")
+    parser.add_argument("--commission-per-lot", type=float, default=0.0,
+                        help="Commission per lot per side in account currency; charged at entry and exit")
     args = parser.parse_args()
 
     app_config = load_config(args.config)
@@ -1249,6 +1338,7 @@ def main() -> None:
         initial_equity=float(args.initial_equity),
         side_mode=str(args.side).lower(),
         trades_csv=trades_csv,
+        commission_per_lot=args.commission_per_lot,
     )
     _print_summary(result)
     if trades_csv is not None:

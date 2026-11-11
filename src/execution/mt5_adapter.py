@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+import math
 from typing import Literal, Optional
 
 try:
@@ -12,6 +13,10 @@ except ImportError:  # pragma: no cover
 
 class MT5UnavailableError(RuntimeError):
     pass
+
+
+class HistoryUnavailableError(RuntimeError):
+    """Daily realized P&L could not be read reliably from the broker."""
 
 
 TIMEFRAME_MAP = {
@@ -372,10 +377,8 @@ class MT5Adapter:
         deviation = self.default_deviation if deviation is None else int(deviation)
         deviation_steps = list(dict.fromkeys([deviation, max(deviation * 2, 50), max(deviation * 5, 100)]))
         invalid_fill_retcode = int(getattr(mt5, "TRADE_RETCODE_INVALID_FILL", 10030))
-        done_retcodes = {
-            int(getattr(mt5, "TRADE_RETCODE_DONE", 10009)),
-            int(getattr(mt5, "TRADE_RETCODE_DONE_PARTIAL", 10010)),
-        }
+        done_retcode = int(getattr(mt5, "TRADE_RETCODE_DONE", 10009))
+        partial_retcode = int(getattr(mt5, "TRADE_RETCODE_DONE_PARTIAL", 10010))
 
         last_result = None
         last_request = None
@@ -410,7 +413,25 @@ class MT5Adapter:
                     continue
 
                 retcode = getattr(result, "retcode", None)
-                if retcode in done_retcodes:
+                if retcode == partial_retcode:
+                    # A partial fill leaves exposure. Refresh volume before retrying;
+                    # never resubmit the original full volume after a partial close.
+                    try:
+                        remaining = [p for p in self.positions_get(symbol, magic=magic)
+                                     if int(p.ticket) == int(position.ticket)]
+                    except Exception as exc:
+                        return CloseResult(False, retcode, getattr(result, "order", None),
+                                           getattr(result, "deal", None), close_price,
+                                           {"error": f"partial_close_reconciliation_failed:{exc}"})
+                    if remaining:
+                        residual_volume = float(remaining[0].volume)
+                        if not math.isfinite(residual_volume) or not 0 < residual_volume < float(position.volume):
+                            return CloseResult(False, retcode, getattr(result, "order", None),
+                                               getattr(result, "deal", None), close_price,
+                                               {"error": "partial_close_volume_not_reconciled"})
+                        position = remaining[0]
+                        continue
+                if retcode == done_retcode or (retcode == partial_retcode and not remaining):
                     return CloseResult(
                         ok=True,
                         retcode=retcode,
@@ -474,24 +495,31 @@ class MT5Adapter:
     def realized_pnl_today(self, magics: set[int], now_utc: datetime) -> float:
         self._ensure_mt5()
         day_start = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
-        deals = mt5.history_deals_get(day_start, now_utc)
+        try:
+            deals = mt5.history_deals_get(day_start, now_utc)
+        except Exception as exc:
+            raise HistoryUnavailableError(f"Daily deal history query failed: {exc}") from exc
         if deals is None:
-            return 0.0
+            raise HistoryUnavailableError("Daily deal history is unavailable.")
 
         deal_entry_out = getattr(mt5, "DEAL_ENTRY_OUT", 1)
         deal_entry_out_by = getattr(mt5, "DEAL_ENTRY_OUT_BY", 3)
+        trade_entries = {getattr(mt5, "DEAL_ENTRY_IN", 0), deal_entry_out,
+                         getattr(mt5, "DEAL_ENTRY_INOUT", 2), deal_entry_out_by}
         total = 0.0
 
         for deal in deals:
             if int(getattr(deal, "magic", -1)) not in magics:
                 continue
-            if getattr(deal, "entry", None) not in (deal_entry_out, deal_entry_out_by):
+            if getattr(deal, "entry", None) not in trade_entries:
                 continue
 
             profit = float(getattr(deal, "profit", 0.0) or 0.0)
             commission = float(getattr(deal, "commission", 0.0) or 0.0)
             swap = float(getattr(deal, "swap", 0.0) or 0.0)
             fee = float(getattr(deal, "fee", 0.0) or 0.0)
+            if not all(math.isfinite(value) for value in (profit, commission, swap, fee)):
+                raise HistoryUnavailableError("Daily deal history contains invalid amounts.")
             total += profit + commission + swap + fee
 
         return float(total)

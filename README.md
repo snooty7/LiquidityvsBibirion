@@ -38,7 +38,7 @@ This repository contains a modular hybrid v2 bot that combines:
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
-pip install MetaTrader5 pytest
+pip install MetaTrader5 pytest tzdata
 ```
 2. Create runtime config:
 ```bash
@@ -55,6 +55,20 @@ python -m src.engine.orchestrator
 - No martingale, no averaging down, no grid.
 
 ## Persistence Ops
+- Risk sizing rounds volume down to the broker step. If the broker/branch minimum lot
+  exceeds the risk budget, the entry is rejected rather than increased to the minimum.
+- Missing or invalid symbol valuation blocks new entries; existing exposure is treated
+  as unknown, not zero. Portfolio caps use the proposed order's actual lot and stop.
+- Daily P&L includes entry and exit commissions, swap, fees, and reversal deals.
+  Unavailable history blocks entries while position management continues.
+- Once the daily loss guard triggers, liquidation retries continue with persisted
+  backoff until positions are closed. Partial fills remain open until reconciled.
+- Schema v3 stores immutable initial risk distances in `position_risk_baselines`.
+  Live trailing, early exits, and position-risk loss guards use that baseline across
+  stop updates and restarts. New fills capture their actual entry-to-stop distance.
+  Existing positions without a baseline capture their current adverse stop distance;
+  if the stop is absent or already at/beyond breakeven, the configured stop distance
+  is captured once as a fallback and logged as `POSITION_RISK_BASELINE_CAPTURED`.
 - Runtime checkpoints are persisted on a controlled cadence (`checkpoint_interval_sec`).
 - Event retention runs on a controlled cadence (`maintenance_interval_sec`) and archives old events to JSONL before deletion.
 - Relevant runtime config:
@@ -94,6 +108,13 @@ python -m src.tools.state_maintenance --db-path bot_state.sqlite3 --retention-da
 ## Historical Backtest
 - A lightweight MT5 history runner is available at `src/tools/backtest_mt5.py`.
 - It reuses the current sweep, displacement/BOS confirmation, bias, order-block, and risk logic for bar-based historical validation.
+- Entry protection, sizing, measured risk caps, initial-R trailing, and daily loss
+  thresholds share the live definitions. Rejected risk entries are counted in `skipped_risk`.
+- Optional `--commission-per-lot 3.5` models 3.5 account-currency units per lot per
+  side, booked separately on the entry and exit trading days. The default is zero;
+  historical bars do not provide actual commissions, fees, or swap. A daily loss
+  triggered by entry costs blocks further entries and, when configured, closes the
+  position on the next simulated M1 polling bar.
 - Example:
 ```bash
 python -m src.tools.backtest_mt5 --config config\settings.json --symbol EURUSD --start 2025-12-28 --end 2026-03-27 --initial-equity 100000 --trades-csv reports\backtest_eurusd.csv
@@ -113,6 +134,100 @@ python -m src.tools.backtest_mt5 --config config\settings.json --symbol EURUSD -
     - `order_block_strong_override_max_distance_pips`
     - `order_block_strong_override_min_impulse_pips`
     - applies only to `sweep_displacement_mss` setups that already passed `range_ok`
+
+## Cost-aware walk-forward branch comparison
+
+`src/tools/walk_forward.py` compares frozen existing branch profiles. With no data
+argument it stays offline and creates a branch inventory and an honest
+`awaiting_history` report:
+
+```powershell
+python -m src.tools.walk_forward --output reports/walk_forward
+```
+
+The default inventory reads `config/*.json` (excluding examples and local overrides)
+and `live/*/settings.json`, including configured BTC research branches.
+Identical strategy/risk settings are deduplicated with source aliases retained;
+different settings with the same magic remain separate profiles. Use `--configs`
+to restrict the comparison, for example to the six active branches.
+
+Recommended workflow: export broker history once, confirm broker costs, then run
+offline. The following costs are illustrative assumptions, not verified charges:
+
+```powershell
+python -m src.tools.walk_forward --configs config/settings.json --history history/broker.json --start 2025-08-01 --end 2026-11-01 --train-days 90 --test-days 30 --embargo-days 1 --min-train-trades 20 --spread-mode historical --spread-pips 1.0 --commission-per-lot 3.5 --slippage-pips 0.2 --output reports/walk_forward
+```
+
+If no export exists, the following **explicit read-only history mode** can fetch
+and save one, then evaluate it. It initializes the MT5 connection and reads
+historical bars/symbol specifications; it never starts the orchestrator, sends an
+order, or changes position protection. This mode is never enabled implicitly.
+
+```powershell
+python -m src.tools.walk_forward --configs config/settings.json --mt5-history --save-history history/broker.json --start 2025-08-01 --end 2026-11-01 --output reports/walk_forward
+```
+
+Output is standalone `report.html` plus strict `report.json`: per-fold train/test
+results, branch fingerprints and data hashes, aggregate net P&L, spread/commission/
+slippage decomposition, average R, realized drawdown, and training-only selections.
+The selected branch must have positive net training return and the minimum trade
+count. Otherwise it holds cash. Missing training data prevents selection; missing
+test data is marked incomplete rather than reported as zero performance.
+
+Windows use exclusive UTC end times. Each replay starts flat with equal equity;
+test windows never overlap. Aggregate P&L sums independent fold results, without
+compounding or simultaneous portfolio simulation. Warm-up data can precede each
+window, but trades and outcomes cannot cross its boundary. Existing branches may
+have been manually tuned on these dates already; this tool cannot certify that
+history as genuinely untouched.
+
+Offline JSON format (provide all M1 bars, not just the abbreviated row below):
+
+```json
+{
+  "quote_basis": "bid",
+  "symbols": {
+    "EURUSD": {
+      "symbol_info": {
+        "digits": 5, "point": 0.00001,
+        "volume_min": 0.01, "volume_max": 100.0, "volume_step": 0.01,
+        "trade_tick_value": 1.0, "trade_tick_size": 0.00001
+      },
+      "rates": {
+        "M1": [
+          {"time": 1754006400, "open": 1.14, "high": 1.1402,
+           "low": 1.1399, "close": 1.1401, "spread": 10, "tick_volume": 123}
+        ]
+      }
+    }
+  }
+}
+```
+
+Timestamps are unique sorted UTC bar-open epoch seconds. `spread` is MT5 points,
+not pips; a missing spread uses `--spread-pips`, and a recorded zero stays zero.
+Missing higher timeframes are derived from complete UTC M1 buckets only. Supplied
+native broker timeframes are preserved when saving history, avoiding loss of
+higher-timeframe candles when quiet minutes contain no ticks. Supply
+enough prehistory for indicator warm-up. Long data gaps and corrupt bars are
+reported rather than filled with invented prices.
+The default maximum gap is three calendar days; `--max-gap-days` makes a different
+market-closure tolerance explicit in the report. Warm-up is checked using actual
+closed bars within the warm-up period rather than requiring a tick at its exact
+calendar starting boundary.
+
+Buys enter ask and exit bid; sells enter bid and exit ask. Market and stop fills
+receive adverse slippage; take-profit limits do not. Stop gaps use the worse of
+the stop and opening quote. Position sizing includes modeled entry slippage.
+Commissions are in account currency per lot per side, booked on the respective
+trading days. Cost decomposition describes the executed trades; it is not a
+separate no-cost strategy replay, since costs can alter sizing and trade outcomes.
+
+This remains an OHLC simulation: intrabar ordering, partial fills, latency, swap,
+financing, historical currency conversion changes, and archived news blackouts
+are not modeled. Drawdown is realized cash-flow drawdown rather than intratrade
+equity drawdown. Native branch risk percentages differ and remain visible in the
+report. None of these reports constitutes evidence of guaranteed profitability.
 
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).

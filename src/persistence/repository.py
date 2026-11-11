@@ -3,6 +3,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import json
+import math
 import sqlite3
 from typing import Dict, Iterator, List, Optional, Tuple
 
@@ -360,6 +361,26 @@ class SQLiteRepository:
             (int(ticket),),
         ).fetchone()
         return self._position_from_row(row) if row is not None else None
+
+    def get_position_risk_distance(self, ticket: int) -> Optional[float]:
+        """Return the immutable initial risk distance, if captured."""
+        row = self.conn.execute(
+            "SELECT distance_price FROM position_risk_baselines WHERE ticket = ?", (int(ticket),)
+        ).fetchone()
+        return float(row[0]) if row is not None else None
+
+    def ensure_position_risk_distance(self, ticket: int, distance: float) -> float:
+        """Capture initial risk once; broker stop updates never overwrite it."""
+        if not math.isfinite(distance) or distance <= 0:
+            raise ValueError("Initial position risk distance must be finite and positive.")
+        self.conn.execute(
+            "INSERT OR IGNORE INTO position_risk_baselines (ticket, distance_price) VALUES (?, ?)",
+            (int(ticket), float(distance)),
+        )
+        self._maybe_commit()
+        captured = self.get_position_risk_distance(ticket)
+        assert captured is not None
+        return captured
 
     def list_open_positions(
         self,

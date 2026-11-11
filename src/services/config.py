@@ -259,12 +259,12 @@ def load_config(path: Union[str, Path]) -> AppConfig:
     raw = json.loads(json.dumps(DEFAULT_CONFIG))
 
     if cfg_path.exists():
-        user_data = json.loads(cfg_path.read_text(encoding="utf-8"))
+        user_data = json.loads(cfg_path.read_text(encoding="utf-8-sig"))
         raw = _merge(raw, user_data)
 
     local_override_path = cfg_path.with_name(f"{cfg_path.stem}.local{cfg_path.suffix}")
     if local_override_path.exists():
-        local_data = json.loads(local_override_path.read_text(encoding="utf-8"))
+        local_data = json.loads(local_override_path.read_text(encoding="utf-8-sig"))
         raw = _merge(raw, local_data)
 
     runtime_raw = raw.get("runtime", {})

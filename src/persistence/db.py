@@ -6,7 +6,7 @@ import sqlite3
 
 
 DEFAULT_DB_PATH = "bot_state.sqlite3"
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 LEGACY_UNVERSIONED_BASELINE = 1
 
 
@@ -128,6 +128,11 @@ def _create_core_tables(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_open_positions_symbol_status
             ON open_positions(symbol, status);
 
+        CREATE TABLE IF NOT EXISTS position_risk_baselines (
+            ticket INTEGER PRIMARY KEY,
+            distance_price REAL NOT NULL CHECK (distance_price > 0)
+        );
+
         CREATE TABLE IF NOT EXISTS guard_state (
             id INTEGER PRIMARY KEY CHECK (id = 1),
             day_key TEXT NOT NULL DEFAULT '',
@@ -209,6 +214,8 @@ def init_schema(conn: sqlite3.Connection) -> None:
         next_version = current + 1
         if next_version == 2:
             _migrate_v1_to_v2(conn)
+        elif next_version == 3:
+            _create_core_tables(conn)
         else:
             raise RuntimeError(
                 f"Unsupported schema migration path {current} -> {next_version}. "

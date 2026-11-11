@@ -955,7 +955,7 @@ def test_portfolio_cap_continuity_after_restart(tmp_path: Path) -> None:
             "EURUSD": [SimpleNamespace(ticket=1, magic=92001)],
         }
     )
-    cap_message = portfolio_caps_message(adapter, app_config, app_config.symbols[0], equity=10_000.0)
+    cap_message = portfolio_caps_message(adapter, app_config, app_config.symbols[0], equity=10_000.0, proposed_risk_money=0.0)
     # default cap is 5 positions, so no cap yet
     assert cap_message is None
 
@@ -989,7 +989,7 @@ def test_portfolio_cap_continuity_after_restart(tmp_path: Path) -> None:
         push_notification_timeout_sec=5,
     )
     strict_cfg = AppConfig(runtime=strict_runtime, symbols=app_config.symbols)
-    cap_hit = portfolio_caps_message(adapter, strict_cfg, strict_cfg.symbols[0], equity=10_000.0)
+    cap_hit = portfolio_caps_message(adapter, strict_cfg, strict_cfg.symbols[0], equity=10_000.0, proposed_risk_money=0.0)
     assert cap_hit is not None
 
 
