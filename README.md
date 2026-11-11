@@ -348,6 +348,27 @@ These commands use saved histories and block broker connections and orders.
 New modes are disabled in all active profiles. Historical gate passes do not
 authorize live deployment or establish future profitability.
 
+## Offline USDCHF sizing sensitivity
+
+The risk-budget study compares 0.1%, 0.2%, 0.3% and 0.5% on the original M30/M1
+reference and its previously tested 0.9-pip spread variant. Maximum lot stays
+0.05; initial stops, exits, daily and portfolio guards are unchanged. The study
+does not select or apply a live risk level. It includes the earlier continuous
+losing year, the twelve monthly test windows and doubled commission/slippage.
+
+See [the sizing sensitivity report](reports/usdchf_risk_levels/README.md) for
+actual capped entry risk, volume distributions, realized drawdowns, losing
+streaks and independently reconstructed costs. Historical profit is not simply
+multiplied. Swap/overnight financing remains excluded for prior comparability.
+
+```powershell
+python -m src.tools.research_risk_levels --workers 6
+python -m src.tools.render_risk_levels reports/usdchf_risk_levels/report.json
+```
+
+These commands use saved history, block broker/order methods and never update
+active settings.
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.

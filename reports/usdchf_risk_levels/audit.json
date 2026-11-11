@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "replays": 160,
+  "saved_trade_records": 3088,
+  "checks": [
+    "all scenarios and windows complete",
+    "fixed lot/stop/daily/portfolio protections",
+    "cost reconciliation and per-side commission",
+    "no widened stops or overlapping trades",
+    "entry-equity risk reconstruction per replay",
+    "loss streaks, drawdowns and all summaries recomputed"
+  ],
+  "live_risk_selected": null
+}

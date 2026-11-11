@@ -1,4 +1,5 @@
 from dataclasses import asdict, replace
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from src.risk.sizing import SymbolTradeInfo
 from src.services.config import load_config
 from src.tools import backtest_mt5 as replay
 from src.tools import research_risk_levels as study
+from src.tools import render_risk_levels as reporting
 
 
 @pytest.fixture
@@ -89,3 +91,43 @@ def test_risk_metrics_reject_overlapping_positions(app, info):
     cfg = study.variants(app.symbols[0])["baseline_risk_0.1"]
     with pytest.raises(ValueError, match="Overlapping"):
         study.record_metrics([closed(-1), closed(-1)], cfg, info)
+
+
+def empty_report(app, info):
+    cfgs = study.variants(app.symbols[0])
+    rows, comparison = [], {}
+    for name, cfg in cfgs.items():
+        empty = study.record_metrics([], cfg, info)
+        comparison[name] = {scope: deepcopy(empty) for scope in (
+            "earlier_year", "earlier_year_stress", "test_year", "confirmation", "stress_confirmation")}
+        for phase, indices in (("earlier_base", [0]), ("earlier_stress", [0]),
+                               ("test_base", range(1, 13)), ("test_stress", range(7, 13))):
+            for index in indices:
+                rows.append({"name": name, "phase": phase, "fold": index,
+                             "start": "2026-01-01T00:00:00+00:00", "end_exclusive": "2026-01-02T00:00:00+00:00",
+                             **deepcopy(empty)})
+    return {"plan": {"settings": {n: asdict(c) for n, c in cfgs.items()},
+                     "symbol_info": asdict(info), "risk_runtime": {"daily_loss_limit_usd": 150,
+                     "max_total_open_risk_pct": .5}},
+            "rows": rows, "comparison": comparison, "unique_replays": 160}
+
+
+def test_sizing_report_audits_all_scenarios_and_resets_equity_per_replay(app, info):
+    assert reporting.audit(empty_report(app, info), [])["passed"]
+
+
+@pytest.mark.parametrize("corruption", ["missing", "lot_cap", "stop_rule", "portfolio", "risk_metric"])
+def test_sizing_audit_rejects_missing_results_weakened_guards_or_wrong_risk(app, info, corruption):
+    report = empty_report(app, info)
+    if corruption == "missing":
+        report["rows"].pop()
+    elif corruption == "lot_cap":
+        report["plan"]["settings"]["baseline_risk_0.2"]["max_lot"] = .1
+    elif corruption == "stop_rule":
+        report["plan"]["settings"]["baseline_risk_0.2"]["trailing_gap_r"] = 2
+    elif corruption == "portfolio":
+        report["plan"]["risk_runtime"]["max_total_open_risk_pct"] = 1
+    else:
+        report["rows"][0]["max_initial_stop_risk_pct"] = .5
+    with pytest.raises(ValueError):
+        reporting.audit(report, [])
