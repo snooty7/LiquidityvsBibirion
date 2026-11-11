@@ -265,6 +265,16 @@ reconstructs previously known behavior rather than discovering a new untouched
 edge. Its results are kept in
 [the confirmation-alignment report](reports/usdchf_confirmation_alignment/README.md),
 alongside the unsuccessful exit/strictness study.
+The explicit M1 profile is stored in
+`config/usdchf_m30_research_candidate.json` with dry-run enabled, a separate magic
+and isolated state paths. It reproduces the previously known M1-fed model; the
+fixed training nomination did not approve replacing the M5 baseline. No active
+live profile is changed. Complete the descriptive comparison, without reranking
+the frozen selections, using:
+
+```powershell
+python -m src.tools.complete_usdchf_alignment --history history/mt5_20261111/USDCHF_extended.json --study-dir reports/usdchf_confirmation_alignment
+```
 
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).

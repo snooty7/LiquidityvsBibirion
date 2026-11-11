@@ -1,5 +1,6 @@
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from types import SimpleNamespace as NS
 
 import pytest
@@ -168,3 +169,48 @@ def test_offline_study_blocks_adapter_and_raw_broker_trading_interfaces(monkeypa
         with pytest.raises(RuntimeError,match="forbids"):
             getattr(fake,name)()
     assert called==[]
+
+
+def test_descriptive_completion_cannot_change_training_selection_or_promotion():
+    from src.tools.complete_usdchf_alignment import compare_declared
+    from copy import deepcopy
+    start=datetime(2026,1,1,tzinfo=timezone.utc)
+    fold={"index":1,"test_start":start.isoformat(),"test_end":(start+timedelta(days=30)).isoformat()}
+    costs=dict(spread_mode="historical",spread_pips=1,commission_per_lot=3.5,slippage_pips=.2)
+    report={"plan":{"study":"confirmation_alignment","folds":[fold],"confirmation_folds":[1],
+                    "costs":costs,"stress_costs":dict(costs,commission_per_lot=7),
+                    "variants":[{"name":"baseline"},{"name":"m1_alignment"}]},
+            "locked_selections":{"fixed":"baseline","adaptive":{"1":"baseline"}},
+            "promotion_checks":{"alternative_selected_from_training":False},"promotion_passed":False}
+    original=deepcopy(report)
+    calls=[]
+    def replay(name,fold,cost):
+        calls.append((name,cost.commission_per_lot))
+        return []
+    result=compare_declared(report,replay)
+    assert report==original
+    assert result["locked_selections"]==original["locked_selections"]
+    assert result["promotion_checks"]==original["promotion_checks"]
+    assert not result["promotion_passed"]
+    assert set(result["declared_comparison"])=={"baseline","m1_alignment"}
+    assert ("m1_alignment",7) in calls
+
+
+def test_committed_m1_candidate_is_isolated_dry_run_and_preserves_risk():
+    from src.tools.walk_forward import RISK_KEYS
+    root=Path(__file__).resolve().parents[1]
+    candidate=load_config(root/"config/usdchf_m30_research_candidate.json")
+    source=load_config(root/"live/expansion_live_92021_92024/settings.json")
+    base=next(cfg for cfg in source.symbols if cfg.symbol=="USDCHF" and cfg.timeframe=="M30")
+    cfg=candidate.symbols[0]
+    assert candidate.runtime.dry_run
+    assert not candidate.runtime.push_notifications_enabled
+    assert candidate.runtime.db_path!=source.runtime.db_path
+    assert candidate.runtime.log_file!=source.runtime.log_file
+    assert cfg.magic!=base.magic
+    assert cfg.cisd_timeframe=="M1"
+    assert cfg.cisd_lookback_bars>=cfg.confirm_expiry_bars*30+1
+    assert replace(cfg,magic=base.magic,cisd_timeframe=base.cisd_timeframe,
+                   cisd_lookback_bars=base.cisd_lookback_bars)==base
+    for key in RISK_KEYS:
+        assert getattr(candidate.runtime,key)==getattr(source.runtime,key)
