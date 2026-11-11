@@ -461,6 +461,8 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         "session_open_scalp_c1",
     }
     valid_strategy_modes = {
+        "htf_trend_pullback",
+        "htf_range_retest",
         "liquidity_sweep",
         "session_open_scalp",
         "opening_range_breakout_v2",
@@ -473,6 +475,13 @@ def load_config(path: Union[str, Path]) -> AppConfig:
     valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}
     for symbol in symbols:
+        if symbol.strategy_mode in {"htf_trend_pullback", "htf_range_retest"}:
+            if (symbol.timeframe != "H1" or symbol.bias_timeframe != "H4"
+                    or symbol.confirmation_mode != "none"
+                    or not 1 < symbol.ema_fast_period < symbol.ema_slow_period
+                    or symbol.bars < max(3*symbol.ema_slow_period, 22)+1
+                    or symbol.bias_lookback_bars < max(3*symbol.ema_slow_period, 22)):
+                raise ValueError("H1/H4 models require closed H1/H4 context, valid EMA periods and intrinsic confirmation")
         if symbol.long_entry_filter_mode not in {"off", "ema_slope_atr"}:
             raise ValueError(f"Unsupported long_entry_filter_mode={symbol.long_entry_filter_mode}")
         if not math.isfinite(symbol.long_entry_min_slope_atr) or symbol.long_entry_min_slope_atr < 0:

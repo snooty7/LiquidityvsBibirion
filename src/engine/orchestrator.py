@@ -61,6 +61,7 @@ from src.strategy.filters import (
     order_block_note,
     resolve_order_block_distance_limit_pips,
 )
+from src.strategy.htf_models import HTF_MODES, detect_htf_signal
 from src.strategy.liquidity import (
     RangeFilterResult,
     TrendRetestReclaimSignalResult,
@@ -1903,7 +1904,13 @@ def process_symbol(
     scalp_result = None
     micro_burst_result = None
     trend_retest_result: Optional[TrendRetestReclaimSignalResult] = None
-    if cfg.strategy_mode == "session_open_scalp":
+    if cfg.strategy_mode in HTF_MODES:
+        context = max(cfg.bias_lookback_bars, 3*cfg.ema_slow_period)
+        macro = adapter.copy_rates(cfg.symbol, cfg.bias_timeframe, context+1)
+        signal = detect_htf_signal(cfg.strategy_mode, rates[:-1], macro[:-1],
+                                   buffer_price=cfg.buffer_pips*pip,
+                                   fast_period=cfg.ema_fast_period, slow_period=cfg.ema_slow_period)
+    elif cfg.strategy_mode == "session_open_scalp":
         scalp_result = detect_session_open_scalp_signal(
             rates,
             session_start_utc=cfg.scalp_session_start_utc,
@@ -2075,6 +2082,8 @@ def process_symbol(
             chop_result = RangeFilterResult(False, "orb_v2_ok", 0.0, 0.0)
             sweep_note = scalp_result.note if scalp_result is not None else "orb_v2_signal"
         elif cfg.strategy_mode in (
+            "htf_trend_pullback",
+            "htf_range_retest",
             "h4_bias_micro_burst",
             "trend_micro_burst_v2",
             "trend_day_acceleration",
@@ -2085,7 +2094,7 @@ def process_symbol(
             if trend_retest_result is not None:
                 sweep_note = trend_retest_result.note
             else:
-                sweep_note = micro_burst_result.note if micro_burst_result is not None else "micro_burst_signal"
+                sweep_note = micro_burst_result.note if micro_burst_result is not None else f"{cfg.strategy_mode}_signal"
         else:
             prior_closed = rates[:-2]
             chop_result = evaluate_range_filter(

@@ -48,6 +48,7 @@ from src.strategy.filters import (
     order_block_distance_pips,
     resolve_order_block_distance_limit_pips,
 )
+from src.strategy.htf_models import HTF_MODES, detect_htf_signal
 from src.strategy.liquidity import (
     SweepSignal,
     detect_btc_mtf_trend_retest_reclaim_signal,
@@ -361,7 +362,11 @@ def _detect_signal_for_cfg(
     levels: list[float] = []
     trend_retest_result = None
 
-    if cfg.strategy_mode == "session_open_scalp":
+    if cfg.strategy_mode in HTF_MODES:
+        signal = detect_htf_signal(cfg.strategy_mode, m5_rates[:-1], closed_bias,
+                                   buffer_price=cfg.buffer_pips*pip,
+                                   fast_period=cfg.ema_fast_period, slow_period=cfg.ema_slow_period)
+    elif cfg.strategy_mode == "session_open_scalp":
         signal = detect_session_open_scalp_signal(
             m5_rates,
             session_start_utc=cfg.scalp_session_start_utc,
@@ -711,9 +716,9 @@ def _max_buffer_days(cfg: SymbolConfig) -> int:
                                                       cfg.long_entry_slope_bars)
                             * TIMEFRAME_SECONDS[cfg.bias_timeframe] // 60)
     max_minutes = max(bars_minutes)
-    # Calendar fetches must also cover FX weekends; indicator requirements are
-    # measured in trading bars rather than elapsed calendar time.
-    return max(7, math.ceil(max_minutes / (60 * 24) * 7 / 5) + 3)
+    # Trading-bar warm-up also spans weekends and year-end holidays. Keep an
+    # extra calendar week; coverage still verifies actual bars and rejects gaps.
+    return max(7, math.ceil(max_minutes / (60 * 24) * 7 / 5) + 7)
 
 
 def entry_long_filter(cfg: SymbolConfig, side: str, closed_rates: Sequence[dict]):
@@ -1034,6 +1039,8 @@ def run_backtest(
                         skip_range_chop += 1
                         continue
                 elif cfg.strategy_mode in (
+                    "htf_trend_pullback",
+                    "htf_range_retest",
                     "opening_range_breakout_v2",
                     "h4_bias_micro_burst",
                     "trend_micro_burst_v2",
