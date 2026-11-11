@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "continuous_replays": 30,
+  "simulated_trade_records_checked": 3020,
+  "checks": [
+    "frozen code/history",
+    "all five hypotheses and six scenarios",
+    "only declared parameter changes",
+    "every profit/target statistic reconstructed",
+    "M1 floating equity and final balances reconstructed",
+    "0.5% sizing budget and unchanged lot cap",
+    "no widened stops",
+    "cost reconciliation",
+    "trade boundaries and single position",
+    "earlier-stress-only nomination"
+  ],
+  "live_settings_changed": false
+}
