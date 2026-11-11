@@ -1,0 +1,19 @@
+{
+  "registered_at_utc": "2026-11-11T19:13:16.047144+00:00",
+  "purpose": "Add already-known spread<=0.9 benchmark and full-history continuous accounts. No tuning, no new discovery, no change to original nomination.",
+  "history_sha256": "8748d7a5373716b692d9e9168c2c2fe315911b643e07afb8bec74fa0b031a6a3",
+  "original_plan_sha256": "84a7ec0d9d01aafb5958b5dc60635da4c9b98a16cfe2c4bc86dd6250df5797ce",
+  "code_sha256": "58c7e08cf1b5d8a147830ad9011fcacb2e63f98b0ed766eccc1046e02e861481",
+  "full_history": {
+    "start": "2024-11-15T00:00:00+00:00",
+    "end_exclusive": "2026-11-11T00:00:00+00:00"
+  },
+  "settings_changes": {
+    "known_spread_0_9": {
+      "max_spread_pips": 0.9
+    }
+  },
+  "tasks": "Four known-cost separate-period base/stress replays and four full-history baseline/known-cost base/stress replays; all EUR20k, 0.5% risk, original exits/guards.",
+  "broker_connections": false,
+  "trading_calls": false
+}
