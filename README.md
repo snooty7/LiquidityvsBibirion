@@ -369,6 +369,26 @@ python -m src.tools.render_risk_levels reports/usdchf_risk_levels/report.json
 These commands use saved history, block broker/order methods and never update
 active settings.
 
+## Single re-entry check and EUR20k paper sizing
+
+[The single re-entry experiment](reports/usdchf_reentry/README.md) tests only the
+legacy same-side/same-level rule: within six pips and two M30 setup bars after
+the last successful simulated entry. Risk is unchanged. The experimental hook
+is isolated to paper replay; no live feature or profile is enabled.
+
+[The EUR20k sizing illustration](reports/usdchf_capital_20k/README.md) separately
+tests a EUR20,000 virtual account at 0.1/0.2/0.3/0.5% declared risk and a raised
+simulation-only lot ceiling of 0.5. It preserves stop/exit, daily and portfolio
+protections. It distinguishes profit on a successful trade from average profit
+after losing trades, and retains the earlier losing year and cost stress.
+Swap/overnight financing is excluded. No capital deposit or live risk change
+is recommended or performed by these research commands.
+
+```powershell
+python -m src.tools.research_reentry
+python -m src.tools.research_capital_20k
+```
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.

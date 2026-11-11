@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "replays": 80,
+  "saved_trade_records_checked": 2113,
+  "checks": [
+    "frozen code fingerprint",
+    "all scenarios complete",
+    "every row and summary recomputed",
+    "time boundaries",
+    "cost reconciliation",
+    "per-side commission",
+    "paper volume ceiling",
+    "stops never widened"
+  ],
+  "live_settings_changed": false
+}
