@@ -20556,5 +20556,6 @@
     "trading_calls_made": false,
     "broker_connections_during_replay": false,
     "costs_are_unverified_assumptions": true
-  }
+  },
+  "validation_notice": "Validation correction: the earlier replay fed M1 candles to confirmation even when a profile requested M5 (and C3/C4 likewise did not use the setup timeframe). Results for those profiles are legacy figures, not a faithful validation of their configured confirmation. See ../usdchf_m30_improvement/ for the corrected USDCHF M30 baseline and improvement study. The original results are retained for audit."
 }

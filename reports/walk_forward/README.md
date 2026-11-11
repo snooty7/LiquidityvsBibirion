@@ -1,5 +1,7 @@
 # MT5 cost-aware walk-forward results
 
+> Validation correction: the earlier replay fed M1 candles to confirmation even when a profile requested M5 (and C3/C4 likewise did not use the setup timeframe). Results for those profiles are legacy figures, not a faithful validation of their configured confirmation. See ../usdchf_m30_improvement/ for the corrected USDCHF M30 baseline and improvement study. The original results are retained for audit.
+
 Completed on 11 November 2026 using saved broker history and offline replay. No bot was started and no trading methods were called.
 
 **Main finding:** the training-selected available-instrument track returned **EUR -50.42 net** across 134 simulated trades after costs. The best individual profile in hindsight was USDCHF M30 at EUR +147.86 (143 trades, PF 1.231). This hindsight ranking is distinct from the training-only selection result.

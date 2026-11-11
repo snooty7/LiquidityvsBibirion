@@ -274,9 +274,10 @@ def _latest_close_price_or_fallback(*rate_sets: Sequence[dict]) -> float:
 def _evaluate_confirmation(
     cfg: SymbolConfig,
     pending: PendingSetupLite,
-    closed_m1: Sequence[dict],
+    closed_confirmation: Sequence[dict],
 ) -> ConfirmationResult:
-    rates = _append_dummy_forming_bar(closed_m1, TIMEFRAME_SECONDS.get(cfg.cisd_timeframe, 60))
+    timeframe = confirmation_timeframe(cfg)
+    rates = _append_dummy_forming_bar(closed_confirmation, TIMEFRAME_SECONDS.get(timeframe, 60))
     mode = cfg.confirmation_mode.lower()
     if mode == "none":
         return evaluate_none_confirmation(rates, pending.candle_time)
@@ -305,6 +306,11 @@ def _evaluate_confirmation(
     if mode == "session_open_scalp_c1":
         return evaluate_session_open_scalp_c1_confirmation(rates, pending.side, pending.candle_time)
     return ConfirmationResult(False, False, f"unknown_confirmation_mode={mode}")
+
+
+def confirmation_timeframe(cfg: SymbolConfig) -> str:
+    """Match live confirmation: C3/C4 use setup bars, displacement uses its configured timeframe."""
+    return cfg.timeframe if cfg.confirmation_mode in {"none", "c3", "c4"} else cfg.cisd_timeframe
 
 
 def _pending_wait_stage(note: str) -> str:
@@ -722,7 +728,7 @@ def run_backtest(
         try:
             adapter.initialize()
             adapter.ensure_symbol(cfg.symbol)
-            timeframes = {"M1", cfg.timeframe, cfg.setup_timeframe, cfg.bias_timeframe}
+            timeframes = {"M1", cfg.timeframe, cfg.setup_timeframe, cfg.bias_timeframe, confirmation_timeframe(cfg)}
             rates = {tf: _fetch_chunked_rates(adapter, cfg.symbol, tf, fetch_start, evaluation_end)
                      for tf in timeframes}
             symbol_info = SymbolTradeInfo.from_mt5(adapter.symbol_info(cfg.symbol))
@@ -735,7 +741,7 @@ def run_backtest(
             tf: history.bars(tf)[
                 bisect.bisect_left(history.timestamps(tf), int(fetch_start.timestamp())):
                 bisect.bisect_left(history.timestamps(tf), int(evaluation_end.timestamp()))
-            ] for tf in {"M1", cfg.timeframe, cfg.setup_timeframe, cfg.bias_timeframe}
+            ] for tf in {"M1", cfg.timeframe, cfg.setup_timeframe, cfg.bias_timeframe, confirmation_timeframe(cfg)}
         }
         symbol_info = history.symbol_info
     # No prices beyond the explicit evaluation boundary enter this replay.
@@ -751,6 +757,8 @@ def run_backtest(
     m5_times = [int(item["time"]) for item in m5]
     setup_times = [int(item["time"]) for item in setup_rates]
     bias_times = [int(item["time"]) for item in bias_rates]
+    confirm_rates = rates[confirmation_timeframe(cfg)]
+    confirm_times = [int(item["time"]) for item in confirm_rates]
     pip = MT5Adapter.pip_size(symbol_info)
     point = float(symbol_info.point)
 
@@ -874,7 +882,12 @@ def run_backtest(
             pending = None
 
         if pending is not None:
-            confirm_result = _evaluate_confirmation(cfg, pending, closed_m1)
+            closed_confirmation = _available_closed_bars(
+                confirm_rates, confirm_times, decision_time,
+                TIMEFRAME_SECONDS[confirmation_timeframe(cfg)],
+                tail_bars=cfg.bars if cfg.confirmation_mode in {"none", "c3", "c4"} else cfg.cisd_lookback_bars,
+            )
+            confirm_result = _evaluate_confirmation(cfg, pending, closed_confirmation)
             if confirm_result.confirmed:
                 entry_time = decision_time
                 entry_price = _latest_close_price(closed_m1)
