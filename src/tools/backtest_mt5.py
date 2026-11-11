@@ -39,6 +39,9 @@ from src.strategy.confirmations import (
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
+    bias_context_count,
+    evaluate_long_entry_filter,
+    long_entry_context_count,
     evaluate_bias,
     find_local_order_block,
     order_block_distance_pips,
@@ -152,6 +155,7 @@ class BacktestResult:
     skipped_cooldown: int
     skipped_daily_loss: int
     skipped_risk: int = 0
+    skipped_long_filter: int = 0
 
 
 def _to_utc_datetime(value: str, *, end_of_day: bool = False) -> datetime:
@@ -637,9 +641,12 @@ def _build_entry_trade(
     commission_per_lot: float = 0.0,
     costs: Optional[ExecutionCosts] = None,
     spread_pips: float = 0.0,
+    long_filter_rates: Optional[Sequence[dict]] = None,
 ) -> Optional[OpenTrade]:
     if not math.isfinite(commission_per_lot) or commission_per_lot < 0:
         raise ValueError("Commission per lot must be finite and nonnegative.")
+    if not entry_long_filter(cfg, entry_side, long_filter_rates or []).allowed:
+        return None
     pip = MT5Adapter.pip_size(symbol_info)
     quoted_price = entry_price + (spread_pips * pip if costs is not None and entry_side == "BUY" else 0.0)
     entry_slippage = costs.slippage_pips * pip if costs is not None else 0.0
@@ -698,10 +705,23 @@ def _max_buffer_days(cfg: SymbolConfig) -> int:
         cfg.cisd_lookback_bars * (TIMEFRAME_SECONDS.get(cfg.cisd_timeframe, 60) // 60),
         cfg.setup_lookback_bars * (TIMEFRAME_SECONDS.get(cfg.setup_timeframe, 3600) // 60),
     ]
+    if cfg.long_entry_filter_mode != "off":
+        bars_minutes.append(long_entry_context_count(cfg.bias_ema_period,cfg.long_entry_atr_period,
+                                                      cfg.long_entry_slope_bars)
+                            * TIMEFRAME_SECONDS[cfg.bias_timeframe] // 60)
     max_minutes = max(bars_minutes)
     # Calendar fetches must also cover FX weekends; indicator requirements are
     # measured in trading bars rather than elapsed calendar time.
     return max(7, math.ceil(max_minutes / (60 * 24) * 7 / 5) + 3)
+
+
+def entry_long_filter(cfg: SymbolConfig, side: str, closed_rates: Sequence[dict]):
+    """Use the same BUY gate and fixed feature horizon as live entries."""
+    return evaluate_long_entry_filter(
+        side, closed_rates, mode=cfg.long_entry_filter_mode,
+        min_slope_atr=cfg.long_entry_min_slope_atr, ema_period=cfg.bias_ema_period,
+        atr_period=cfg.long_entry_atr_period, slope_bars=cfg.long_entry_slope_bars,
+    )
 
 
 def run_backtest(
@@ -805,6 +825,7 @@ def run_backtest(
     skip_cooldown = 0
     skip_daily_loss = 0
     skip_risk = 0
+    skip_long_filter = 0
 
     for idx, current_m5 in enumerate(m5):
         decision_time = int(current_m5["time"]) + TIMEFRAME_SECONDS.get(cfg.timeframe, 300)
@@ -863,7 +884,10 @@ def run_backtest(
             bias_times,
             decision_time,
             TIMEFRAME_SECONDS.get(cfg.bias_timeframe, 900),
-            tail_bars=max(cfg.bias_lookback_bars, cfg.bias_ema_period + 3, 120),
+            tail_bars=max(cfg.bias_lookback_bars, cfg.bias_ema_period + 3, 120,
+                          long_entry_context_count(cfg.bias_ema_period,cfg.long_entry_atr_period,
+                                                   cfg.long_entry_slope_bars)
+                          if cfg.long_entry_filter_mode != "off" else 0),
         )
         closed_setup = _available_closed_bars(
             setup_rates,
@@ -915,7 +939,7 @@ def run_backtest(
                     continue
 
                 if cfg.use_bias_filter:
-                    bias_info = evaluate_bias(closed_bias, cfg.bias_ema_period)
+                    bias_info = evaluate_bias(closed_bias[-bias_context_count(cfg.bias_lookback_bars,cfg.bias_ema_period):], cfg.bias_ema_period)
                     bias_ok = bias_info["ok_buy"] if pending.side == "BUY" else bias_info["ok_sell"]
                     if not bias_ok:
                         skip_bias += 1
@@ -953,6 +977,10 @@ def run_backtest(
                         pending = None
                         continue
 
+                if not entry_long_filter(cfg,pending.side,closed_bias).allowed:
+                    skip_long_filter += 1
+                    pending = None
+                    continue
                 open_trade = _build_entry_trade(
                     cfg,
                     app_config.runtime,
@@ -965,6 +993,7 @@ def run_backtest(
                     str(confirm_result.note),
                     pending,
                     commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
+                    long_filter_rates=closed_bias,
                 )
                 if open_trade is not None:
                     book_pnl(-open_trade.entry_commission_money)
@@ -1085,7 +1114,7 @@ def run_backtest(
                         continue
 
                     if cfg.use_bias_filter:
-                        bias_info = evaluate_bias(closed_bias, cfg.bias_ema_period)
+                        bias_info = evaluate_bias(closed_bias[-bias_context_count(cfg.bias_lookback_bars,cfg.bias_ema_period):], cfg.bias_ema_period)
                         bias_ok = bias_info["ok_buy"] if pending_candidate.side == "BUY" else bias_info["ok_sell"]
                         if not bias_ok:
                             skip_bias += 1
@@ -1120,6 +1149,9 @@ def run_backtest(
                             skip_order_block += 1
                             continue
 
+                    if not entry_long_filter(cfg,pending_candidate.side,closed_bias).allowed:
+                        skip_long_filter += 1
+                        continue
                     open_trade = _build_entry_trade(
                         cfg,
                         app_config.runtime,
@@ -1132,6 +1164,7 @@ def run_backtest(
                         "confirm=none",
                         pending_candidate,
                         commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
+                        long_filter_rates=closed_bias,
                     )
                     if open_trade is not None:
                         book_pnl(-open_trade.entry_commission_money)
@@ -1289,6 +1322,7 @@ def run_backtest(
         skipped_cooldown=skip_cooldown,
         skipped_daily_loss=skip_daily_loss,
         skipped_risk=skip_risk,
+        skipped_long_filter=skip_long_filter,
     )
 
     if trades_csv is not None:

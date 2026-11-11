@@ -71,7 +71,13 @@ def discover_branches(paths: list[Path]) -> list[Branch]:
         app = load_config(path)
         risk = {key: getattr(app.runtime, key) for key in RISK_KEYS}
         for cfg in app.symbols:
-            serialized = json.dumps({"symbol": asdict(cfg), "runtime": risk}, sort_keys=True, allow_nan=False)
+            settings = asdict(cfg)
+            if cfg.long_entry_filter_mode == "off":
+                # Disabled optional features preserve established branch identities.
+                for key in ("long_entry_filter_mode", "long_entry_min_slope_atr",
+                            "long_entry_slope_bars", "long_entry_atr_period"):
+                    settings.pop(key)
+            serialized = json.dumps({"symbol": settings, "runtime": risk}, sort_keys=True, allow_nan=False)
             digest = hashlib.sha256(serialized.encode()).hexdigest()
             if digest in branches:
                 branches[digest].sources.append(str(path))
@@ -161,6 +167,10 @@ def history_coverage(history: HistoricalData, cfg: SymbolConfig, start: datetime
     if cfg.use_bias_filter or cfg.strategy_mode == "btc_mtf_trend_retest_reclaim":
         required[cfg.bias_timeframe] = max(required.get(cfg.bias_timeframe, 0),
                                            cfg.bias_lookback_bars, cfg.bias_ema_period+3)
+    if cfg.long_entry_filter_mode != "off":
+        from src.strategy.filters import long_entry_context_count
+        required[cfg.bias_timeframe] = max(required.get(cfg.bias_timeframe,0),
+            long_entry_context_count(cfg.bias_ema_period,cfg.long_entry_atr_period,cfg.long_entry_slope_bars))
     if cfg.strategy_mode == "btc_mtf_trend_retest_reclaim":
         required[cfg.setup_timeframe] = max(required.get(cfg.setup_timeframe, 0),
                                             cfg.setup_lookback_bars, cfg.ema_slow_period+3)

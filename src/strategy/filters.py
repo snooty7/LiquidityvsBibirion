@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import Optional, Sequence
+from dataclasses import dataclass
+import math
 
 
 def _price(bar: object, field: str) -> float:
@@ -44,6 +46,68 @@ def evaluate_bias(rates: Sequence[object], ema_period: int) -> dict:
         "ok_sell": ok_sell,
         "note": f"bias close={last_close:.5f} ema={ema_now:.5f} ema_prev={ema_prev:.5f}",
     }
+
+
+def bias_context_count(lookback_bars: int, ema_period: int) -> int:
+    """Number of closed bars used by both live and historical entry-bias checks."""
+    return max(lookback_bars, ema_period + 2)
+
+
+def long_entry_context_count(ema_period: int, atr_period: int, slope_bars: int) -> int:
+    """Use a fixed EMA initialization horizon so feature values match across runtimes."""
+    return max(4 * ema_period, atr_period + 1, slope_bars + 2)
+
+
+def long_entry_slope_atr(closed_rates: Sequence[object], *, ema_period: int = 20,
+                         atr_period: int = 14, slope_bars: int = 3) -> Optional[float]:
+    """EMA rise over the specified closed bars, divided by recent mean true range."""
+    if ema_period < 1 or atr_period < 2 or slope_bars < 1:
+        raise ValueError("Long-entry periods must be positive, with ATR period >= 2")
+    count = long_entry_context_count(ema_period, atr_period, slope_bars)
+    if len(closed_rates) < count:
+        return None
+    rates = list(closed_rates[-count:])
+    closes = [_price(row, "close") for row in rates]
+    highs = [_price(row, "high") for row in rates]
+    lows = [_price(row, "low") for row in rates]
+    if not all(math.isfinite(v) and v > 0 for v in closes + highs + lows):
+        return None
+    if any(low > close or close > high for low, close, high in zip(lows, closes, highs)):
+        return None
+    true_ranges = [max(highs[i]-lows[i], abs(highs[i]-closes[i-1]), abs(lows[i]-closes[i-1]))
+                   for i in range(len(rates)-atr_period, len(rates))]
+    atr = sum(true_ranges)/atr_period
+    if atr <= 0 or not math.isfinite(atr):
+        return None
+    values = ema(closes, ema_period)
+    return (values[-1]-values[-1-slope_bars])/atr
+
+
+@dataclass(frozen=True)
+class LongEntryFilterResult:
+    allowed: bool
+    note: str
+    slope_atr: Optional[float] = None
+
+
+def evaluate_long_entry_filter(side: str, closed_rates: Sequence[object], *, mode: str = "off",
+                               min_slope_atr: float = 0.0, ema_period: int = 20,
+                               atr_period: int = 14, slope_bars: int = 3) -> LongEntryFilterResult:
+    """Apply an optional BUY-only gate; SELL eligibility is unchanged."""
+    if mode not in {"off", "ema_slope_atr"}:
+        raise ValueError(f"Unsupported long-entry filter mode: {mode}")
+    if mode == "off" or side.upper() == "SELL":
+        return LongEntryFilterResult(True, "long_filter_off" if mode == "off" else "long_filter_sell_unchanged")
+    if side.upper() != "BUY":
+        raise ValueError("Entry side must be BUY or SELL")
+    if not math.isfinite(min_slope_atr) or min_slope_atr < 0:
+        raise ValueError("Long-entry threshold must be finite and nonnegative")
+    value = long_entry_slope_atr(closed_rates, ema_period=ema_period,
+                                 atr_period=atr_period, slope_bars=slope_bars)
+    if value is None:
+        return LongEntryFilterResult(False, "long_filter_context_unavailable")
+    allowed = value >= min_slope_atr
+    return LongEntryFilterResult(allowed, f"long_filter slope_atr={value:.6f} min={min_slope_atr:.6f}", value)
 
 
 def find_local_order_block(

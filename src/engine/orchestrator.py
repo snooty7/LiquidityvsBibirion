@@ -51,6 +51,9 @@ from src.strategy.confirmations import (
     evaluate_sweep_displacement_mss_confirmation,
 )
 from src.strategy.filters import (
+    bias_context_count,
+    evaluate_long_entry_filter,
+    long_entry_context_count,
     evaluate_bias,
     find_local_order_block,
     order_block_distance_pips,
@@ -2305,8 +2308,8 @@ def process_symbol(
             ok = False
             revalidation_note = "conflicts_with_open_broker_position"
         elif cfg.use_bias_filter:
-            needed = max(cfg.bias_lookback_bars, cfg.bias_ema_period + 3)
-            bias_rates = adapter.copy_rates(cfg.symbol, cfg.bias_timeframe, needed)
+            needed = bias_context_count(cfg.bias_lookback_bars, cfg.bias_ema_period)
+            bias_rates = adapter.copy_rates(cfg.symbol, cfg.bias_timeframe, needed+1)
             closed_bias_rates = bias_rates[:-1]
             bias_info = evaluate_bias(closed_bias_rates, cfg.bias_ema_period)
             bias_ok = bias_info["ok_buy"] if pending.side == "BUY" else bias_info["ok_sell"]
@@ -2622,11 +2625,16 @@ def process_symbol(
         return
 
     bias_note = ""
+    closed_bias_rates = []
+    bias_count = bias_context_count(cfg.bias_lookback_bars, cfg.bias_ema_period)
+    long_enabled = entry_side == "BUY" and cfg.long_entry_filter_mode != "off"
+    if cfg.use_bias_filter or long_enabled:
+        count = max(bias_count, long_entry_context_count(cfg.bias_ema_period, cfg.long_entry_atr_period,
+                                                        cfg.long_entry_slope_bars) if long_enabled else 0)
+        bias_rates = adapter.copy_rates(cfg.symbol, cfg.bias_timeframe, count+1)
+        closed_bias_rates = list(bias_rates[:-1])
     if cfg.use_bias_filter:
-        needed = max(cfg.bias_lookback_bars, cfg.bias_ema_period + 3)
-        bias_rates = adapter.copy_rates(cfg.symbol, cfg.bias_timeframe, needed)
-        closed_bias_rates = bias_rates[:-1]
-        bias_info = evaluate_bias(closed_bias_rates, cfg.bias_ema_period)
+        bias_info = evaluate_bias(closed_bias_rates[-bias_count:], cfg.bias_ema_period)
         bias_ok = bias_info["ok_buy"] if entry_side == "BUY" else bias_info["ok_sell"]
         bias_note = str(bias_info["note"])
         if not bias_ok:
@@ -2644,6 +2652,20 @@ def process_symbol(
             else:
                 log_event(log_file, {**base_row, "event": "SKIP_BIAS", "message": bias_note})
             return
+
+    long_filter = evaluate_long_entry_filter(
+        entry_side, closed_bias_rates, mode=cfg.long_entry_filter_mode,
+        min_slope_atr=cfg.long_entry_min_slope_atr, ema_period=cfg.bias_ema_period,
+        atr_period=cfg.long_entry_atr_period, slope_bars=cfg.long_entry_slope_bars,
+    )
+    if not long_filter.allowed:
+        if entry_setup is not None:
+            cancel_entry_setup(repo=repo, app_config=app_config, log_file=log_file,
+                               cfg=cfg, setup=entry_setup, event_type="SKIP_LONG_FILTER",
+                               message=long_filter.note, csv_row=base_row)
+        else:
+            log_event(log_file, {**base_row, "event": "SKIP_LONG_FILTER", "message": long_filter.note})
+        return
 
     tick = adapter.symbol_tick(cfg.symbol)
     price = float(tick.ask if entry_side == "BUY" else tick.bid)

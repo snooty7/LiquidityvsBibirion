@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import json
+import math
 from typing import Any, Union
 
 
@@ -232,6 +233,10 @@ class SymbolConfig:
     trailing_remove_tp_on_activation: bool | None = None
     refresh_pending_on_newer_signal: bool = False
     refresh_pending_min_age_bars: int = 1
+    long_entry_filter_mode: str = "off"
+    long_entry_min_slope_atr: float = 0.0
+    long_entry_slope_bars: int = 3
+    long_entry_atr_period: int = 14
 
     @property
     def tp_pips(self) -> float:
@@ -407,6 +412,10 @@ def load_config(path: Union[str, Path]) -> AppConfig:
                 ),
                 refresh_pending_on_newer_signal=bool(row.get("refresh_pending_on_newer_signal", False)),
                 refresh_pending_min_age_bars=int(row.get("refresh_pending_min_age_bars", 1)),
+                long_entry_filter_mode=str(row.get("long_entry_filter_mode", "off")).lower(),
+                long_entry_min_slope_atr=float(row.get("long_entry_min_slope_atr", 0.0)),
+                long_entry_slope_bars=int(row.get("long_entry_slope_bars", 3)),
+                long_entry_atr_period=int(row.get("long_entry_atr_period", 14)),
             )
         )
 
@@ -464,6 +473,12 @@ def load_config(path: Union[str, Path]) -> AppConfig:
     valid_trade_side_filters = {"both", "buy", "sell"}
     valid_trailing_modes = {"", "off", "r_multiple"}
     for symbol in symbols:
+        if symbol.long_entry_filter_mode not in {"off", "ema_slope_atr"}:
+            raise ValueError(f"Unsupported long_entry_filter_mode={symbol.long_entry_filter_mode}")
+        if not math.isfinite(symbol.long_entry_min_slope_atr) or symbol.long_entry_min_slope_atr < 0:
+            raise ValueError("long_entry_min_slope_atr must be finite and nonnegative")
+        if symbol.long_entry_slope_bars < 1 or symbol.long_entry_atr_period < 2:
+            raise ValueError("Long-entry slope bars must be >=1 and ATR period >=2")
         if symbol.strategy_mode not in valid_strategy_modes:
             raise ValueError(f"Unsupported strategy_mode={symbol.strategy_mode} for {symbol.symbol}")
         if symbol.confirmation_mode not in valid_confirmation_modes:
