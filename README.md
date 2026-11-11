@@ -389,6 +389,31 @@ python -m src.tools.research_reentry
 python -m src.tools.research_capital_20k
 ```
 
+## Continuous-account strategy improvement comparison
+
+[The EUR20k loss-reduction comparison](reports/usdchf_loss_reduction/README.md)
+uses continuous accounts without monthly resets. It compares the original model,
+an ATR-scaled initial stop with trailing, the ATR stop with fixed 2R exits, and a
+paper-only scenario without inherited session/spread/daily-loss restrictions.
+Per-entry risk stays at 0.5%; risk-based sizing, one position and the concurrent
+0.5% exposure cap remain. Open protective stops are never widened.
+
+An explicitly registered addendum includes the already-known 0.9-pip cost
+benchmark and full accounts spanning November 2024 to November 2026. It preserves
+the original earlier-data nomination. Every candidate is shown; there is no
+sample gate hiding unfavorable or sparse results. Mean winning trades and
+EUR100-200 winning-trade counts are distinct from overall profitability.
+
+The report shows initial/final balances and equity drawdown at observed M1
+closes, including floating P&L. Intrabar drawdown may be greater. Earlier monthly
+reports remain sums of independently reset folds, not continuous account paths.
+All figures exclude swap/financing; no live setting is modified.
+
+```powershell
+python -m src.tools.research_loss_reduction --workers 4
+python -m src.tools.complete_loss_reduction --workers 4
+```
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.

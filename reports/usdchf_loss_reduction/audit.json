@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "independent_continuous_replays": 24,
+  "simulated_trade_records": 4121,
+  "checks": [
+    "source and data hashes",
+    "all outcomes recomputed",
+    "continuous cash and M1 floating equity reconstructed",
+    "initial risk <=0.5% per entry",
+    "broker maximum volume",
+    "no open-stop widening",
+    "cost reconciliation",
+    "period boundaries",
+    "ATR protection fitted only to already closed bars",
+    "original nomination preserved"
+  ],
+  "live_settings_changed": false
+}

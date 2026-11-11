@@ -1,0 +1,11 @@
+{
+  "selected": "baseline",
+  "diagnostics": {
+    "ranking_by_older_net": [
+      "baseline",
+      "unrestricted_entries",
+      "atr_fixed2r",
+      "atr_trailing"
+    ]
+  }
+}
