@@ -321,6 +321,33 @@ Replay now defaults to the configured `trade_side_filter`, matching live.
 the same finite, nonnegative spread-cap check, including arithmetic tolerance
 at the exact boundary. All study models are rerun with these corrections.
 
+## Three-pair H1/H4 research
+
+The next study freezes two new signal models: an H1 EMA pullback/reclaim in the
+H4 trend direction, and an H1 20-bar range breakout confirmed by a following
+retest, also aligned with H4. Each has one declared setting, applied separately
+to EURUSD, GBPUSD and USDCHF. They share their signal function between live and
+backtest. The original USDCHF M30/M1 logic, applied with common settings to each
+pair, is a reference; original EURUSD/GBPUSD live branches are not replaced.
+
+Initial risk, stops, targets, trailing, sessions, spread caps and daily/exposure
+guards remain the same. Native histories cover the same dates; all pairs' prior
+training nominations are locked before any test outcomes. Every pair/model is
+an independent EUR 10,000 simulation, not a combined portfolio. Swap/overnight
+financing is not modeled and overnight trade counts are disclosed.
+
+See [the three-pair H1/H4 report](reports/fx_htf/README.md) for the full comparison,
+cost stress, selection evidence, limitations and independently audited trades.
+
+```powershell
+python -m src.tools.research_fx_htf --workers 4
+python -m src.tools.render_fx_htf reports/fx_htf/report.json
+```
+
+These commands use saved histories and block broker connections and orders.
+New modes are disabled in all active profiles. Historical gate passes do not
+authorize live deployment or establish future profitability.
+
 ## Confirmation modes
 - `none`: enter immediately on sweep (baseline behavior).
 - `c3`: wait for a strong C2 candle and a valid C3 close.
