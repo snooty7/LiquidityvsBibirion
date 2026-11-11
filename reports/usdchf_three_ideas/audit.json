@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "test_rows_recomputed": 126,
+  "test_trade_records": 1278,
+  "checks": [
+    "test boundaries",
+    "all cost components reconcile",
+    "per-side commission",
+    "unchanged maximum lot",
+    "side eligibility",
+    "stops never widened",
+    "every test row and aggregate independently recomputed"
+  ]
+}
