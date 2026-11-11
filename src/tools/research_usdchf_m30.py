@@ -4,9 +4,10 @@ from __future__ import annotations
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, replace
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 
 from src.backtesting.costs import ExecutionCosts
@@ -46,6 +47,13 @@ def training_score(metrics: dict) -> float:
     return metrics["net_pnl"] - 0.5 * metrics["max_realized_drawdown"]
 
 
+def study_folds(train_days: int = 365) -> list:
+    """Extend training backward without moving the previously reserved test windows."""
+    first_test = datetime(2025, 11, 16, tzinfo=timezone.utc)
+    return make_folds(first_test-timedelta(days=train_days+1),
+                      datetime(2026, 11, 11, tzinfo=timezone.utc), train_days, 30, 1)
+
+
 def select_training(metrics: dict[str, dict], *, min_trades: int = 20) -> str:
     """Only prior training metrics may influence this fold's selection."""
     base = metrics["baseline"]
@@ -68,7 +76,7 @@ def select_fixed(training: dict[int, dict[str, dict]], development_folds: int = 
             continue
         values = [window[name] for window in windows]
         score = sum(training_score(value) for value in values)
-        if (sum(value["trades"] >= 20 for value in values) >= 6
+        if (sum(value["trades"] >= 20 for value in values) >= math.ceil(2*development_folds/3)
                 and sum(value["net_pnl"] for value in values) > 0
                 and sum(value["max_realized_drawdown"] for value in values) <= 1.25*base_dd
                 and score > base_score):
@@ -133,15 +141,18 @@ def _replay(task: tuple) -> tuple[str, dict]:
     return key, result
 
 
-def run_study(history_path: Path, output: Path, workers: int = 6) -> dict:
+def run_study(history_path: Path, output: Path, workers: int = 6, train_days: int = 365,
+              development_folds: int = 6) -> dict:
     """Register the protocol, run training, lock selections, then evaluate tests and stress."""
     _forbid_broker()
     source = next(branch for branch in discover_branches(default_config_paths())
                   if branch.branch_id == "92024-USDCHF-M30-3c27c3d9")
     variants = candidates(source.symbol)
     app = source.config
-    folds = make_folds(datetime(2025, 8, 17, tzinfo=timezone.utc),
-                       datetime(2026, 11, 11, tzinfo=timezone.utc), 90, 30, 1)
+    folds = study_folds(train_days)
+    if not 1 <= development_folds < len(folds):
+        raise ValueError("Development folds must leave at least one confirmation fold")
+    confirmation_folds = folds[development_folds:]
     base_costs, stress_costs = ExecutionCosts(), ExecutionCosts("historical", 2.0, 7.0, .4)
     history = load_history(history_path)["USDCHF"]
     history_hash = history.digest()
@@ -159,9 +170,13 @@ def run_study(history_path: Path, output: Path, workers: int = 6) -> dict:
         "history_sha256": history_hash, "replay_code_sha256": code_hash,
         "costs": asdict(base_costs), "stress_costs": asdict(stress_costs),
         "variants": [{"name": v.name, "hypothesis": v.hypothesis, "settings": asdict(v.settings)} for v in variants],
-        "folds": [fold.record() for fold in folds], "development_folds": 9, "confirmation_folds": [10, 11, 12],
+        "folds": [fold.record() for fold in folds], "development_folds": development_folds,
+        "confirmation_folds": [fold.index for fold in confirmation_folds],
+        "training_days": train_days,
+        "followup_reason": "Initial 90-day diagnostic failed training sample gates; older history extends training without changing hypotheses, test dates, minimum sample or selection/promotion rules.",
         "selection_rule": "training net minus 0.5 realized drawdown; minimum 20 trades; drawdown <=1.25 baseline; positive net; otherwise baseline",
-        "fixed_rule": "aggregate development-training score; at least six of nine windows with >=20 trades; positive aggregate net; aggregate drawdown sum <=1.25 baseline",
+        "fixed_rule": "aggregate development-training score; at least two-thirds of development windows with >=20 trades; positive aggregate net; aggregate drawdown sum <=1.25 baseline",
+        "confirmation_amendment": "Before any alternative OOS testing, six later test folds were reserved because the known baseline had only 14 trades in three folds. Minimum 20 trades and all hypotheses/risk/cost/test-date rules remain unchanged.",
         "promotion_rule": "fixed candidate must improve aggregate and positive holdout net, maintain drawdown <=1.25 baseline, have >=20 holdout trades and remain positive/not worse under doubled assumed costs",
         "caveat": "These dates and baseline were previously examined. Confirmation folds are reserved within this study, not genuinely new unseen market data.",
         "broker_connections": False, "trading_calls": False,
@@ -188,13 +203,13 @@ def run_study(history_path: Path, output: Path, workers: int = 6) -> dict:
         batch([task(v.name, f, "train", base_costs) for f in folds for v in variants], pool, "training")
         training = {f.index:{v.name:results[task(v.name,f,"train",base_costs)[0]]["metrics"] for v in variants} for f in folds}
         adaptive = {f.index:select_training(training[f.index]) for f in folds}
-        fixed = select_fixed(training)
+        fixed = select_fixed(training, development_folds)
         locked = {"fixed":fixed,"adaptive":adaptive,"training_metrics":training}
         (output/"locked_selections.json").write_text(json.dumps(locked,indent=2),encoding="utf-8")
         print("Selections locked before test replays; fixed candidate:",fixed,flush=True)
         batch([task(name,f,"test",base_costs) for f in folds
                for name in {"baseline",fixed,adaptive[f.index]}],pool,"test")
-        batch([task(name,f,"test",stress_costs) for f in folds[-3:]
+        batch([task(name,f,"test",stress_costs) for f in confirmation_folds
                for name in {"baseline",fixed}],pool,"stress confirmation")
     def metrics(names: dict[int,str], selected_folds, costs) -> dict:
         trades = [ClosedTrade(**trade) for f in selected_folds
@@ -204,10 +219,10 @@ def run_study(history_path: Path, output: Path, workers: int = 6) -> dict:
     fixed_names = {f.index:fixed for f in folds}
     aggregate = {"baseline":metrics(baseline_names,folds,base_costs),
                  "fixed":metrics(fixed_names,folds,base_costs),"adaptive":metrics(adaptive,folds,base_costs)}
-    holdout = {"baseline":metrics(baseline_names,folds[-3:],base_costs),
-               "fixed":metrics(fixed_names,folds[-3:],base_costs),"adaptive":metrics(adaptive,folds[-3:],base_costs)}
-    stress = {"baseline":metrics(baseline_names,folds[-3:],stress_costs),
-              "fixed":metrics(fixed_names,folds[-3:],stress_costs)}
+    holdout = {"baseline":metrics(baseline_names,confirmation_folds,base_costs),
+               "fixed":metrics(fixed_names,confirmation_folds,base_costs),"adaptive":metrics(adaptive,confirmation_folds,base_costs)}
+    stress = {"baseline":metrics(baseline_names,confirmation_folds,stress_costs),
+              "fixed":metrics(fixed_names,confirmation_folds,stress_costs)}
     checks = promotion_checks(aggregate["baseline"],aggregate["fixed"],holdout["baseline"],
                               holdout["fixed"],stress["baseline"],stress["fixed"],fixed)
     per_fold = [{"fold":f.index,"test_start":f.test_start.isoformat(),"test_end_exclusive":f.test_end.isoformat(),
@@ -227,10 +242,12 @@ def main() -> None:
     parser.add_argument("--history",type=Path,required=True)
     parser.add_argument("--output",type=Path,default=Path("reports/usdchf_m30_improvement"))
     parser.add_argument("--workers",type=int,default=6)
+    parser.add_argument("--train-days",type=int,default=365)
+    parser.add_argument("--development-folds",type=int,default=6)
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("--workers must be positive")
-    run_study(args.history,args.output,args.workers)
+    run_study(args.history,args.output,args.workers,args.train_days,args.development_folds)
 
 
 if __name__ == "__main__":

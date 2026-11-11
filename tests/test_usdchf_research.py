@@ -13,7 +13,7 @@ from src.services.config import AppConfig, load_config
 from src.strategy.confirmations import ConfirmationResult
 from src.strategy.liquidity import SweepSignal
 from src.tools import backtest_mt5 as b
-from src.tools.research_usdchf_m30 import candidates, select_training, select_fixed, promotion_checks
+from src.tools.research_usdchf_m30 import candidates, select_training, select_fixed, promotion_checks, study_folds
 
 
 @pytest.fixture
@@ -108,6 +108,24 @@ def test_fixed_selection_cannot_use_confirmation_fold_results():
         training[i]["good"]=metrics(-1000,1000)
         training[i]["bad"]=metrics(10000,0)
     assert select_fixed(training)=="good"
+
+
+def test_more_training_history_does_not_move_or_overlap_test_windows():
+    original,extended=study_folds(90),study_folds(365)
+    assert len(original)==len(extended)==12
+    for before,after in zip(original,extended):
+        assert before.test_start==after.test_start
+        assert before.test_end==after.test_end
+        assert after.train_end==before.train_end
+        assert after.train_end-after.train_start==timedelta(days=365)
+        assert after.train_end < after.test_start
+
+
+def test_six_fold_development_selection_never_reads_later_training_windows():
+    training={i:{"baseline":metrics(),"good":metrics(20,6),"later":metrics(1,5)} for i in range(1,13)}
+    for i in range(7,13):
+        training[i]["later"]=metrics(100000,0)
+    assert select_fixed(training,development_folds=6)=="good"
 
 
 def test_promotion_fails_when_confirmation_or_stress_fails_even_if_total_profit_is_high():

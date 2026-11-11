@@ -1,0 +1,26 @@
+{
+  "stage": "before alternative OOS testing",
+  "alternative_test_replays_completed": 0,
+  "reason": "Known corrected baseline has only 14 trades in last three windows; use last six windows to retain the unchanged 20-trade confirmation gate",
+  "changes": {
+    "development_folds": 6,
+    "confirmation_folds": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  "unchanged": [
+    "eight hypotheses",
+    "365-day training",
+    "test dates",
+    "risk",
+    "costs",
+    "minimum 20 trades",
+    "drawdown and stress promotion rules"
+  ],
+  "initial_365d_training_replays_completed_at_last_check": 6
+}
