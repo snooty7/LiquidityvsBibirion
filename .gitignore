@@ -30,6 +30,8 @@ logs/
 /history/
 # Full broader-study ledgers are committed as lossless, hash-verified gzip files.
 /reports/qait/broad_20261112/*/*/report.json
+# Gap-audit repeats must match the already archived originals byte for byte.
+/reports/qait/gaps_20261112/*/*/report.json
 
 # OS
 .DS_Store

@@ -1,0 +1,85 @@
+{
+  "date_utc": "2026-04-03",
+  "records": [
+    {
+      "symbol": "EURUSD",
+      "history_sha256": "c20cda4c4fa8c1a3a959ad8ca190f2ec02ebeaaef72d7d9369d72fbcc9dbe92b",
+      "native_bar_counts": {
+        "H1": 0,
+        "H4": 0,
+        "M1": 0,
+        "M30": 0
+      },
+      "native_samples": {
+        "H1": null,
+        "H4": null
+      }
+    },
+    {
+      "symbol": "GBPUSD",
+      "history_sha256": "3de2e25011e7137fdf67258542c0c5a8f2b321545c360205f3ff152b3ae8b9f0",
+      "native_bar_counts": {
+        "H1": 0,
+        "H4": 0,
+        "M1": 0,
+        "M30": 0
+      },
+      "native_samples": {
+        "H1": null,
+        "H4": null
+      }
+    },
+    {
+      "symbol": "USDCHF",
+      "history_sha256": "23617686bff6ef70b2838d36622099c979851052348d1ed2ff2ded24a0ed680a",
+      "native_bar_counts": {
+        "H1": 24,
+        "H4": 6,
+        "M1": 1430,
+        "M15": 96,
+        "M30": 48,
+        "M5": 287
+      },
+      "native_samples": {
+        "H1": {
+          "time": 1775174400,
+          "open": 0.79803,
+          "high": 0.79875,
+          "low": 0.79668,
+          "close": 0.79813,
+          "tick_volume": 3345,
+          "spread": 26,
+          "real_volume": 0
+        },
+        "H4": {
+          "time": 1775174400,
+          "open": 0.79803,
+          "high": 0.79903,
+          "low": 0.79668,
+          "close": 0.79875,
+          "tick_volume": 6538,
+          "spread": 6,
+          "real_volume": 0
+        }
+      }
+    },
+    {
+      "symbol": "NZDUSD",
+      "history_sha256": "fd83a5b68f8c1b5987c9214a17deeff31ea803296ea8d6211c883dcd5cbc5f9c",
+      "native_bar_counts": {
+        "H1": 0,
+        "H4": 0,
+        "M1": 0,
+        "M15": 0,
+        "M30": 0,
+        "M5": 0
+      },
+      "native_samples": {
+        "H1": null,
+        "H4": null
+      }
+    }
+  ],
+  "auditor_sha256": "908a7dd738d98ccffd1ab628485532ab157b276ffcf0cc0e8968a4c2d89255f6",
+  "conclusion": "Saved observations differ by instrument. No cross-instrument holiday closure or tradable-price substitution can be inferred; broker schedules remain unavailable."
+}

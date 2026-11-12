@@ -1,0 +1,1034 @@
+{
+  "status": "passed",
+  "auditor_sha256": "30ad5bbb0c2e33e56811ce37037b5d7629006f5d63ef1b3aa47c803209b5705a",
+  "original_registration_sha256": "f5f7574154a32022d9a6128bedb2b0aa54977ca5e27bc6ad35809639c7e1e109",
+  "records": [
+    {
+      "symbol": "EURUSD",
+      "history_sha256": "c20cda4c4fa8c1a3a959ad8ca190f2ec02ebeaaef72d7d9369d72fbcc9dbe92b",
+      "frames": [
+        {
+          "timeframe": "M5",
+          "native": false,
+          "bars": 155462,
+          "gap_categories": {
+            "contains_weekday": 1222,
+            "weekend_only": 14
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1727742000,
+                "next_open": 1727743200,
+                "separation_seconds": 1200,
+                "missing_opens": 3,
+                "missing_weekday_opens": 3,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727743500,
+                "next_open": 1727744400,
+                "separation_seconds": 900,
+                "missing_opens": 2,
+                "missing_weekday_opens": 2,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727744400,
+                "next_open": 1727745000,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              }
+            ],
+            "weekend_only": [
+              {
+                "previous_open": 1729900500,
+                "next_open": 1730073600,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1730505300,
+                "next_open": 1730678400,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1731110100,
+                "next_open": 1731283200,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H1",
+          "native": true,
+          "bars": 13109,
+          "gap_categories": {
+            "weekend_only": 112,
+            "contains_weekday": 5
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728082800,
+                "next_open": 1728226800,
+                "separation_seconds": 144000,
+                "missing_opens": 39,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728226800,
+                "next_open": 1728259200,
+                "separation_seconds": 32400,
+                "missing_opens": 8,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728687600,
+                "next_open": 1728864000,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1735084800,
+                "next_open": 1735171200,
+                "separation_seconds": 86400,
+                "missing_opens": 23,
+                "missing_weekday_opens": 23,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735689600,
+                "next_open": 1735776000,
+                "separation_seconds": 86400,
+                "missing_opens": 23,
+                "missing_weekday_opens": 23,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1766617200,
+                "next_open": 1766707200,
+                "separation_seconds": 90000,
+                "missing_opens": 24,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H4",
+          "native": true,
+          "bars": 3281,
+          "gap_categories": {
+            "weekend_only": 112,
+            "contains_weekday": 5
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728072000,
+                "next_open": 1728216000,
+                "separation_seconds": 144000,
+                "missing_opens": 9,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728216000,
+                "next_open": 1728259200,
+                "separation_seconds": 43200,
+                "missing_opens": 2,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728676800,
+                "next_open": 1728864000,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1735084800,
+                "next_open": 1735171200,
+                "separation_seconds": 86400,
+                "missing_opens": 5,
+                "missing_weekday_opens": 5,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735689600,
+                "next_open": 1735776000,
+                "separation_seconds": 86400,
+                "missing_opens": 5,
+                "missing_weekday_opens": 5,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1766606400,
+                "next_open": 1766707200,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "M1",
+          "native": true,
+          "bars": 783050,
+          "gap_categories": {
+            "contains_weekday": 1787,
+            "weekend_only": 21
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1727742480,
+                "next_open": 1727742600,
+                "separation_seconds": 120,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727742660,
+                "next_open": 1727742840,
+                "separation_seconds": 180,
+                "missing_opens": 2,
+                "missing_weekday_opens": 2,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727743020,
+                "next_open": 1727743140,
+                "separation_seconds": 120,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              }
+            ],
+            "weekend_only": [
+              {
+                "previous_open": 1728691140,
+                "next_open": 1728864000,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729295940,
+                "next_open": 1729468800,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729900740,
+                "next_open": 1730073600,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ]
+          }
+        }
+      ],
+      "checked_observations": {
+        "base": 6244,
+        "doubled_costs": 6235
+      },
+      "oracle_windows": 4280,
+      "rejection_counts": {
+        "M5:gapped_or_unordered": 4268,
+        "M1:gapped_or_unordered": 286,
+        "H1:gapped_or_unordered": 566,
+        "H4:gapped_or_unordered": 1691
+      },
+      "discrepancies": []
+    },
+    {
+      "symbol": "GBPUSD",
+      "history_sha256": "3de2e25011e7137fdf67258542c0c5a8f2b321545c360205f3ff152b3ae8b9f0",
+      "frames": [
+        {
+          "timeframe": "M5",
+          "native": false,
+          "bars": 155758,
+          "gap_categories": {
+            "contains_weekday": 910,
+            "weekend_only": 16
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1727741700,
+                "next_open": 1727742600,
+                "separation_seconds": 900,
+                "missing_opens": 2,
+                "missing_weekday_opens": 2,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727743500,
+                "next_open": 1727744100,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727826900,
+                "next_open": 1727827500,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              }
+            ],
+            "weekend_only": [
+              {
+                "previous_open": 1728086100,
+                "next_open": 1728259200,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729900500,
+                "next_open": 1730073600,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1730505300,
+                "next_open": 1730678400,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H1",
+          "native": true,
+          "bars": 13108,
+          "gap_categories": {
+            "weekend_only": 111,
+            "contains_weekday": 5
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728082800,
+                "next_open": 1728259200,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728687600,
+                "next_open": 1728864000,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729292400,
+                "next_open": 1729468800,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1735084800,
+                "next_open": 1735171200,
+                "separation_seconds": 86400,
+                "missing_opens": 23,
+                "missing_weekday_opens": 23,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735689600,
+                "next_open": 1735776000,
+                "separation_seconds": 86400,
+                "missing_opens": 23,
+                "missing_weekday_opens": 23,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1766617200,
+                "next_open": 1766707200,
+                "separation_seconds": 90000,
+                "missing_opens": 24,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H4",
+          "native": true,
+          "bars": 3280,
+          "gap_categories": {
+            "weekend_only": 111,
+            "contains_weekday": 5
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728072000,
+                "next_open": 1728259200,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728676800,
+                "next_open": 1728864000,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729281600,
+                "next_open": 1729468800,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1735084800,
+                "next_open": 1735171200,
+                "separation_seconds": 86400,
+                "missing_opens": 5,
+                "missing_weekday_opens": 5,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735689600,
+                "next_open": 1735776000,
+                "separation_seconds": 86400,
+                "missing_opens": 5,
+                "missing_weekday_opens": 5,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1766606400,
+                "next_open": 1766707200,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "M1",
+          "native": true,
+          "bars": 782952,
+          "gap_categories": {
+            "contains_weekday": 1458,
+            "weekend_only": 23
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1727740800,
+                "next_open": 1727740920,
+                "separation_seconds": 120,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727742120,
+                "next_open": 1727742240,
+                "separation_seconds": 120,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727742360,
+                "next_open": 1727742600,
+                "separation_seconds": 240,
+                "missing_opens": 3,
+                "missing_weekday_opens": 3,
+                "weekend_only": false
+              }
+            ],
+            "weekend_only": [
+              {
+                "previous_open": 1728086340,
+                "next_open": 1728259200,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728691140,
+                "next_open": 1728864000,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729295940,
+                "next_open": 1729468800,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ]
+          }
+        }
+      ],
+      "checked_observations": {
+        "base": 5859,
+        "doubled_costs": 5859
+      },
+      "oracle_windows": 4060,
+      "rejection_counts": {
+        "M5:gapped_or_unordered": 4218,
+        "H1:gapped_or_unordered": 530,
+        "H4:gapped_or_unordered": 1594,
+        "M1:gapped_or_unordered": 112
+      },
+      "discrepancies": []
+    },
+    {
+      "symbol": "USDCHF",
+      "history_sha256": "23617686bff6ef70b2838d36622099c979851052348d1ed2ff2ded24a0ed680a",
+      "frames": [
+        {
+          "timeframe": "M5",
+          "native": true,
+          "bars": 157257,
+          "gap_categories": {
+            "weekend_only": 24,
+            "contains_weekday": 150
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728086100,
+                "next_open": 1728259200,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728690900,
+                "next_open": 1728864000,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729295700,
+                "next_open": 1729468800,
+                "separation_seconds": 173100,
+                "missing_opens": 576,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1728346800,
+                "next_open": 1728347400,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1729209600,
+                "next_open": 1729210200,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1729556100,
+                "next_open": 1729556700,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H1",
+          "native": true,
+          "bars": 13127,
+          "gap_categories": {
+            "weekend_only": 110,
+            "contains_weekday": 5
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728082800,
+                "next_open": 1728259200,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728687600,
+                "next_open": 1728864000,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729292400,
+                "next_open": 1729468800,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1730314800,
+                "next_open": 1730322000,
+                "separation_seconds": 7200,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735081200,
+                "next_open": 1735171200,
+                "separation_seconds": 90000,
+                "missing_opens": 24,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735686000,
+                "next_open": 1735776000,
+                "separation_seconds": 90000,
+                "missing_opens": 24,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H4",
+          "native": true,
+          "bars": 3282,
+          "gap_categories": {
+            "weekend_only": 110,
+            "contains_weekday": 4
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1728072000,
+                "next_open": 1728259200,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728676800,
+                "next_open": 1728864000,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729281600,
+                "next_open": 1729468800,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1735070400,
+                "next_open": 1735171200,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1735675200,
+                "next_open": 1735776000,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1766606400,
+                "next_open": 1766707200,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "M1",
+          "native": true,
+          "bars": 783556,
+          "gap_categories": {
+            "contains_weekday": 1829,
+            "weekend_only": 20
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1727741400,
+                "next_open": 1727741640,
+                "separation_seconds": 240,
+                "missing_opens": 3,
+                "missing_weekday_opens": 3,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727741640,
+                "next_open": 1727741820,
+                "separation_seconds": 180,
+                "missing_opens": 2,
+                "missing_weekday_opens": 2,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1727741940,
+                "next_open": 1727742060,
+                "separation_seconds": 120,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              }
+            ],
+            "weekend_only": [
+              {
+                "previous_open": 1728086340,
+                "next_open": 1728259200,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1728691140,
+                "next_open": 1728864000,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1729295940,
+                "next_open": 1729468800,
+                "separation_seconds": 172860,
+                "missing_opens": 2880,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ]
+          }
+        }
+      ],
+      "checked_observations": {
+        "base": 8249,
+        "doubled_costs": 3408
+      },
+      "oracle_windows": 6271,
+      "rejection_counts": {
+        "H1:gapped_or_unordered": 440,
+        "M5:gapped_or_unordered": 657,
+        "H4:gapped_or_unordered": 1304,
+        "M1:gapped_or_unordered": 166
+      },
+      "discrepancies": []
+    },
+    {
+      "symbol": "NZDUSD",
+      "history_sha256": "fd83a5b68f8c1b5987c9214a17deeff31ea803296ea8d6211c883dcd5cbc5f9c",
+      "frames": [
+        {
+          "timeframe": "M5",
+          "native": true,
+          "bars": 96017,
+          "gap_categories": {
+            "contains_weekday": 98
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1753834200,
+                "next_open": 1753834800,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1753834800,
+                "next_open": 1753835400,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1754006700,
+                "next_open": 1754007300,
+                "separation_seconds": 600,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H1",
+          "native": true,
+          "bars": 8016,
+          "gap_categories": {
+            "weekend_only": 66,
+            "contains_weekday": 3
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1754089200,
+                "next_open": 1754265600,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1754694000,
+                "next_open": 1754870400,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1755298800,
+                "next_open": 1755475200,
+                "separation_seconds": 176400,
+                "missing_opens": 48,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1766617200,
+                "next_open": 1766707200,
+                "separation_seconds": 90000,
+                "missing_opens": 24,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1767222000,
+                "next_open": 1767312000,
+                "separation_seconds": 90000,
+                "missing_opens": 24,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1775170800,
+                "next_open": 1775433600,
+                "separation_seconds": 262800,
+                "missing_opens": 72,
+                "missing_weekday_opens": 24,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "H4",
+          "native": true,
+          "bars": 2004,
+          "gap_categories": {
+            "weekend_only": 66,
+            "contains_weekday": 3
+          },
+          "examples": {
+            "weekend_only": [
+              {
+                "previous_open": 1754078400,
+                "next_open": 1754265600,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1754683200,
+                "next_open": 1754870400,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              },
+              {
+                "previous_open": 1755288000,
+                "next_open": 1755475200,
+                "separation_seconds": 187200,
+                "missing_opens": 12,
+                "missing_weekday_opens": 0,
+                "weekend_only": true
+              }
+            ],
+            "contains_weekday": [
+              {
+                "previous_open": 1766606400,
+                "next_open": 1766707200,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1767211200,
+                "next_open": 1767312000,
+                "separation_seconds": 100800,
+                "missing_opens": 6,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1775160000,
+                "next_open": 1775433600,
+                "separation_seconds": 273600,
+                "missing_opens": 18,
+                "missing_weekday_opens": 6,
+                "weekend_only": false
+              }
+            ]
+          }
+        },
+        {
+          "timeframe": "M1",
+          "native": true,
+          "bars": 478773,
+          "gap_categories": {
+            "contains_weekday": 951
+          },
+          "examples": {
+            "contains_weekday": [
+              {
+                "previous_open": 1753661580,
+                "next_open": 1753661700,
+                "separation_seconds": 120,
+                "missing_opens": 1,
+                "missing_weekday_opens": 1,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1753661820,
+                "next_open": 1753662000,
+                "separation_seconds": 180,
+                "missing_opens": 2,
+                "missing_weekday_opens": 2,
+                "weekend_only": false
+              },
+              {
+                "previous_open": 1753662000,
+                "next_open": 1753662180,
+                "separation_seconds": 180,
+                "missing_opens": 2,
+                "missing_weekday_opens": 2,
+                "weekend_only": false
+              }
+            ]
+          }
+        }
+      ],
+      "checked_observations": {
+        "base": 1139,
+        "doubled_costs": 1123
+      },
+      "oracle_windows": 1280,
+      "rejection_counts": {
+        "H4:insufficient_bars": 64,
+        "M5:gapped_or_unordered": 296,
+        "M1:gapped_or_unordered": 82
+      },
+      "discrepancies": []
+    }
+  ],
+  "contract": "Explicit UTC weekend missing opens only; weekday/holiday gaps remain unavailable; fixed three-day calendar separation and wall-clock freshness unchanged",
+  "limitation": "Agreement with the frozen contract is not evidence of broker session/holiday schedules. None are present in these exports. No holiday or rollover closure is inferred from absence of prices."
+}

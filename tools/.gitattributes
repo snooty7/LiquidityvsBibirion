@@ -4,4 +4,6 @@ audit_qait_broad.py -text
 audit_qait_broad_coverage.py -text
 audit_qait_broad_risk.py -text
 audit_qait_results.py -text
+audit_qait_gaps.py -text
+audit_qait_holiday_scope.py -text
 qait_broad_artifacts.py -text

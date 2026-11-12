@@ -1,0 +1,59 @@
+{
+  "status": "frozen_before_replay",
+  "registered_at_utc": "2026-11-12T09:36:57.237784+00:00",
+  "source_digest": "bb54d18ed617ebdcea2d36fcc3b49bb3ea0ae5b1585308df5204bc0613001a77",
+  "orchestrator_sha256": "30ad5bbb0c2e33e56811ce37037b5d7629006f5d63ef1b3aa47c803209b5705a",
+  "original_registration_sha256": "f5f7574154a32022d9a6128bedb2b0aa54977ca5e27bc6ad35809639c7e1e109",
+  "jobs": [
+    {
+      "symbol": "EURUSD",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\EURUSD\\base_protocol.json",
+      "protocol_sha256": "164ca603f640de35ab1be9768797deb54ecb28087f0c8c8d0e3146b5a66687d4"
+    },
+    {
+      "symbol": "EURUSD",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\EURUSD\\doubled_costs_protocol.json",
+      "protocol_sha256": "f38ada9e4cc1b6fea3a23c61064238ab1d38fe8bd63cf3504073bcd7f0006426"
+    },
+    {
+      "symbol": "GBPUSD",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\GBPUSD\\base_protocol.json",
+      "protocol_sha256": "3e83c75d698f1fab528d25326a11d8253fa2fd47103dd58ba101fe1f539c1bef"
+    },
+    {
+      "symbol": "GBPUSD",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\GBPUSD\\doubled_costs_protocol.json",
+      "protocol_sha256": "ee88af80e145189c1355b10a0d4e38641f8c3bd4ee6488bdc9ed873b10f0a45a"
+    },
+    {
+      "symbol": "USDCHF",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\USDCHF\\base_protocol.json",
+      "protocol_sha256": "cb5128089b175020202cf825ae5f22bc675721402ea6f561fecef666300f50b4"
+    },
+    {
+      "symbol": "USDCHF",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\USDCHF\\doubled_costs_protocol.json",
+      "protocol_sha256": "45f209a798adebe6c562c4807c17fd43e47cab81147e729cba1ab53032a867e9"
+    },
+    {
+      "symbol": "NZDUSD",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\NZDUSD\\base_protocol.json",
+      "protocol_sha256": "95d3e736a7a80b63b8b715d735dda9aea82ab9a0261f727457c0337dc2e99896"
+    },
+    {
+      "symbol": "NZDUSD",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\NZDUSD\\doubled_costs_protocol.json",
+      "protocol_sha256": "83758a824607d9b903d887e332009156c7da1de05d14409ba8d19369a3f16640"
+    }
+  ],
+  "expectation": "No demonstrated contract bug: unchanged source, inputs, thresholds, risk and original protocol bytes; all eight complete reports must reproduce byte for byte",
+  "safety": "Broker operations forbidden; adaptive defaults remain false; offline history only"
+}
