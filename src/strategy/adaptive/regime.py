@@ -4,26 +4,9 @@ from statistics import pstdev
 
 from src.strategy.adaptive.config import AdaptiveConfig
 from src.strategy.adaptive.models import Candle, Regime, RegimeResult
+from src.strategy.adaptive.indicators import closed_atr_series
 from src.strategy.filters import ema
 from src.strategy.liquidity import _adx_value
-
-
-def _closed_atrs(bars: tuple[Candle, ...], period: int) -> list[float]:
-    """Seed ATR with a mean of actual transitions, never an unknown first TR.
-
-    First output belongs to bars[period]; every input TR has a prior close.
-    Subsequent values use the same period's Wilder recurrence.
-    """
-    ranges = [max(bar.high-bar.low, abs(bar.high-previous.close), abs(bar.low-previous.close))
-              for previous, bar in zip(bars, bars[1:])]
-    if len(ranges) < period:
-        return []
-    running = math.fsum(value/period for value in ranges[:period])
-    result = [running]
-    for value in ranges[period:]:
-        running = running*((period-1)/period)+value/period
-        result.append(running)
-    return result
 
 
 def detect_regime(bars: tuple[Candle, ...], config: AdaptiveConfig) -> RegimeResult:
@@ -35,7 +18,7 @@ def detect_regime(bars: tuple[Candle, ...], config: AdaptiveConfig) -> RegimeRes
            or not bar.low <= min(bar.open, bar.close) <= max(bar.open, bar.close) <= bar.high
            for bar in bars):
         return RegimeResult(Regime.UNCERTAIN, 0, 0, 0, 0, 0, "invalid_context")
-    atrs = _closed_atrs(bars, config.atr_period)
+    atrs = closed_atr_series(bars, config.atr_period)
     if not all(math.isfinite(value) for value in atrs):
         return RegimeResult(Regime.UNCERTAIN, 0, 0, 0, 0, 0, "invalid_indicators")
     atr = atrs[-1]

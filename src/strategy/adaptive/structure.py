@@ -1,4 +1,5 @@
 """Causal pivots, sweep/structure events and zone lifecycles from closed bars."""
+import math
 from src.backtesting.history import TIMEFRAMES
 from src.strategy.adaptive.config import AdaptiveConfig
 from src.strategy.adaptive.models import Candle, StructureContext, StructureEvent, Zone
@@ -12,6 +13,7 @@ def analyze_structure(bars: tuple[Candle, ...], config: AdaptiveConfig, atr: flo
     marked mitigated and is no longer scored; a close through it invalidates it.
     """
     length, step = config.pivot_length, TIMEFRAMES[config.entry_timeframe]
+    atr_valid = math.isfinite(atr) and atr > 0
     events, pivots, zones = [], [], []
     trend = None
     broken = set()
@@ -28,16 +30,19 @@ def analyze_structure(bars: tuple[Candle, ...], config: AdaptiveConfig, atr: flo
                 consumed.add((pivot_index, kind))
                 penetration = current.high-level if side == "SELL" else level-current.low
                 events.append(StructureEvent("SWEEP", side, level, bars[pivot_index].time,
-                                             current.time+step, penetration/max(atr, 1e-12)))
+                                             current.time+step, penetration/atr if atr_valid else 0.0,
+                                             config.entry_timeframe, raw_move=penetration, normalization_atr=atr))
             direction = "BUY" if kind == "HIGH" else "SELL"
             crossed = current.close > level if direction == "BUY" else current.close < level
             identifier = (pivot_index, kind)
             if crossed and identifier not in broken:
                 broken.add(identifier)
                 kind_name = "MSS" if trend is not None and direction != trend else "BOS"
-                strength = abs(current.close-level)/max(atr, 1e-12)
-                if abs(current.close-current.open)/max(atr, 1e-12) >= config.min_displacement_atr:
-                    events.append(StructureEvent(kind_name, direction, level, bars[pivot_index].time, current.time+step, strength))
+                strength = abs(current.close-level)/atr if atr_valid else 0.0
+                if atr_valid and abs(current.close-current.open)/atr >= config.min_displacement_atr:
+                    events.append(StructureEvent(kind_name, direction, level, bars[pivot_index].time,
+                                                 current.time+step, strength, config.entry_timeframe,
+                                                 raw_move=abs(current.close-level), normalization_atr=atr))
                     trend = direction
         pivot_index = index-length
         if pivot_index >= length:
@@ -57,7 +62,7 @@ def analyze_structure(bars: tuple[Candle, ...], config: AdaptiveConfig, atr: flo
                 touched = any(bar.low <= high if side == "BUY" else bar.high >= low for bar in later)
                 status = "invalidated" if invalid else "expired" if len(later) > config.zone_expiry_bars else "mitigated" if touched else "active"
                 zones.append(Zone("FVG", side, low, high, current.time+step, status))
-    if bars:
+    if bars and atr_valid:
         for side in ("BUY", "SELL"):
             block = find_local_order_block(bars, len(bars)-1, side, pip, config.zone_expiry_bars,
                                           config.zone_expiry_bars, "body", max(atr/pip*.25, .1))

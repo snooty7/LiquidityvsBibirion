@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-VERSION = "adaptive-v4-audited-gates-research"
+VERSION = "adaptive-v5-audited-scoring-research"
 
 
 class Regime(str, Enum):
@@ -71,6 +71,8 @@ class StructureEvent:
     level_kind: str = ""
     level_lifecycle: str = ""
     prior_crossings: int = 0
+    raw_move: float | None = None
+    normalization_atr: float | None = None
 
 
 @dataclass(frozen=True)

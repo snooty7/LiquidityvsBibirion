@@ -13,6 +13,7 @@ from src.strategy.adaptive.alignment import align_signal
 from src.strategy.adaptive.regime import detect_regime
 from src.strategy.adaptive.scoring import score_features
 from src.strategy.adaptive.structure import analyze_structure
+from src.strategy.adaptive.normalization import event_observation, regime_observation, zone_observation
 
 
 def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
@@ -67,18 +68,11 @@ def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
     reasons.extend(timeframe_block_reasons(alignment, side, config.context_timeframes))
     if regime.regime == Regime.TRENDING_BULLISH and side != "BUY" or regime.regime == Regime.TRENDING_BEARISH and side != "SELL":
         reasons.append("regime_direction_conflict")
-    active = [zone for zone in structure.zones if zone.side == side and zone.status == "active"]
-    zone_quality = max((max(0.0, 1-abs(entry_price-(zone.low+zone.high)/2)/max(regime.atr*2, 1e-12)) for zone in active), default=0.0)
     observations = (
-        FeatureObservation("sweep", min(1.0, sweep.strength) if sweep else None, "penetration_atr", context.decision_time,
-                           (("penetration_atr", sweep.strength),) if sweep else ()),
-        FeatureObservation("structure", min(1.0, broken.strength) if broken else None,
-                           f"break_strength_atr:{broken.timeframe}" if broken and broken.timeframe else "break_strength_atr", context.decision_time,
-                           (("break_strength_atr", broken.strength),) if broken else ()),
-        FeatureObservation("zone", zone_quality if active else None, "max_fvg_ob_proximity" if active else "no_active_zone", context.decision_time,
-                           (("active_zone_count", float(len(active))),)),
-        FeatureObservation("regime", 1.0 if regime.regime not in {Regime.UNCERTAIN, Regime.HIGH_VOLATILITY} else 0.0, regime.reason, context.decision_time,
-                           (("atr", regime.atr), ("adx", regime.adx), ("atr_percentile", regime.atr_percentile), ("realized_volatility", regime.realized_volatility))),
+        event_observation("sweep", sweep, context.decision_time),
+        event_observation("structure", broken, context.decision_time),
+        zone_observation(structure.zones, side, entry_price, regime.atr, context.decision_time),
+        regime_observation(regime, side, context.decision_time),
         order_flow or FeatureObservation("order_flow", None, "exchange_flow_unavailable_tick_volume_not_substituted", context.decision_time),
     )
     if order_flow is not None and order_flow.name != "order_flow":
