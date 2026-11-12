@@ -36,7 +36,8 @@ def snapshot(symbol: str, decision_time: int, rates: dict, config: AdaptiveConfi
                     raise ValueError("invalid_timestamp")
                 if row["time"] + step <= decision_time:
                     rows.append(row)
-            for row in rows[-count:]:
+            selected = rows[-count:]
+            for position, row in enumerate(selected):
                 bar = Candle(**{name: row[name] for name in ("time", "open", "high", "low", "close")},
                              tick_volume=float(row.get("tick_volume", 0)) if isinstance(row, dict) else float(row["tick_volume"]))
                 if (type(bar.time) is not int or bar.time % step or
@@ -45,11 +46,18 @@ def snapshot(symbol: str, decision_time: int, rates: dict, config: AdaptiveConfi
                         not math.isfinite(bar.tick_volume) or bar.tick_volume < 0):
                     raise ValueError("invalid_bar")
                 if previous is not None and bar.time != previous + step:
+                    if bar.time <= previous:
+                        raise ValueError("gapped_or_unordered")
                     weekend_gap = (config.allow_utc_weekend_gaps and bar.time > previous
                                    and bar.time-previous <= 3*86400
                                    and all(datetime.fromtimestamp(t, timezone.utc).weekday() >= 5
                                            for t in range(previous+step, bar.time, step)))
-                    if not weekend_gap:
+                    # Extended provenance is not a larger indicator window.
+                    # Its actually used pivot/consumption/ATR intervals are
+                    # checked by align_signal; unrelated older gaps cannot erase
+                    # an otherwise complete fixed-window feature series.
+                    older_provenance = count > config.lookback and position <= len(selected)-config.lookback
+                    if not weekend_gap and not older_provenance:
                         raise ValueError("gapped_or_unordered")
                 previous = bar.time
                 bars.append(bar)

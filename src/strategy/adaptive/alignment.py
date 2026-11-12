@@ -1,11 +1,23 @@
 """Verify a pending sweep and its actual lower-timeframe confirmation causally."""
 import math
+from datetime import datetime, timezone
 
 from src.backtesting.history import TIMEFRAMES
 from src.strategy.adaptive.config import AdaptiveConfig
 from src.strategy.adaptive.models import AlignedEvidence, MarketSnapshot, SignalAnchor, StructureEvent
 from src.strategy.confirmations import evaluate_sweep_displacement_mss_confirmation
 from src.strategy.liquidity import SweepSignal, _atr_series, evaluate_sweep_significance
+
+
+def _contiguous(bars, step: int, allow_weekends: bool) -> bool:
+    for before, after in zip(bars, bars[1:]):
+        if after.time == before.time+step:
+            continue
+        if (not allow_weekends or after.time <= before.time or after.time-before.time > 3*86400 or
+                not all(datetime.fromtimestamp(t, timezone.utc).weekday() >= 5
+                        for t in range(before.time+step, after.time, step))):
+            return False
+    return True
 
 
 def align_signal(context: MarketSnapshot, anchor: SignalAnchor, config: AdaptiveConfig) -> AlignedEvidence:
@@ -44,19 +56,26 @@ def align_signal(context: MarketSnapshot, anchor: SignalAnchor, config: Adaptive
         return AlignedEvidence(None, None, ("anchor_not_a_sweep",))
     length = anchor.pivot_length
     confirmed, untaken = [], []
+    gapped = False
     for pivot in range(length, index-length):
         bar = bars[pivot]
         window = bars[pivot-length:pivot+length+1]
-        level = bar.low if anchor.side == "BUY" else bar.high
-        extremum = min(item.low for item in window) if anchor.side == "BUY" else max(item.high for item in window)
-        if not math.isclose(level, anchor.level, rel_tol=0, abs_tol=1e-10) or level != extremum:
+        kinds = [kind for kind, level, extremum in (
+            ("LOW", bar.low, min(item.low for item in window)),
+            ("HIGH", bar.high, max(item.high for item in window)))
+            if math.isclose(level, anchor.level, rel_tol=0, abs_tol=1e-10) and level == extremum]
+        if not kinds:
             continue
         confirmed.append(pivot)
+        if not _contiguous(bars[pivot-length:index+1], step, config.allow_utc_weekend_gaps):
+            gapped = True
+            continue
         intervening = bars[pivot+length+1:index]
-        if not any(item.low < level if anchor.side == "BUY" else item.high > level for item in intervening):
-            untaken.append(pivot)
+        if not any(item.low < anchor.level if anchor.side == "BUY" else item.high > anchor.level for item in intervening):
+            untaken.append((pivot, kinds[0]))
     if not untaken:
-        return AlignedEvidence(None, None, ("anchor_liquidity_already_consumed" if confirmed else "anchor_level_not_confirmed",))
+        reason = "anchor_level_history_gapped" if gapped else "anchor_liquidity_already_consumed" if confirmed else "anchor_level_not_confirmed"
+        return AlignedEvidence(None, None, (reason,))
     quality = evaluate_sweep_significance(
         bars, SweepSignal(anchor.side, anchor.level, anchor.candle_time),
         lookback_bars=anchor.significance_lookback,
@@ -64,10 +83,13 @@ def align_signal(context: MarketSnapshot, anchor: SignalAnchor, config: Adaptive
         min_penetration_price=anchor.minimum_penetration_price)
     if not quality.valid:
         return AlignedEvidence(None, None, (f"anchor_quality:{quality.note}",))
-    signal_atr = _atr_series(bars[max(0, index+1-config.lookback):index+1], config.atr_period)[-1]
+    signal_history = bars[max(0, index+1-config.lookback):index+1]
+    if len(signal_history) < config.lookback or not _contiguous(signal_history, step, config.allow_utc_weekend_gaps):
+        return AlignedEvidence(None, None, ("sweep_atr_history_unavailable",))
+    signal_atr = _atr_series(signal_history, config.atr_period)[-1]
     penetration = anchor.level-sweep_bar.low if anchor.side == "BUY" else sweep_bar.high-anchor.level
-    sweep = StructureEvent("SWEEP", anchor.side, anchor.level, bars[untaken[-1]].time,
-                           available, penetration/max(signal_atr, 1e-12), anchor.signal_timeframe)
+    sweep = StructureEvent("SWEEP", anchor.side, anchor.level, bars[untaken[-1][0]].time,
+                           available, penetration/max(signal_atr, 1e-12), anchor.signal_timeframe, untaken[-1][1])
     if anchor.confirmation_mode != "sweep_displacement_mss":
         return AlignedEvidence(sweep, None, ("anchor_confirmation_mode_unsupported",))
     lower = context.bars(anchor.confirmation_timeframe)
@@ -94,6 +116,8 @@ def align_signal(context: MarketSnapshot, anchor: SignalAnchor, config: Adaptive
         history = [bar for bar in lower if bar.time <= current.time][-config.lookback:]
         if len(history) < config.lookback:
             return AlignedEvidence(sweep, None, ("confirmation_atr_warmup_unavailable",))
+        if not _contiguous(history, lower_step, config.allow_utc_weekend_gaps):
+            return AlignedEvidence(sweep, None, ("confirmation_atr_history_gapped",))
         atr = _atr_series(history, config.atr_period)[-1]
         if atr <= 0 or abs(current.close-current.open)/atr < config.min_displacement_atr:
             continue

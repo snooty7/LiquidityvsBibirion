@@ -92,6 +92,37 @@ def test_previously_taken_liquidity_is_not_resurrected():
     assert result.sweep is None and "anchor_liquidity_already_consumed" in result.reasons
 
 
+def test_baseline_untyped_pivot_map_keeps_high_level_provenance_for_a_buy():
+    context, anchor, config = fixture()
+    rows = list(context.bars("M5"))
+    rows[570] = replace(rows[570], high=1.101)
+    for i in range(576, 596):
+        rows[i] = replace(rows[i], open=1.102, high=1.1025, low=1.1015, close=1.102)
+    rows[596] = replace(rows[596], open=1.1015, high=1.1025, low=1.1008, close=1.1015)
+    for i in range(597, 600):
+        rows[i] = replace(rows[i], open=1.1019, high=1.1025, low=1.10135, close=1.10195)
+    lower = tuple(replace(row, open=row.open+.0015, high=row.high+.0015,
+                          low=row.low+.0015, close=row.close+.0015) for row in context.bars("M1"))
+    context = replace(context, series=(("M5", tuple(rows)), ("M1", lower)))
+    result = align_signal(context, replace(anchor, level=1.101), config)
+    assert not result.reasons and result.sweep.level_kind == "HIGH" and result.confirmation
+
+
+def test_only_used_provenance_windows_require_contiguous_history():
+    from dataclasses import asdict
+    context, anchor, config = fixture()
+    rows = list(context.bars("M5"))
+    extended = [replace(rows[0], time=rows[0].time-300), *rows]
+    extended.pop(101)  # older than the used pivot, sweep ATR and feature windows
+    result = snapshot("EURUSD", context.decision_time,
+                      {"M5": [asdict(row) for row in extended], "M1": [asdict(row) for row in context.bars("M1")]},
+                      config, additional_timeframes=("M1",), lookbacks={"M5": 600, "M1": 120})
+    assert result.bars("M5") and align_signal(result, anchor, config).confirmation
+    rows.pop(580)  # inside the required level-to-sweep provenance
+    gapped = replace(context, series=(("M5", tuple(rows)), ("M1", context.bars("M1"))))
+    assert "anchor_level_history_gapped" in align_signal(gapped, anchor, config).reasons
+
+
 def test_break_before_sweep_close_is_not_post_sweep_confirmation():
     context, anchor, config = fixture()
     lower = [replace(row, open=1.1, high=1.10005, low=1.09995, close=1.1) for row in context.bars("M1")]

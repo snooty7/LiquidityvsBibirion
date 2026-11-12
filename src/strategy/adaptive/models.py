@@ -68,6 +68,7 @@ class StructureEvent:
     available_at: int
     strength: float = 0.0
     timeframe: str = ""
+    level_kind: str = ""
 
 
 @dataclass(frozen=True)
