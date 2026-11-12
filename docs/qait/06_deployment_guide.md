@@ -2,6 +2,8 @@
 
 This release is **offline/observational only**. It does not add an adaptive strategy mode to the live orchestrator, install ML libraries, change production configuration, alter credentials, start MT5 or send trades. Existing strategies retain their dispatch, guards and execution adapter. The adaptive evaluator is broker-independent; a future live adapter is a separate, unimplemented boundary.
 
+The latest [alignment validation](08_signal_alignment_results.md) uses `reports/qait/aligned_92001/protocol.json` and `stress_protocol.json`. These supersede the initial research protocols for the corrected code; original evidence remains available at its frozen source revision. This correction does not change activation or risk settings.
+
 ## Defaults and configuration
 
 Omitting `adaptive` preserves a disabled `AdaptiveConfig`. `enabled`, `ml_shadow`, `dynamic_leverage`, `hedging`, break-even, trailing activation and partial activation are all false/zero by default. Enabling dynamic leverage or hedging raises a configuration error. An enabled adaptive observation cannot coexist with `ignore_portfolio_cap` in the loaded profiles.

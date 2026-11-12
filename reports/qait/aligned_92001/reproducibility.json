@@ -1,0 +1,6 @@
+{
+  "status": "byte_identical",
+  "base_report_sha256": "b5c0c3da6e66e2b01e80e5c475a236abe4da9e2ee2e7e737429976594b3b0c38",
+  "repeat_report_sha256": "b5c0c3da6e66e2b01e80e5c475a236abe4da9e2ee2e7e737429976594b3b0c38",
+  "repeat_command": ".venv/Scripts/python.exe -m src.tools.research_adaptive run --protocol reports/qait/aligned_92001/protocol.json --output .git/qait-aligned-repeat"
+}

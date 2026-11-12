@@ -16,6 +16,8 @@ The five arms are:
 
 The full arm adapts candidates from the existing strategy; it is not an independent discovery stream or a replica of QAIT. New strategy code has no MT5 import or execution method. Existing live behavior is unaffected by an adaptive observation setting.
 
+The [alignment repair](07_signal_alignment_investigation.md) binds liquidity-sweep candidates to their original pending identity and configured confirmation timeframe. Existing source-level provenance can use additional past history without changing fixed feature windows. The qualified lower-timeframe recent-extrema break is explicitly labeled `CONFIRMATION_BREAK`; it is not relabeled as an independent M5 swing BOS/MSS. Only a post-sweep-close confirmation is usable. Other confirmation modes without an anchored definition reject explicitly rather than treating unimplemented evidence as true.
+
 ## Frozen inputs and windows
 
 `freeze` records code digest, original configuration-file hash, effective configuration hash (including local override effects), redacted effective settings, source-history file hash, adaptive parameters, broker valuation/volume data via the history bundle, costs, equity, and chronological fold boundaries. Code hashing normalizes newline conventions. Notification URL/token values are redacted in the public protocol; hashes still detect input changes.

@@ -2,6 +2,8 @@
 
 Date: 2026-11-12. **No adaptive performance improvement is established. No live trades were placed.** The initial fixed scoring/full-adaptive settings held cash throughout both test windows. This is an observed no-trade outcome, not evidence that the strategy is profitable or ready for activation.
 
+Follow-up: [signal/timeframe alignment repair and validation](08_signal_alignment_results.md). The original artifacts below remain immutable; corrected protocols and diagnostics are linked in the follow-up.
+
 ## Scope and artifacts
 
 Implemented the broker-independent regime/MTF/structure/scoring/proposal engine, shared risk preflight, configurable pure exits and offline partial-fill accounting, ML observer/split contracts, frozen five-arm runner, metrics and optional dashboard observations. Defaults remain disabled. Existing strategy dispatch, production settings, credentials and MT5 order code were preserved.
