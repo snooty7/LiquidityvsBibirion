@@ -22,6 +22,8 @@ The subsequent [source lifecycle audit](09_level_lifecycle_audit.md) corrects an
 
 The [gate audit](11_volatility_timeframe_audit.md) enforces the fixed window at direct regime/direction entry points and corrects the adaptive regime ATR seed to use actual prior-close transitions. Legacy strategy indicator definitions are unchanged. Current ATR is ranked against 85 prior fully initialized values at the frozen 100-bar/14-period settings. Realized volatility remains unannualized per-bar log-return standard deviation. Neutral/unavailable contexts continue to block with distinct reasons; genuine opposite directions retain the conflict gate.
 
+The [scoring audit](13_scoring_normalization_audit.md) shares that adaptive ATR convention across event features, defines proximity as interval distance using the existing order-block helper at the same 2-ATR scale, and makes regime evidence side-compatible. Invalid/future normalization inputs are explicitly unavailable. Fixed weights/denominator, clipping and threshold remain unchanged; maximum aggregation prevents double counting FVG/OB evidence. Raw prices, ATRs and distances are recorded for independent reconstruction.
+
 ## Frozen inputs and windows
 
 `freeze` records code digest, original configuration-file hash, effective configuration hash (including local override effects), redacted effective settings, source-history file hash, adaptive parameters, broker valuation/volume data via the history bundle, costs, equity, and chronological fold boundaries. Code hashing normalizes newline conventions. Notification URL/token values are redacted in the public protocol; hashes still detect input changes.

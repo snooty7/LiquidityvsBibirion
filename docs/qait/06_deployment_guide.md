@@ -2,7 +2,7 @@
 
 This release is **offline/observational only**. It does not add an adaptive strategy mode to the live orchestrator, install ML libraries, change production configuration, alter credentials, start MT5 or send trades. Existing strategies retain their dispatch, guards and execution adapter. The adaptive evaluator is broker-independent; a future live adapter is a separate, unimplemented boundary.
 
-The latest [gate validation](12_volatility_timeframe_results.md) uses `reports/qait/gates_92001/protocol.json` and `stress_protocol.json`. These supersede the earlier research protocols for the corrected code; original evidence remains available at its frozen source revision. This correction does not change activation or risk settings.
+The latest [scoring validation](14_scoring_normalization_results.md) uses `reports/qait/scoring_92001/protocol.json` and `stress_protocol.json`. These supersede the earlier research protocols for the corrected code; original evidence remains available at its frozen source revision. This correction does not change activation or risk settings. The [main-goal status](15_main_goal_status.md) separates delivered engineering from the still-unproven performance objective.
 
 ## Defaults and configuration
 

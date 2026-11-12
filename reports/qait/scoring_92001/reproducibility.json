@@ -1,0 +1,6 @@
+{
+  "status": "byte_identical",
+  "base_report_sha256": "4d516045db2dc69a141a3ddc40da7f35f9a537394e0face73a3309b48da7094b",
+  "repeat_report_sha256": "4d516045db2dc69a141a3ddc40da7f35f9a537394e0face73a3309b48da7094b",
+  "repeat_command": ".venv/Scripts/python.exe -m src.tools.research_adaptive run --protocol reports/qait/scoring_92001/protocol.json --output .git/qait-scoring-repeat"
+}

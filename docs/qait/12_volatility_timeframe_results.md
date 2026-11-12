@@ -2,6 +2,8 @@
 
 Date: 2026-11-12. **No false historical high-volatility or timeframe-conflict rejection was found in the frozen windows. Controlled input-window and ATR initialization bugs are fixed. Numerical thresholds and risk controls are unchanged; everything remains disabled and no live trades were placed.**
 
+Follow-up: [scoring/normalization audit](14_scoring_normalization_results.md) shares the corrected adaptive ATR implementation across feature producers and supplies the latest comparison. This document preserves the preceding gate-only study.
+
 ## What changed
 
 - `detect_regime` and `directions` now enforce the declared fixed feature window even when called directly with additional older history. Older prefixes could previously change ATR initialization/rank or reverse EMA direction. The replay already supplied fixed windows, but the public helpers did not enforce that contract.

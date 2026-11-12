@@ -1,0 +1,4944 @@
+{
+  "status": "passed",
+  "scenarios": {
+    "base": {
+      "identical_ledgers": 29,
+      "changed_ledgers": [
+        [
+          2,
+          "train",
+          "scoring"
+        ]
+      ],
+      "gate_counts": {
+        "atr_extreme": 22,
+        "realized_extreme": 0,
+        "actual_timeframe_opposition": 37,
+        "unavailable_data": 1
+      },
+      "native_htf_vs_m1_close_checks": 104,
+      "observation_count": 63,
+      "traces": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790830800,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.13273,
+              "ema20": 1.1337085835466354,
+              "previous_ema20": 1.1338115923410181,
+              "direction": "SELL",
+              "last_closed_at": 1790830800,
+              "first_open_at": 1790298000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13327,
+              "ema20": 1.1354757049968842,
+              "previous_ema20": 1.1357078844702404,
+              "direction": "SELL",
+              "last_closed_at": 1790827200,
+              "first_open_at": 1788868800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0001999667218953859,
+            "prior_atr_samples": 85,
+            "percentile": 0.7058823529411765,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00012845041493188494,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790830800
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790838000,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.13287,
+              "ema20": 1.133524569592842,
+              "previous_ema20": 1.1335934716552465,
+              "direction": "SELL",
+              "last_closed_at": 1790838000,
+              "first_open_at": 1790305200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13327,
+              "ema20": 1.1354757049968842,
+              "previous_ema20": 1.1357078844702404,
+              "direction": "SELL",
+              "last_closed_at": 1790827200,
+              "first_open_at": 1788868800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00019920714441471222,
+            "prior_atr_samples": 85,
+            "percentile": 0.7176470588235294,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.44062577761914e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790838000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790852700,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.13037,
+              "ema20": 1.1328164550921427,
+              "previous_ema20": 1.1330739766807894,
+              "direction": "SELL",
+              "last_closed_at": 1790852400,
+              "first_open_at": 1790319600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13184,
+              "ema20": 1.1351294622355934,
+              "previous_ema20": 1.1354757214182873,
+              "direction": "SELL",
+              "last_closed_at": 1790841600,
+              "first_open_at": 1788883200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005682654652061197,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00028071998866683706,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1790852700
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790854500,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.13037,
+              "ema20": 1.1328164550921427,
+              "previous_ema20": 1.1330739766807894,
+              "direction": "SELL",
+              "last_closed_at": 1790852400,
+              "first_open_at": 1790319600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13184,
+              "ema20": 1.1351294622355934,
+              "previous_ema20": 1.1354757214182873,
+              "direction": "SELL",
+              "last_closed_at": 1790841600,
+              "first_open_at": 1788883200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005846157105858273,
+            "prior_atr_samples": 85,
+            "percentile": 0.9647058823529412,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002839414423659832,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790854500
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790878200,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12657,
+              "ema20": 1.1306915931483879,
+              "previous_ema20": 1.1311254450587445,
+              "direction": "SELL",
+              "last_closed_at": 1790877600,
+              "first_open_at": 1790344800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1286,
+              "ema20": 1.1339855175620732,
+              "previous_ema20": 1.1345524141475547,
+              "direction": "SELL",
+              "last_closed_at": 1790870400,
+              "first_open_at": 1788912000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.000678574945278415,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0003770719821190407,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1790878200
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790922600,
+          "side": "BUY",
+          "regime": "TRENDING_BULLISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12438,
+              "ema20": 1.1258651745691592,
+              "previous_ema20": 1.126021508734334,
+              "direction": "SELL",
+              "last_closed_at": 1790920800,
+              "first_open_at": 1790560800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12339,
+              "ema20": 1.1311856267618263,
+              "previous_ema20": 1.1320062190525448,
+              "direction": "SELL",
+              "last_closed_at": 1790913600,
+              "first_open_at": 1788955200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00022207323398560854,
+            "prior_atr_samples": 85,
+            "percentile": 0.6352941176470588,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00012220481293736803,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790922600
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790933100,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12465,
+              "ema20": 1.12563743737547,
+              "previous_ema20": 1.1257413781518353,
+              "direction": "SELL",
+              "last_closed_at": 1790931600,
+              "first_open_at": 1790571600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12523,
+              "ema20": 1.1306183760388933,
+              "previous_ema20": 1.1311855735166714,
+              "direction": "SELL",
+              "last_closed_at": 1790928000,
+              "first_open_at": 1788969600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003171761499358931,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021411108282183986,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1790933100
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790946900,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12506,
+              "ema20": 1.1255756611534684,
+              "previous_ema20": 1.1256299412748862,
+              "direction": "SELL",
+              "last_closed_at": 1790946000,
+              "first_open_at": 1790586000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12509,
+              "ema20": 1.1300918518790855,
+              "previous_ema20": 1.1306183626031998,
+              "direction": "SELL",
+              "last_closed_at": 1790942400,
+              "first_open_at": 1788984000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00041345111236814144,
+            "prior_atr_samples": 85,
+            "percentile": 0.7764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021496727414942288,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790946900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791269700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12141,
+              "ema20": 1.1215749081161333,
+              "previous_ema20": 1.1215922668651999,
+              "direction": "SELL",
+              "last_closed_at": 1791266400,
+              "first_open_at": 1790733600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12225,
+              "ema20": 1.125100396214191,
+              "previous_ema20": 1.125400437920948,
+              "direction": "SELL",
+              "last_closed_at": 1791259200,
+              "first_open_at": 1789128000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00023423386534541087,
+            "prior_atr_samples": 85,
+            "percentile": 0.9294117647058824,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001223285347083246,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791269700
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791275400,
+          "side": "SELL",
+          "regime": "RANGING",
+          "timeframes": {
+            "H1": {
+              "close": 1.12166,
+              "ema20": 1.121635989958103,
+              "previous_ema20": 1.1216334625852717,
+              "direction": "BUY",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1790740800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12166,
+              "ema20": 1.1247727241242018,
+              "previous_ema20": 1.1251003792951704,
+              "direction": "SELL",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1789142400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00022359860401994244,
+            "prior_atr_samples": 85,
+            "percentile": 0.6352941176470588,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.7617788581969e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791275400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791276900,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12166,
+              "ema20": 1.121635989958103,
+              "previous_ema20": 1.1216334625852717,
+              "direction": "BUY",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1790740800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12166,
+              "ema20": 1.1247727241242018,
+              "previous_ema20": 1.1251003792951704,
+              "direction": "SELL",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1789142400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.000210312176926554,
+            "prior_atr_samples": 85,
+            "percentile": 0.32941176470588235,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 8.871726926922676e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791276900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791349500,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12384,
+              "ema20": 1.1248071297292488,
+              "previous_ema20": 1.1249089328586435,
+              "direction": "SELL",
+              "last_closed_at": 1791349200,
+              "first_open_at": 1790816400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12483,
+              "ema20": 1.1249925373438756,
+              "previous_ema20": 1.1250096465379678,
+              "direction": "SELL",
+              "last_closed_at": 1791345600,
+              "first_open_at": 1789387200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00020538917260892235,
+            "prior_atr_samples": 85,
+            "percentile": 0.9764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00010095701494541093,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791349500
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791358200,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12377,
+              "ema20": 1.1245991837089875,
+              "previous_ema20": 1.1246864662046703,
+              "direction": "SELL",
+              "last_closed_at": 1791356400,
+              "first_open_at": 1790823600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12483,
+              "ema20": 1.1249925373438756,
+              "previous_ema20": 1.1250096465379678,
+              "direction": "SELL",
+              "last_closed_at": 1791345600,
+              "first_open_at": 1789387200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00019073932599720882,
+            "prior_atr_samples": 85,
+            "percentile": 0.8117647058823529,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.710755434870328e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791358200
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "decision_time": 1791547800,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12178,
+              "ema20": 1.1216652230507127,
+              "previous_ema20": 1.1216531412665771,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1791187200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004232943650651459,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.000268380020323935,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791547800
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "decision_time": 1791553800,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12161,
+              "ema20": 1.121659958309837,
+              "previous_ema20": 1.1216652170792936,
+              "direction": "SELL",
+              "last_closed_at": 1791550800,
+              "first_open_at": 1791190800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003484235724877552,
+            "prior_atr_samples": 85,
+            "percentile": 0.5529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00017900316508977525,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791553800
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "decision_time": 1791561000,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12085,
+              "ema20": 1.1215027725469422,
+              "previous_ema20": 1.1215714854466203,
+              "direction": "SELL",
+              "last_closed_at": 1791558000,
+              "first_open_at": 1791198000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00037610698970440694,
+            "prior_atr_samples": 85,
+            "percentile": 0.8117647058823529,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001855662093899315,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791561000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791869400,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11707,
+              "ema20": 1.1169750448289837,
+              "previous_ema20": 1.116965049547824,
+              "direction": "BUY",
+              "last_closed_at": 1791867600,
+              "first_open_at": 1791334800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11592,
+              "ema20": 1.1193580906814549,
+              "previous_ema20": 1.119719994963713,
+              "direction": "SELL",
+              "last_closed_at": 1791864000,
+              "first_open_at": 1789732800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002434815917494316,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019686760532439427,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791869400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791884400,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11791,
+              "ema20": 1.1171638599569707,
+              "previous_ema20": 1.1170853188998098,
+              "direction": "BUY",
+              "last_closed_at": 1791882000,
+              "first_open_at": 1791349200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002271223311531539,
+            "prior_atr_samples": 85,
+            "percentile": 0.8941176470588236,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00011827514077472814,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791884400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791885900,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1178,
+              "ema20": 1.117224455078173,
+              "previous_ema20": 1.1171638714021912,
+              "direction": "BUY",
+              "last_closed_at": 1791885600,
+              "first_open_at": 1791352800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002999449588459878,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019990243915630907,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791885900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791909300,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11954,
+              "ema20": 1.1178739889510798,
+              "previous_ema20": 1.117698619366983,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1791374400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11954,
+              "ema20": 1.1190918729648114,
+              "previous_ema20": 1.1190447016979495,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1789948800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00043140382095013146,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00023594306888348012,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791909300
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791972900,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12077,
+              "ema20": 1.1198696960309642,
+              "previous_ema20": 1.1197749271921182,
+              "direction": "BUY",
+              "last_closed_at": 1791972000,
+              "first_open_at": 1791439200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00026393378426204175,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014075022577783318,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791972900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791978000,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1199,
+              "ema20": 1.1198725843743838,
+              "previous_ema20": 1.1198696985190557,
+              "direction": "BUY",
+              "last_closed_at": 1791975600,
+              "first_open_at": 1791442800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00030179558443825267,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021788753057944992,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791978000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792055700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12152,
+              "ema20": 1.118852269823956,
+              "previous_ema20": 1.1185714561212146,
+              "direction": "BUY",
+              "last_closed_at": 1792054800,
+              "first_open_at": 1791522000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12151,
+              "ema20": 1.1184065860980754,
+              "previous_ema20": 1.1180799109505044,
+              "direction": "BUY",
+              "last_closed_at": 1792051200,
+              "first_open_at": 1790092800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00033418385781157616,
+            "prior_atr_samples": 85,
+            "percentile": 0.27058823529411763,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014264469316843125,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792055700
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792064100,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.121,
+              "ema20": 1.1192246562061148,
+              "previous_ema20": 1.1190377779120215,
+              "direction": "BUY",
+              "last_closed_at": 1792062000,
+              "first_open_at": 1791529200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12151,
+              "ema20": 1.1184065860980754,
+              "previous_ema20": 1.1180799109505044,
+              "direction": "BUY",
+              "last_closed_at": 1792051200,
+              "first_open_at": 1790092800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005016499826364028,
+            "prior_atr_samples": 85,
+            "percentile": 0.6705882352941176,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002789554256570552,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792064100
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792127100,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12128,
+              "ema20": 1.120928588568643,
+              "previous_ema20": 1.120891597891658,
+              "direction": "BUY",
+              "last_closed_at": 1792126800,
+              "first_open_at": 1791766800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1212,
+              "ema20": 1.11955476721915,
+              "previous_ema20": 1.1193815848211657,
+              "direction": "BUY",
+              "last_closed_at": 1792123200,
+              "first_open_at": 1790164800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002183359577992519,
+            "prior_atr_samples": 85,
+            "percentile": 0.7529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001322760664974514,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792127100
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792175400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1252900000000001,
+              "ema20": 1.1235883527142554,
+              "previous_ema20": 1.123409231947335,
+              "direction": "BUY",
+              "last_closed_at": 1792173600,
+              "first_open_at": 1791813600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12423,
+              "ema20": 1.1206802618453022,
+              "previous_ema20": 1.1203066051974393,
+              "direction": "BUY",
+              "last_closed_at": 1792166400,
+              "first_open_at": 1790208000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00042469374413937194,
+            "prior_atr_samples": 85,
+            "percentile": 0.9294117647058824,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002548210201937033,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792175400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792401000,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12255,
+              "ema20": 1.12281035217763,
+              "previous_ema20": 1.1228377576700121,
+              "direction": "SELL",
+              "last_closed_at": 1792400400,
+              "first_open_at": 1791867600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1232,
+              "ema20": 1.121424932742812,
+              "previous_ema20": 1.121238083557845,
+              "direction": "BUY",
+              "last_closed_at": 1792396800,
+              "first_open_at": 1790265600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00027436433505584096,
+            "prior_atr_samples": 85,
+            "percentile": 0.47058823529411764,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00017435697922009273,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792401000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792404000,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12273,
+              "ema20": 1.1228026905847632,
+              "previous_ema20": 1.1228103422252647,
+              "direction": "SELL",
+              "last_closed_at": 1792404000,
+              "first_open_at": 1791871200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1232,
+              "ema20": 1.121424932742812,
+              "previous_ema20": 1.121238083557845,
+              "direction": "BUY",
+              "last_closed_at": 1792396800,
+              "first_open_at": 1790265600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003050234276549139,
+            "prior_atr_samples": 85,
+            "percentile": 0.7764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00018253219183516275,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792404000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792425900,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12232,
+              "ema20": 1.12219194328092,
+              "previous_ema20": 1.12217846362628,
+              "direction": "BUY",
+              "last_closed_at": 1792425600,
+              "first_open_at": 1791892800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12232,
+              "ema20": 1.1214942264094199,
+              "previous_ema20": 1.1214073028735692,
+              "direction": "BUY",
+              "last_closed_at": 1792425600,
+              "first_open_at": 1790294400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00043361836581425463,
+            "prior_atr_samples": 85,
+            "percentile": 0.7529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002680998855508136,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792425900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792442700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12116,
+              "ema20": 1.1219407315357193,
+              "previous_ema20": 1.122022913802637,
+              "direction": "SELL",
+              "last_closed_at": 1792440000,
+              "first_open_at": 1791907200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12116,
+              "ema20": 1.121462373711958,
+              "previous_ema20": 1.1214942025237429,
+              "direction": "SELL",
+              "last_closed_at": 1792440000,
+              "first_open_at": 1790308800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002927136110430016,
+            "prior_atr_samples": 85,
+            "percentile": 0.03529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001444086361589445,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792442700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791439500,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12019,
+              "ema20": 1.1202984180493591,
+              "previous_ema20": 1.1203098304756074,
+              "direction": "SELL",
+              "last_closed_at": 1791439200,
+              "first_open_at": 1790906400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1198,
+              "ema20": 1.1225990925861145,
+              "previous_ema20": 1.1228937339109686,
+              "direction": "SELL",
+              "last_closed_at": 1791432000,
+              "first_open_at": 1789473600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00023226031052590168,
+            "prior_atr_samples": 85,
+            "percentile": 0.8470588235294118,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001505235671213333,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791439500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791440100,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12019,
+              "ema20": 1.1202984180493591,
+              "previous_ema20": 1.1203098304756074,
+              "direction": "SELL",
+              "last_closed_at": 1791439200,
+              "first_open_at": 1790906400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1198,
+              "ema20": 1.1225990925861145,
+              "previous_ema20": 1.1228937339109686,
+              "direction": "SELL",
+              "last_closed_at": 1791432000,
+              "first_open_at": 1789473600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00024336382279706176,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00016198794348319884,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791440100
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791440400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12019,
+              "ema20": 1.1202984180493591,
+              "previous_ema20": 1.1203098304756074,
+              "direction": "SELL",
+              "last_closed_at": 1791439200,
+              "first_open_at": 1790906400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1198,
+              "ema20": 1.1225990925861145,
+              "previous_ema20": 1.1228937339109686,
+              "direction": "SELL",
+              "last_closed_at": 1791432000,
+              "first_open_at": 1789473600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002409652211911581,
+            "prior_atr_samples": 85,
+            "percentile": 0.9764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00016221256562753183,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791440400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791464400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1181,
+              "ema20": 1.1197811502539305,
+              "previous_ema20": 1.1199581134385548,
+              "direction": "SELL",
+              "last_closed_at": 1791464400,
+              "first_open_at": 1790931600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11897,
+              "ema20": 1.1220708524662828,
+              "previous_ema20": 1.1223972579890495,
+              "direction": "SELL",
+              "last_closed_at": 1791460800,
+              "first_open_at": 1789502400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004425736484398426,
+            "prior_atr_samples": 85,
+            "percentile": 0.7294117647058823,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00026492285579437434,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791464400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791467700,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1181,
+              "ema20": 1.1197811502539305,
+              "previous_ema20": 1.1199581134385548,
+              "direction": "SELL",
+              "last_closed_at": 1791464400,
+              "first_open_at": 1790931600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11897,
+              "ema20": 1.1220708524662828,
+              "previous_ema20": 1.1223972579890495,
+              "direction": "SELL",
+              "last_closed_at": 1791460800,
+              "first_open_at": 1789502400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00041255848790697095,
+            "prior_atr_samples": 85,
+            "percentile": 0.5529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00020102173021503304,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791467700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791476700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11822,
+              "ema20": 1.1193405095174147,
+              "previous_ema20": 1.119458457887669,
+              "direction": "SELL",
+              "last_closed_at": 1791475200,
+              "first_open_at": 1790942400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11822,
+              "ema20": 1.1217040708453974,
+              "previous_ema20": 1.1220708151449128,
+              "direction": "SELL",
+              "last_closed_at": 1791475200,
+              "first_open_at": 1789516800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005114234561183638,
+            "prior_atr_samples": 85,
+            "percentile": 0.9647058823529412,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00032777783806447,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791476700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791547800,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12178,
+              "ema20": 1.1216652230507127,
+              "previous_ema20": 1.1216531412665771,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1791187200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004232943650651459,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.000268380020323935,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791547800
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791553800,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12161,
+              "ema20": 1.121659958309837,
+              "previous_ema20": 1.1216652170792936,
+              "direction": "SELL",
+              "last_closed_at": 1791550800,
+              "first_open_at": 1791190800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003484235724877552,
+            "prior_atr_samples": 85,
+            "percentile": 0.5529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00017900316508977525,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791553800
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791561000,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12085,
+              "ema20": 1.1215027725469422,
+              "previous_ema20": 1.1215714854466203,
+              "direction": "SELL",
+              "last_closed_at": 1791558000,
+              "first_open_at": 1791198000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00037610698970440694,
+            "prior_atr_samples": 85,
+            "percentile": 0.8117647058823529,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001855662093899315,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791561000
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791793200,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12066,
+              "ema20": 1.1205329237306563,
+              "previous_ema20": 1.1205195472812517,
+              "direction": "BUY",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1791259200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12066,
+              "ema20": 1.1211090615860253,
+              "previous_ema20": 1.1211563312266595,
+              "direction": "SELL",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1789660800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "unavailable_data_blocked"
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791793500,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12066,
+              "ema20": 1.1205329237306563,
+              "previous_ema20": 1.1205195472812517,
+              "direction": "BUY",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1791259200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12066,
+              "ema20": 1.1211090615860253,
+              "previous_ema20": 1.1211563312266595,
+              "direction": "SELL",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1789660800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00019112671900848137,
+            "prior_atr_samples": 85,
+            "percentile": 0.3764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.671810758638307e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791793500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791797700,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1202,
+              "ema20": 1.12050119374716,
+              "previous_ema20": 1.1205328983521243,
+              "direction": "SELL",
+              "last_closed_at": 1791795600,
+              "first_open_at": 1791262800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12066,
+              "ema20": 1.1211090615860253,
+              "previous_ema20": 1.1211563312266595,
+              "direction": "SELL",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1789660800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002480508047427051,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001445498026466287,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791797700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791819600,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11755,
+              "ema20": 1.119716789234513,
+              "previous_ema20": 1.1199448723118302,
+              "direction": "SELL",
+              "last_closed_at": 1791817200,
+              "first_open_at": 1791284400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11926,
+              "ema20": 1.1209329586816899,
+              "previous_ema20": 1.121109059595552,
+              "direction": "SELL",
+              "last_closed_at": 1791806400,
+              "first_open_at": 1789675200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.000267181387321372,
+            "prior_atr_samples": 85,
+            "percentile": 0.4470588235294118,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001656046580673452,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791819600
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791869400,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11707,
+              "ema20": 1.1169750448289837,
+              "previous_ema20": 1.116965049547824,
+              "direction": "BUY",
+              "last_closed_at": 1791867600,
+              "first_open_at": 1791334800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11592,
+              "ema20": 1.1193580906814549,
+              "previous_ema20": 1.119719994963713,
+              "direction": "SELL",
+              "last_closed_at": 1791864000,
+              "first_open_at": 1789732800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002434815917494316,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019686760532439427,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791869400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791884400,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11791,
+              "ema20": 1.1171638599569707,
+              "previous_ema20": 1.1170853188998098,
+              "direction": "BUY",
+              "last_closed_at": 1791882000,
+              "first_open_at": 1791349200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002271223311531539,
+            "prior_atr_samples": 85,
+            "percentile": 0.8941176470588236,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00011827514077472814,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791884400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791885900,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1178,
+              "ema20": 1.117224455078173,
+              "previous_ema20": 1.1171638714021912,
+              "direction": "BUY",
+              "last_closed_at": 1791885600,
+              "first_open_at": 1791352800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002999449588459878,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019990243915630907,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791885900
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791909300,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11954,
+              "ema20": 1.1178739889510798,
+              "previous_ema20": 1.117698619366983,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1791374400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11954,
+              "ema20": 1.1190918729648114,
+              "previous_ema20": 1.1190447016979495,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1789948800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00043140382095013146,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00023594306888348012,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791909300
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791972900,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12077,
+              "ema20": 1.1198696960309642,
+              "previous_ema20": 1.1197749271921182,
+              "direction": "BUY",
+              "last_closed_at": 1791972000,
+              "first_open_at": 1791439200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00026393378426204175,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014075022577783318,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791972900
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791978000,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1199,
+              "ema20": 1.1198725843743838,
+              "previous_ema20": 1.1198696985190557,
+              "direction": "BUY",
+              "last_closed_at": 1791975600,
+              "first_open_at": 1791442800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00030179558443825267,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021788753057944992,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791978000
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "decision_time": 1792127100,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12128,
+              "ema20": 1.120928588568643,
+              "previous_ema20": 1.120891597891658,
+              "direction": "BUY",
+              "last_closed_at": 1792126800,
+              "first_open_at": 1791766800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1212,
+              "ema20": 1.11955476721915,
+              "previous_ema20": 1.1193815848211657,
+              "direction": "BUY",
+              "last_closed_at": 1792123200,
+              "first_open_at": 1790164800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002183359577992519,
+            "prior_atr_samples": 85,
+            "percentile": 0.7529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001322760664974514,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792127100
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "decision_time": 1792175400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1252900000000001,
+              "ema20": 1.1235883527142554,
+              "previous_ema20": 1.123409231947335,
+              "direction": "BUY",
+              "last_closed_at": 1792173600,
+              "first_open_at": 1791813600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12423,
+              "ema20": 1.1206802618453022,
+              "previous_ema20": 1.1203066051974393,
+              "direction": "BUY",
+              "last_closed_at": 1792166400,
+              "first_open_at": 1790208000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00042469374413937194,
+            "prior_atr_samples": 85,
+            "percentile": 0.9294117647058824,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002548210201937033,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792175400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792474500,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12191,
+              "ema20": 1.1216154493055626,
+              "previous_ema20": 1.1215844439693061,
+              "direction": "BUY",
+              "last_closed_at": 1792472400,
+              "first_open_at": 1791939600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12153,
+              "ema20": 1.1214428892912018,
+              "previous_ema20": 1.1214337197429074,
+              "direction": "BUY",
+              "last_closed_at": 1792468800,
+              "first_open_at": 1790337600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00021247640209419409,
+            "prior_atr_samples": 85,
+            "percentile": 0.9529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014379451563001266,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792474500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792491300,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1227800000000001,
+              "ema20": 1.1221152245657715,
+              "previous_ema20": 1.1220452482042738,
+              "direction": "BUY",
+              "last_closed_at": 1792490400,
+              "first_open_at": 1791957600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1233,
+              "ema20": 1.1216197169076354,
+              "previous_ema20": 1.121442845003176,
+              "direction": "BUY",
+              "last_closed_at": 1792483200,
+              "first_open_at": 1790352000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002607620449063363,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00015672188075728153,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792491300
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792497000,
+          "side": "BUY",
+          "regime": "RANGING",
+          "timeframes": {
+            "H1": {
+              "close": 1.12282,
+              "ema20": 1.1221823536895408,
+              "previous_ema20": 1.1221152330252822,
+              "direction": "BUY",
+              "last_closed_at": 1792494000,
+              "first_open_at": 1791961200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1233,
+              "ema20": 1.1216197169076354,
+              "previous_ema20": 1.121442845003176,
+              "direction": "BUY",
+              "last_closed_at": 1792483200,
+              "first_open_at": 1790352000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00026613325934135654,
+            "prior_atr_samples": 85,
+            "percentile": 0.9176470588235294,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001416721599117853,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792497000
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792559700,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12258,
+              "ema20": 1.1228026508779363,
+              "previous_ema20": 1.122826087812456,
+              "direction": "SELL",
+              "last_closed_at": 1792558800,
+              "first_open_at": 1792026000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12281,
+              "ema20": 1.1221152146325168,
+              "previous_ema20": 1.1220420793306767,
+              "direction": "BUY",
+              "last_closed_at": 1792555200,
+              "first_open_at": 1790596800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0001914717157657223,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00010582024366871575,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792559700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792568100,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12266,
+              "ema20": 1.1227734212389389,
+              "previous_ema20": 1.122785360316722,
+              "direction": "SELL",
+              "last_closed_at": 1792566000,
+              "first_open_at": 1792033200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12281,
+              "ema20": 1.1221152146325168,
+              "previous_ema20": 1.1220420793306767,
+              "direction": "BUY",
+              "last_closed_at": 1792555200,
+              "first_open_at": 1790596800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00017442808237708247,
+            "prior_atr_samples": 85,
+            "percentile": 0.7411764705882353,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 7.805376813138325e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792568100
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792589400,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12191,
+              "ema20": 1.1224975898835807,
+              "previous_ema20": 1.1225594414502735,
+              "direction": "SELL",
+              "last_closed_at": 1792587600,
+              "first_open_at": 1792054800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12205,
+              "ema20": 1.122132681665998,
+              "previous_ema20": 1.1221413849992607,
+              "direction": "SELL",
+              "last_closed_at": 1792584000,
+              "first_open_at": 1790625600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00035285597716069585,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00023667720210401,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792589400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792662600,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1251,
+              "ema20": 1.123441980324787,
+              "previous_ema20": 1.1232674519379227,
+              "direction": "BUY",
+              "last_closed_at": 1792659600,
+              "first_open_at": 1792126800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1243,
+              "ema20": 1.1226512583211332,
+              "previous_ema20": 1.122477706565463,
+              "direction": "BUY",
+              "last_closed_at": 1792656000,
+              "first_open_at": 1790697600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00037118829390550285,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002414845891285797,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792662600
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792666200,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1243400000000001,
+              "ema20": 1.1235275933519948,
+              "previous_ema20": 1.1234420768627311,
+              "direction": "BUY",
+              "last_closed_at": 1792663200,
+              "first_open_at": 1792130400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1243,
+              "ema20": 1.1226512583211332,
+              "previous_ema20": 1.122477706565463,
+              "direction": "BUY",
+              "last_closed_at": 1792656000,
+              "first_open_at": 1790697600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004390865825536036,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002655028532317642,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792666200
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792741800,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12148,
+              "ema20": 1.121756247042542,
+              "previous_ema20": 1.121785325678599,
+              "direction": "SELL",
+              "last_closed_at": 1792738800,
+              "first_open_at": 1792378800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12193,
+              "ema20": 1.1223505890136265,
+              "previous_ema20": 1.1223948615413766,
+              "direction": "SELL",
+              "last_closed_at": 1792728000,
+              "first_open_at": 1790769600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00016202210638963324,
+            "prior_atr_samples": 85,
+            "percentile": 0.35294117647058826,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 6.794646513872036e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792741800
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792744500,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12086,
+              "ema20": 1.121670904138355,
+              "previous_ema20": 1.1217562624687083,
+              "direction": "SELL",
+              "last_closed_at": 1792742400,
+              "first_open_at": 1792382400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12086,
+              "ema20": 1.122208518300029,
+              "previous_ema20": 1.1223504675947689,
+              "direction": "SELL",
+              "last_closed_at": 1792742400,
+              "first_open_at": 1790784000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0001604353012170596,
+            "prior_atr_samples": 85,
+            "percentile": 0.35294117647058826,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 7.643606553513675e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792744500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792766400,
+          "side": "SELL",
+          "regime": "RANGING",
+          "timeframes": {
+            "H1": {
+              "close": 1.11951,
+              "ema20": 1.1208910465649282,
+              "previous_ema20": 1.1210364198875522,
+              "direction": "SELL",
+              "last_closed_at": 1792764000,
+              "first_open_at": 1792404000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11894,
+              "ema20": 1.1218971853700523,
+              "previous_ema20": 1.122208468040584,
+              "direction": "SELL",
+              "last_closed_at": 1792756800,
+              "first_open_at": 1790798400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003104982065446884,
+            "prior_atr_samples": 85,
+            "percentile": 0.43529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001865629480925339,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792766400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1793010300,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.1215600000000001,
+              "ema20": 1.1211667105150482,
+              "previous_ema20": 1.1211253116218955,
+              "direction": "BUY",
+              "last_closed_at": 1793008800,
+              "first_open_at": 1792476000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12196,
+              "ema20": 1.1214789598628487,
+              "previous_ema20": 1.1214283240589382,
+              "direction": "BUY",
+              "last_closed_at": 1793001600,
+              "first_open_at": 1790870400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002463214645596169,
+            "prior_atr_samples": 85,
+            "percentile": 0.7294117647058823,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014704684767564475,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1793010300
+          }
+        }
+      ]
+    },
+    "doubled_costs": {
+      "identical_ledgers": 29,
+      "changed_ledgers": [
+        [
+          2,
+          "train",
+          "scoring"
+        ]
+      ],
+      "gate_counts": {
+        "atr_extreme": 22,
+        "realized_extreme": 0,
+        "actual_timeframe_opposition": 37,
+        "unavailable_data": 1
+      },
+      "native_htf_vs_m1_close_checks": 104,
+      "observation_count": 63,
+      "traces": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790830800,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.13273,
+              "ema20": 1.1337085835466354,
+              "previous_ema20": 1.1338115923410181,
+              "direction": "SELL",
+              "last_closed_at": 1790830800,
+              "first_open_at": 1790298000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13327,
+              "ema20": 1.1354757049968842,
+              "previous_ema20": 1.1357078844702404,
+              "direction": "SELL",
+              "last_closed_at": 1790827200,
+              "first_open_at": 1788868800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0001999667218953859,
+            "prior_atr_samples": 85,
+            "percentile": 0.7058823529411765,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00012845041493188494,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790830800
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790838000,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.13287,
+              "ema20": 1.133524569592842,
+              "previous_ema20": 1.1335934716552465,
+              "direction": "SELL",
+              "last_closed_at": 1790838000,
+              "first_open_at": 1790305200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13327,
+              "ema20": 1.1354757049968842,
+              "previous_ema20": 1.1357078844702404,
+              "direction": "SELL",
+              "last_closed_at": 1790827200,
+              "first_open_at": 1788868800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00019920714441471222,
+            "prior_atr_samples": 85,
+            "percentile": 0.7176470588235294,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.44062577761914e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790838000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790852700,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.13037,
+              "ema20": 1.1328164550921427,
+              "previous_ema20": 1.1330739766807894,
+              "direction": "SELL",
+              "last_closed_at": 1790852400,
+              "first_open_at": 1790319600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13184,
+              "ema20": 1.1351294622355934,
+              "previous_ema20": 1.1354757214182873,
+              "direction": "SELL",
+              "last_closed_at": 1790841600,
+              "first_open_at": 1788883200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005682654652061197,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00028071998866683706,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1790852700
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790854500,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.13037,
+              "ema20": 1.1328164550921427,
+              "previous_ema20": 1.1330739766807894,
+              "direction": "SELL",
+              "last_closed_at": 1790852400,
+              "first_open_at": 1790319600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.13184,
+              "ema20": 1.1351294622355934,
+              "previous_ema20": 1.1354757214182873,
+              "direction": "SELL",
+              "last_closed_at": 1790841600,
+              "first_open_at": 1788883200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005846157105858273,
+            "prior_atr_samples": 85,
+            "percentile": 0.9647058823529412,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002839414423659832,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790854500
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790878200,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12657,
+              "ema20": 1.1306915931483879,
+              "previous_ema20": 1.1311254450587445,
+              "direction": "SELL",
+              "last_closed_at": 1790877600,
+              "first_open_at": 1790344800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1286,
+              "ema20": 1.1339855175620732,
+              "previous_ema20": 1.1345524141475547,
+              "direction": "SELL",
+              "last_closed_at": 1790870400,
+              "first_open_at": 1788912000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.000678574945278415,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0003770719821190407,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1790878200
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790922600,
+          "side": "BUY",
+          "regime": "TRENDING_BULLISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12438,
+              "ema20": 1.1258651745691592,
+              "previous_ema20": 1.126021508734334,
+              "direction": "SELL",
+              "last_closed_at": 1790920800,
+              "first_open_at": 1790560800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12339,
+              "ema20": 1.1311856267618263,
+              "previous_ema20": 1.1320062190525448,
+              "direction": "SELL",
+              "last_closed_at": 1790913600,
+              "first_open_at": 1788955200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00022207323398560854,
+            "prior_atr_samples": 85,
+            "percentile": 0.6352941176470588,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00012220481293736803,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790922600
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790933100,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12465,
+              "ema20": 1.12563743737547,
+              "previous_ema20": 1.1257413781518353,
+              "direction": "SELL",
+              "last_closed_at": 1790931600,
+              "first_open_at": 1790571600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12523,
+              "ema20": 1.1306183760388933,
+              "previous_ema20": 1.1311855735166714,
+              "direction": "SELL",
+              "last_closed_at": 1790928000,
+              "first_open_at": 1788969600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003171761499358931,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021411108282183986,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1790933100
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1790946900,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12506,
+              "ema20": 1.1255756611534684,
+              "previous_ema20": 1.1256299412748862,
+              "direction": "SELL",
+              "last_closed_at": 1790946000,
+              "first_open_at": 1790586000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12509,
+              "ema20": 1.1300918518790855,
+              "previous_ema20": 1.1306183626031998,
+              "direction": "SELL",
+              "last_closed_at": 1790942400,
+              "first_open_at": 1788984000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00041345111236814144,
+            "prior_atr_samples": 85,
+            "percentile": 0.7764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021496727414942288,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1790946900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791269700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12141,
+              "ema20": 1.1215749081161333,
+              "previous_ema20": 1.1215922668651999,
+              "direction": "SELL",
+              "last_closed_at": 1791266400,
+              "first_open_at": 1790733600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12225,
+              "ema20": 1.125100396214191,
+              "previous_ema20": 1.125400437920948,
+              "direction": "SELL",
+              "last_closed_at": 1791259200,
+              "first_open_at": 1789128000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00023423386534541087,
+            "prior_atr_samples": 85,
+            "percentile": 0.9294117647058824,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001223285347083246,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791269700
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791275400,
+          "side": "SELL",
+          "regime": "RANGING",
+          "timeframes": {
+            "H1": {
+              "close": 1.12166,
+              "ema20": 1.121635989958103,
+              "previous_ema20": 1.1216334625852717,
+              "direction": "BUY",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1790740800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12166,
+              "ema20": 1.1247727241242018,
+              "previous_ema20": 1.1251003792951704,
+              "direction": "SELL",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1789142400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00022359860401994244,
+            "prior_atr_samples": 85,
+            "percentile": 0.6352941176470588,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.7617788581969e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791275400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791276900,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12166,
+              "ema20": 1.121635989958103,
+              "previous_ema20": 1.1216334625852717,
+              "direction": "BUY",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1790740800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12166,
+              "ema20": 1.1247727241242018,
+              "previous_ema20": 1.1251003792951704,
+              "direction": "SELL",
+              "last_closed_at": 1791273600,
+              "first_open_at": 1789142400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.000210312176926554,
+            "prior_atr_samples": 85,
+            "percentile": 0.32941176470588235,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 8.871726926922676e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791276900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791349500,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12384,
+              "ema20": 1.1248071297292488,
+              "previous_ema20": 1.1249089328586435,
+              "direction": "SELL",
+              "last_closed_at": 1791349200,
+              "first_open_at": 1790816400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12483,
+              "ema20": 1.1249925373438756,
+              "previous_ema20": 1.1250096465379678,
+              "direction": "SELL",
+              "last_closed_at": 1791345600,
+              "first_open_at": 1789387200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00020538917260892235,
+            "prior_atr_samples": 85,
+            "percentile": 0.9764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00010095701494541093,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791349500
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "decision_time": 1791358200,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12377,
+              "ema20": 1.1245991837089875,
+              "previous_ema20": 1.1246864662046703,
+              "direction": "SELL",
+              "last_closed_at": 1791356400,
+              "first_open_at": 1790823600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12483,
+              "ema20": 1.1249925373438756,
+              "previous_ema20": 1.1250096465379678,
+              "direction": "SELL",
+              "last_closed_at": 1791345600,
+              "first_open_at": 1789387200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00019073932599720882,
+            "prior_atr_samples": 85,
+            "percentile": 0.8117647058823529,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.710755434870328e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791358200
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "decision_time": 1791547800,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12178,
+              "ema20": 1.1216652230507127,
+              "previous_ema20": 1.1216531412665771,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1791187200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004232943650651459,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.000268380020323935,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791547800
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "decision_time": 1791553800,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12161,
+              "ema20": 1.121659958309837,
+              "previous_ema20": 1.1216652170792936,
+              "direction": "SELL",
+              "last_closed_at": 1791550800,
+              "first_open_at": 1791190800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003484235724877552,
+            "prior_atr_samples": 85,
+            "percentile": 0.5529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00017900316508977525,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791553800
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "decision_time": 1791561000,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12085,
+              "ema20": 1.1215027725469422,
+              "previous_ema20": 1.1215714854466203,
+              "direction": "SELL",
+              "last_closed_at": 1791558000,
+              "first_open_at": 1791198000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00037610698970440694,
+            "prior_atr_samples": 85,
+            "percentile": 0.8117647058823529,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001855662093899315,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791561000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791869400,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11707,
+              "ema20": 1.1169750448289837,
+              "previous_ema20": 1.116965049547824,
+              "direction": "BUY",
+              "last_closed_at": 1791867600,
+              "first_open_at": 1791334800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11592,
+              "ema20": 1.1193580906814549,
+              "previous_ema20": 1.119719994963713,
+              "direction": "SELL",
+              "last_closed_at": 1791864000,
+              "first_open_at": 1789732800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002434815917494316,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019686760532439427,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791869400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791884400,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11791,
+              "ema20": 1.1171638599569707,
+              "previous_ema20": 1.1170853188998098,
+              "direction": "BUY",
+              "last_closed_at": 1791882000,
+              "first_open_at": 1791349200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002271223311531539,
+            "prior_atr_samples": 85,
+            "percentile": 0.8941176470588236,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00011827514077472814,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791884400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791885900,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1178,
+              "ema20": 1.117224455078173,
+              "previous_ema20": 1.1171638714021912,
+              "direction": "BUY",
+              "last_closed_at": 1791885600,
+              "first_open_at": 1791352800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002999449588459878,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019990243915630907,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791885900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791909300,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11954,
+              "ema20": 1.1178739889510798,
+              "previous_ema20": 1.117698619366983,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1791374400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11954,
+              "ema20": 1.1190918729648114,
+              "previous_ema20": 1.1190447016979495,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1789948800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00043140382095013146,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00023594306888348012,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791909300
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791972900,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12077,
+              "ema20": 1.1198696960309642,
+              "previous_ema20": 1.1197749271921182,
+              "direction": "BUY",
+              "last_closed_at": 1791972000,
+              "first_open_at": 1791439200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00026393378426204175,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014075022577783318,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791972900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1791978000,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1199,
+              "ema20": 1.1198725843743838,
+              "previous_ema20": 1.1198696985190557,
+              "direction": "BUY",
+              "last_closed_at": 1791975600,
+              "first_open_at": 1791442800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00030179558443825267,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021788753057944992,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791978000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792055700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12152,
+              "ema20": 1.118852269823956,
+              "previous_ema20": 1.1185714561212146,
+              "direction": "BUY",
+              "last_closed_at": 1792054800,
+              "first_open_at": 1791522000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12151,
+              "ema20": 1.1184065860980754,
+              "previous_ema20": 1.1180799109505044,
+              "direction": "BUY",
+              "last_closed_at": 1792051200,
+              "first_open_at": 1790092800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00033418385781157616,
+            "prior_atr_samples": 85,
+            "percentile": 0.27058823529411763,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014264469316843125,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792055700
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792064100,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.121,
+              "ema20": 1.1192246562061148,
+              "previous_ema20": 1.1190377779120215,
+              "direction": "BUY",
+              "last_closed_at": 1792062000,
+              "first_open_at": 1791529200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12151,
+              "ema20": 1.1184065860980754,
+              "previous_ema20": 1.1180799109505044,
+              "direction": "BUY",
+              "last_closed_at": 1792051200,
+              "first_open_at": 1790092800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005016499826364028,
+            "prior_atr_samples": 85,
+            "percentile": 0.6705882352941176,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002789554256570552,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792064100
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792127100,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12128,
+              "ema20": 1.120928588568643,
+              "previous_ema20": 1.120891597891658,
+              "direction": "BUY",
+              "last_closed_at": 1792126800,
+              "first_open_at": 1791766800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1212,
+              "ema20": 1.11955476721915,
+              "previous_ema20": 1.1193815848211657,
+              "direction": "BUY",
+              "last_closed_at": 1792123200,
+              "first_open_at": 1790164800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002183359577992519,
+            "prior_atr_samples": 85,
+            "percentile": 0.7529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001322760664974514,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792127100
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792175400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1252900000000001,
+              "ema20": 1.1235883527142554,
+              "previous_ema20": 1.123409231947335,
+              "direction": "BUY",
+              "last_closed_at": 1792173600,
+              "first_open_at": 1791813600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12423,
+              "ema20": 1.1206802618453022,
+              "previous_ema20": 1.1203066051974393,
+              "direction": "BUY",
+              "last_closed_at": 1792166400,
+              "first_open_at": 1790208000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00042469374413937194,
+            "prior_atr_samples": 85,
+            "percentile": 0.9294117647058824,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002548210201937033,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792175400
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792401000,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12255,
+              "ema20": 1.12281035217763,
+              "previous_ema20": 1.1228377576700121,
+              "direction": "SELL",
+              "last_closed_at": 1792400400,
+              "first_open_at": 1791867600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1232,
+              "ema20": 1.121424932742812,
+              "previous_ema20": 1.121238083557845,
+              "direction": "BUY",
+              "last_closed_at": 1792396800,
+              "first_open_at": 1790265600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00027436433505584096,
+            "prior_atr_samples": 85,
+            "percentile": 0.47058823529411764,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00017435697922009273,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792401000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792404000,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12273,
+              "ema20": 1.1228026905847632,
+              "previous_ema20": 1.1228103422252647,
+              "direction": "SELL",
+              "last_closed_at": 1792404000,
+              "first_open_at": 1791871200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1232,
+              "ema20": 1.121424932742812,
+              "previous_ema20": 1.121238083557845,
+              "direction": "BUY",
+              "last_closed_at": 1792396800,
+              "first_open_at": 1790265600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003050234276549139,
+            "prior_atr_samples": 85,
+            "percentile": 0.7764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00018253219183516275,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792404000
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792425900,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12232,
+              "ema20": 1.12219194328092,
+              "previous_ema20": 1.12217846362628,
+              "direction": "BUY",
+              "last_closed_at": 1792425600,
+              "first_open_at": 1791892800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12232,
+              "ema20": 1.1214942264094199,
+              "previous_ema20": 1.1214073028735692,
+              "direction": "BUY",
+              "last_closed_at": 1792425600,
+              "first_open_at": 1790294400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00043361836581425463,
+            "prior_atr_samples": 85,
+            "percentile": 0.7529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002680998855508136,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792425900
+          }
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "decision_time": 1792442700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12116,
+              "ema20": 1.1219407315357193,
+              "previous_ema20": 1.122022913802637,
+              "direction": "SELL",
+              "last_closed_at": 1792440000,
+              "first_open_at": 1791907200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12116,
+              "ema20": 1.121462373711958,
+              "previous_ema20": 1.1214942025237429,
+              "direction": "SELL",
+              "last_closed_at": 1792440000,
+              "first_open_at": 1790308800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002927136110430016,
+            "prior_atr_samples": 85,
+            "percentile": 0.03529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001444086361589445,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792442700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791439500,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12019,
+              "ema20": 1.1202984180493591,
+              "previous_ema20": 1.1203098304756074,
+              "direction": "SELL",
+              "last_closed_at": 1791439200,
+              "first_open_at": 1790906400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1198,
+              "ema20": 1.1225990925861145,
+              "previous_ema20": 1.1228937339109686,
+              "direction": "SELL",
+              "last_closed_at": 1791432000,
+              "first_open_at": 1789473600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00023226031052590168,
+            "prior_atr_samples": 85,
+            "percentile": 0.8470588235294118,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001505235671213333,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791439500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791440100,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12019,
+              "ema20": 1.1202984180493591,
+              "previous_ema20": 1.1203098304756074,
+              "direction": "SELL",
+              "last_closed_at": 1791439200,
+              "first_open_at": 1790906400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1198,
+              "ema20": 1.1225990925861145,
+              "previous_ema20": 1.1228937339109686,
+              "direction": "SELL",
+              "last_closed_at": 1791432000,
+              "first_open_at": 1789473600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00024336382279706176,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00016198794348319884,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791440100
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791440400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12019,
+              "ema20": 1.1202984180493591,
+              "previous_ema20": 1.1203098304756074,
+              "direction": "SELL",
+              "last_closed_at": 1791439200,
+              "first_open_at": 1790906400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1198,
+              "ema20": 1.1225990925861145,
+              "previous_ema20": 1.1228937339109686,
+              "direction": "SELL",
+              "last_closed_at": 1791432000,
+              "first_open_at": 1789473600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002409652211911581,
+            "prior_atr_samples": 85,
+            "percentile": 0.9764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00016221256562753183,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791440400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791464400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1181,
+              "ema20": 1.1197811502539305,
+              "previous_ema20": 1.1199581134385548,
+              "direction": "SELL",
+              "last_closed_at": 1791464400,
+              "first_open_at": 1790931600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11897,
+              "ema20": 1.1220708524662828,
+              "previous_ema20": 1.1223972579890495,
+              "direction": "SELL",
+              "last_closed_at": 1791460800,
+              "first_open_at": 1789502400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004425736484398426,
+            "prior_atr_samples": 85,
+            "percentile": 0.7294117647058823,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00026492285579437434,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791464400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791467700,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1181,
+              "ema20": 1.1197811502539305,
+              "previous_ema20": 1.1199581134385548,
+              "direction": "SELL",
+              "last_closed_at": 1791464400,
+              "first_open_at": 1790931600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11897,
+              "ema20": 1.1220708524662828,
+              "previous_ema20": 1.1223972579890495,
+              "direction": "SELL",
+              "last_closed_at": 1791460800,
+              "first_open_at": 1789502400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00041255848790697095,
+            "prior_atr_samples": 85,
+            "percentile": 0.5529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00020102173021503304,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791467700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791476700,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11822,
+              "ema20": 1.1193405095174147,
+              "previous_ema20": 1.119458457887669,
+              "direction": "SELL",
+              "last_closed_at": 1791475200,
+              "first_open_at": 1790942400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11822,
+              "ema20": 1.1217040708453974,
+              "previous_ema20": 1.1220708151449128,
+              "direction": "SELL",
+              "last_closed_at": 1791475200,
+              "first_open_at": 1789516800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0005114234561183638,
+            "prior_atr_samples": 85,
+            "percentile": 0.9647058823529412,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00032777783806447,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791476700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791547800,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12178,
+              "ema20": 1.1216652230507127,
+              "previous_ema20": 1.1216531412665771,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1791187200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004232943650651459,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.000268380020323935,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791547800
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791553800,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12161,
+              "ema20": 1.121659958309837,
+              "previous_ema20": 1.1216652170792936,
+              "direction": "SELL",
+              "last_closed_at": 1791550800,
+              "first_open_at": 1791190800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003484235724877552,
+            "prior_atr_samples": 85,
+            "percentile": 0.5529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00017900316508977525,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791553800
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791561000,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.12085,
+              "ema20": 1.1215027725469422,
+              "previous_ema20": 1.1215714854466203,
+              "direction": "SELL",
+              "last_closed_at": 1791558000,
+              "first_open_at": 1791198000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12178,
+              "ema20": 1.1216352050454739,
+              "previous_ema20": 1.121619963471313,
+              "direction": "BUY",
+              "last_closed_at": 1791547200,
+              "first_open_at": 1789588800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00037610698970440694,
+            "prior_atr_samples": 85,
+            "percentile": 0.8117647058823529,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001855662093899315,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791561000
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791793200,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12066,
+              "ema20": 1.1205329237306563,
+              "previous_ema20": 1.1205195472812517,
+              "direction": "BUY",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1791259200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12066,
+              "ema20": 1.1211090615860253,
+              "previous_ema20": 1.1211563312266595,
+              "direction": "SELL",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1789660800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "unavailable_data_blocked"
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791793500,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12066,
+              "ema20": 1.1205329237306563,
+              "previous_ema20": 1.1205195472812517,
+              "direction": "BUY",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1791259200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12066,
+              "ema20": 1.1211090615860253,
+              "previous_ema20": 1.1211563312266595,
+              "direction": "SELL",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1789660800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00019112671900848137,
+            "prior_atr_samples": 85,
+            "percentile": 0.3764705882352941,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 9.671810758638307e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791793500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791797700,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1202,
+              "ema20": 1.12050119374716,
+              "previous_ema20": 1.1205328983521243,
+              "direction": "SELL",
+              "last_closed_at": 1791795600,
+              "first_open_at": 1791262800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12066,
+              "ema20": 1.1211090615860253,
+              "previous_ema20": 1.1211563312266595,
+              "direction": "SELL",
+              "last_closed_at": 1791792000,
+              "first_open_at": 1789660800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002480508047427051,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001445498026466287,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791797700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791819600,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11755,
+              "ema20": 1.119716789234513,
+              "previous_ema20": 1.1199448723118302,
+              "direction": "SELL",
+              "last_closed_at": 1791817200,
+              "first_open_at": 1791284400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11926,
+              "ema20": 1.1209329586816899,
+              "previous_ema20": 1.121109059595552,
+              "direction": "SELL",
+              "last_closed_at": 1791806400,
+              "first_open_at": 1789675200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.000267181387321372,
+            "prior_atr_samples": 85,
+            "percentile": 0.4470588235294118,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001656046580673452,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791819600
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791869400,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11707,
+              "ema20": 1.1169750448289837,
+              "previous_ema20": 1.116965049547824,
+              "direction": "BUY",
+              "last_closed_at": 1791867600,
+              "first_open_at": 1791334800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11592,
+              "ema20": 1.1193580906814549,
+              "previous_ema20": 1.119719994963713,
+              "direction": "SELL",
+              "last_closed_at": 1791864000,
+              "first_open_at": 1789732800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002434815917494316,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019686760532439427,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791869400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791884400,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.11791,
+              "ema20": 1.1171638599569707,
+              "previous_ema20": 1.1170853188998098,
+              "direction": "BUY",
+              "last_closed_at": 1791882000,
+              "first_open_at": 1791349200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002271223311531539,
+            "prior_atr_samples": 85,
+            "percentile": 0.8941176470588236,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00011827514077472814,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1791884400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791885900,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1178,
+              "ema20": 1.117224455078173,
+              "previous_ema20": 1.1171638714021912,
+              "direction": "BUY",
+              "last_closed_at": 1791885600,
+              "first_open_at": 1791352800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1171,
+              "ema20": 1.119143059188511,
+              "previous_ema20": 1.1193581180504595,
+              "direction": "SELL",
+              "last_closed_at": 1791878400,
+              "first_open_at": 1789747200,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002999449588459878,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00019990243915630907,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791885900
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791909300,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.11954,
+              "ema20": 1.1178739889510798,
+              "previous_ema20": 1.117698619366983,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1791374400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11954,
+              "ema20": 1.1190918729648114,
+              "previous_ema20": 1.1190447016979495,
+              "direction": "BUY",
+              "last_closed_at": 1791907200,
+              "first_open_at": 1789948800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00043140382095013146,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00023594306888348012,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791909300
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791972900,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12077,
+              "ema20": 1.1198696960309642,
+              "previous_ema20": 1.1197749271921182,
+              "direction": "BUY",
+              "last_closed_at": 1791972000,
+              "first_open_at": 1791439200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00026393378426204175,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014075022577783318,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791972900
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "decision_time": 1791978000,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1199,
+              "ema20": 1.1198725843743838,
+              "previous_ema20": 1.1198696985190557,
+              "direction": "BUY",
+              "last_closed_at": 1791975600,
+              "first_open_at": 1791442800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12087,
+              "ema20": 1.1194046020001431,
+              "previous_ema20": 1.1192503495791057,
+              "direction": "BUY",
+              "last_closed_at": 1791964800,
+              "first_open_at": 1790006400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00030179558443825267,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00021788753057944992,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1791978000
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "decision_time": 1792127100,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12128,
+              "ema20": 1.120928588568643,
+              "previous_ema20": 1.120891597891658,
+              "direction": "BUY",
+              "last_closed_at": 1792126800,
+              "first_open_at": 1791766800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1212,
+              "ema20": 1.11955476721915,
+              "previous_ema20": 1.1193815848211657,
+              "direction": "BUY",
+              "last_closed_at": 1792123200,
+              "first_open_at": 1790164800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002183359577992519,
+            "prior_atr_samples": 85,
+            "percentile": 0.7529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001322760664974514,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792127100
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "decision_time": 1792175400,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.1252900000000001,
+              "ema20": 1.1235883527142554,
+              "previous_ema20": 1.123409231947335,
+              "direction": "BUY",
+              "last_closed_at": 1792173600,
+              "first_open_at": 1791813600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12423,
+              "ema20": 1.1206802618453022,
+              "previous_ema20": 1.1203066051974393,
+              "direction": "BUY",
+              "last_closed_at": 1792166400,
+              "first_open_at": 1790208000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00042469374413937194,
+            "prior_atr_samples": 85,
+            "percentile": 0.9294117647058824,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002548210201937033,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792175400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792474500,
+          "side": "BUY",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12191,
+              "ema20": 1.1216154493055626,
+              "previous_ema20": 1.1215844439693061,
+              "direction": "BUY",
+              "last_closed_at": 1792472400,
+              "first_open_at": 1791939600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12153,
+              "ema20": 1.1214428892912018,
+              "previous_ema20": 1.1214337197429074,
+              "direction": "BUY",
+              "last_closed_at": 1792468800,
+              "first_open_at": 1790337600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00021247640209419409,
+            "prior_atr_samples": 85,
+            "percentile": 0.9529411764705882,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014379451563001266,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792474500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792491300,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1227800000000001,
+              "ema20": 1.1221152245657715,
+              "previous_ema20": 1.1220452482042738,
+              "direction": "BUY",
+              "last_closed_at": 1792490400,
+              "first_open_at": 1791957600,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1233,
+              "ema20": 1.1216197169076354,
+              "previous_ema20": 1.121442845003176,
+              "direction": "BUY",
+              "last_closed_at": 1792483200,
+              "first_open_at": 1790352000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002607620449063363,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00015672188075728153,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792491300
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792497000,
+          "side": "BUY",
+          "regime": "RANGING",
+          "timeframes": {
+            "H1": {
+              "close": 1.12282,
+              "ema20": 1.1221823536895408,
+              "previous_ema20": 1.1221152330252822,
+              "direction": "BUY",
+              "last_closed_at": 1792494000,
+              "first_open_at": 1791961200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1233,
+              "ema20": 1.1216197169076354,
+              "previous_ema20": 1.121442845003176,
+              "direction": "BUY",
+              "last_closed_at": 1792483200,
+              "first_open_at": 1790352000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00026613325934135654,
+            "prior_atr_samples": 85,
+            "percentile": 0.9176470588235294,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001416721599117853,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792497000
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792559700,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12258,
+              "ema20": 1.1228026508779363,
+              "previous_ema20": 1.122826087812456,
+              "direction": "SELL",
+              "last_closed_at": 1792558800,
+              "first_open_at": 1792026000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12281,
+              "ema20": 1.1221152146325168,
+              "previous_ema20": 1.1220420793306767,
+              "direction": "BUY",
+              "last_closed_at": 1792555200,
+              "first_open_at": 1790596800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0001914717157657223,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00010582024366871575,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792559700
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792568100,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12266,
+              "ema20": 1.1227734212389389,
+              "previous_ema20": 1.122785360316722,
+              "direction": "SELL",
+              "last_closed_at": 1792566000,
+              "first_open_at": 1792033200,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12281,
+              "ema20": 1.1221152146325168,
+              "previous_ema20": 1.1220420793306767,
+              "direction": "BUY",
+              "last_closed_at": 1792555200,
+              "first_open_at": 1790596800,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00017442808237708247,
+            "prior_atr_samples": 85,
+            "percentile": 0.7411764705882353,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 7.805376813138325e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792568100
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792589400,
+          "side": "BUY",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.12191,
+              "ema20": 1.1224975898835807,
+              "previous_ema20": 1.1225594414502735,
+              "direction": "SELL",
+              "last_closed_at": 1792587600,
+              "first_open_at": 1792054800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12205,
+              "ema20": 1.122132681665998,
+              "previous_ema20": 1.1221413849992607,
+              "direction": "SELL",
+              "last_closed_at": 1792584000,
+              "first_open_at": 1790625600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00035285597716069585,
+            "prior_atr_samples": 85,
+            "percentile": 0.9882352941176471,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00023667720210401,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792589400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792662600,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1251,
+              "ema20": 1.123441980324787,
+              "previous_ema20": 1.1232674519379227,
+              "direction": "BUY",
+              "last_closed_at": 1792659600,
+              "first_open_at": 1792126800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1243,
+              "ema20": 1.1226512583211332,
+              "previous_ema20": 1.122477706565463,
+              "direction": "BUY",
+              "last_closed_at": 1792656000,
+              "first_open_at": 1790697600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00037118829390550285,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002414845891285797,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792662600
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792666200,
+          "side": "SELL",
+          "regime": "HIGH_VOLATILITY",
+          "timeframes": {
+            "H1": {
+              "close": 1.1243400000000001,
+              "ema20": 1.1235275933519948,
+              "previous_ema20": 1.1234420768627311,
+              "direction": "BUY",
+              "last_closed_at": 1792663200,
+              "first_open_at": 1792130400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.1243,
+              "ema20": 1.1226512583211332,
+              "previous_ema20": 1.122477706565463,
+              "direction": "BUY",
+              "last_closed_at": 1792656000,
+              "first_open_at": 1790697600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0004390865825536036,
+            "prior_atr_samples": 85,
+            "percentile": 1.0,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0002655028532317642,
+            "realized_limit": 0.01,
+            "atr_block": true,
+            "realized_block": false,
+            "last_closed_at": 1792666200
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792741800,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12148,
+              "ema20": 1.121756247042542,
+              "previous_ema20": 1.121785325678599,
+              "direction": "SELL",
+              "last_closed_at": 1792738800,
+              "first_open_at": 1792378800,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12193,
+              "ema20": 1.1223505890136265,
+              "previous_ema20": 1.1223948615413766,
+              "direction": "SELL",
+              "last_closed_at": 1792728000,
+              "first_open_at": 1790769600,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.00016202210638963324,
+            "prior_atr_samples": 85,
+            "percentile": 0.35294117647058826,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 6.794646513872036e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792741800
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792744500,
+          "side": "SELL",
+          "regime": "UNCERTAIN",
+          "timeframes": {
+            "H1": {
+              "close": 1.12086,
+              "ema20": 1.121670904138355,
+              "previous_ema20": 1.1217562624687083,
+              "direction": "SELL",
+              "last_closed_at": 1792742400,
+              "first_open_at": 1792382400,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12086,
+              "ema20": 1.122208518300029,
+              "previous_ema20": 1.1223504675947689,
+              "direction": "SELL",
+              "last_closed_at": 1792742400,
+              "first_open_at": 1790784000,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0001604353012170596,
+            "prior_atr_samples": 85,
+            "percentile": 0.35294117647058826,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 7.643606553513675e-05,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792744500
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1792766400,
+          "side": "SELL",
+          "regime": "RANGING",
+          "timeframes": {
+            "H1": {
+              "close": 1.11951,
+              "ema20": 1.1208910465649282,
+              "previous_ema20": 1.1210364198875522,
+              "direction": "SELL",
+              "last_closed_at": 1792764000,
+              "first_open_at": 1792404000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.11894,
+              "ema20": 1.1218971853700523,
+              "previous_ema20": 1.122208468040584,
+              "direction": "SELL",
+              "last_closed_at": 1792756800,
+              "first_open_at": 1790798400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0003104982065446884,
+            "prior_atr_samples": 85,
+            "percentile": 0.43529411764705883,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.0001865629480925339,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1792766400
+          }
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "decision_time": 1793010300,
+          "side": "SELL",
+          "regime": "TRENDING_BEARISH",
+          "timeframes": {
+            "H1": {
+              "close": 1.1215600000000001,
+              "ema20": 1.1211667105150482,
+              "previous_ema20": 1.1211253116218955,
+              "direction": "BUY",
+              "last_closed_at": 1793008800,
+              "first_open_at": 1792476000,
+              "bars": 100
+            },
+            "H4": {
+              "close": 1.12196,
+              "ema20": 1.1214789598628487,
+              "previous_ema20": 1.1214283240589382,
+              "direction": "BUY",
+              "last_closed_at": 1793001600,
+              "first_open_at": 1790870400,
+              "bars": 100
+            }
+          },
+          "volatility": {
+            "status": "verified",
+            "atr": 0.0002463214645596169,
+            "prior_atr_samples": 85,
+            "percentile": 0.7294117647058823,
+            "percentile_limit": 0.98,
+            "realized_per_bar": 0.00014704684767564475,
+            "realized_limit": 0.01,
+            "atr_block": false,
+            "realized_block": false,
+            "last_closed_at": 1793010300
+          }
+        }
+      ]
+    }
+  },
+  "settings_and_risk_unchanged": true,
+  "auditor_sha256": "7cd95b7317ac53c451ef7372ef250837b0dc4c3f8f7576ab37b087dbcd35f8fb",
+  "limitation": "Development-data gate verification; no profitability or untouched-holdout claim"
+}

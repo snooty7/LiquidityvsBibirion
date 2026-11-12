@@ -1,0 +1,1491 @@
+{
+  "status": "passed",
+  "scenarios": {
+    "base": {
+      "checks": {
+        "identical_control_ledgers": 12,
+        "verified_sweep_normalizations": 88,
+        "verified_structure_normalizations": 51,
+        "verified_zone_normalizations": 92,
+        "verified_scores": 100
+      },
+      "changed_ledgers": [
+        [
+          2,
+          "train",
+          "scoring"
+        ]
+      ],
+      "paired_baseline_scores": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790830800,
+          "previous_score": 0.4926426585731199,
+          "corrected_score": 0.512669600877987,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790852700,
+          "previous_score": 0.3838570984142967,
+          "corrected_score": 0.40321424867859357,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790878200,
+          "previous_score": 0.6704214650485767,
+          "corrected_score": 0.6748424947680967,
+          "previous_reasons": [],
+          "corrected_reasons": []
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790922600,
+          "previous_score": 0.5854846144617318,
+          "corrected_score": 0.585491193654791,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790946900,
+          "previous_score": 0.2958871063390257,
+          "corrected_score": 0.30964901832439345,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1791269700,
+          "previous_score": 0.4154788886286567,
+          "corrected_score": 0.4155050822537787,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1791275400,
+          "previous_score": 0.7720525445597594,
+          "corrected_score": 0.7854860589229501,
+          "previous_reasons": [],
+          "corrected_reasons": []
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1791349500,
+          "previous_score": 0.3267286577394951,
+          "corrected_score": 0.3267301718693659,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "timestamp": 1791547800,
+          "previous_score": 0.28618084481983647,
+          "corrected_score": 0.30389684922136045,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1791869400,
+          "previous_score": 0.1566879478442352,
+          "corrected_score": 0.21008471520964428,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1791909300,
+          "previous_score": 0.19724479881266704,
+          "corrected_score": 0.2204223546366516,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1791972900,
+          "previous_score": 0.2685374346434328,
+          "corrected_score": 0.26853692239486354,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792055700,
+          "previous_score": 0.0,
+          "corrected_score": 0.0,
+          "previous_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792064100,
+          "previous_score": 0.40833546529228903,
+          "corrected_score": 0.4123226041528934,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792127100,
+          "previous_score": 0.5759562905578685,
+          "corrected_score": 0.6080169738760756,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792175400,
+          "previous_score": 0.23302515120233205,
+          "corrected_score": 0.2447903703149236,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792401000,
+          "previous_score": 0.4471505653348391,
+          "corrected_score": 0.46355211402407165,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792425900,
+          "previous_score": 0.439368632465751,
+          "corrected_score": 0.4474427236770586,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792442700,
+          "previous_score": 0.36879892352820154,
+          "corrected_score": 0.382451771844784,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791439500,
+          "previous_score": 0.6315983672039673,
+          "corrected_score": 0.6854172912021728,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": []
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791464400,
+          "previous_score": 0.13786344917524326,
+          "corrected_score": 0.1435122265229393,
+          "previous_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791476700,
+          "previous_score": 0.5177544233324436,
+          "corrected_score": 0.5197092194493882,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791547800,
+          "previous_score": 0.28618084481983647,
+          "corrected_score": 0.30389684922136045,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791793200,
+          "previous_score": 0.0,
+          "corrected_score": 0.0,
+          "previous_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "required_feature_unavailable:regime",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791819600,
+          "previous_score": 0.4243978210319353,
+          "corrected_score": 0.4372739358453266,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791869400,
+          "previous_score": 0.1566879478442352,
+          "corrected_score": 0.21008471520964428,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791909300,
+          "previous_score": 0.19724479881266704,
+          "corrected_score": 0.2204223546366516,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791972900,
+          "previous_score": 0.2685374346434328,
+          "corrected_score": 0.26853692239486354,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "timestamp": 1792127100,
+          "previous_score": 0.5759562905578685,
+          "corrected_score": 0.6080169738760756,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "timestamp": 1792175400,
+          "previous_score": 0.23302515120233205,
+          "corrected_score": 0.2447903703149236,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792474500,
+          "previous_score": 0.3730219712205687,
+          "corrected_score": 0.417729293531522,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792559700,
+          "previous_score": 0.1350256164529102,
+          "corrected_score": 0.13656858216190515,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792589400,
+          "previous_score": 0.4234815285906209,
+          "corrected_score": 0.4773278603231865,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792662600,
+          "previous_score": 0.45285411666441516,
+          "corrected_score": 0.46767139428420457,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792741800,
+          "previous_score": 0.28205295154131776,
+          "corrected_score": 0.2851310688250758,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792766400,
+          "previous_score": 0.620204668272129,
+          "corrected_score": 0.6362984104642282,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1793010300,
+          "previous_score": 0.5507332093298668,
+          "corrected_score": 0.5588490641349347,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        }
+      ],
+      "outcomes": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "baseline",
+          "trades": 8,
+          "net_pnl": 54.14587726415669
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "regime",
+          "trades": 4,
+          "net_pnl": 58.117365053633
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "scoring",
+          "trades": 2,
+          "net_pnl": 14.9107146075584
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "baseline",
+          "trades": 1,
+          "net_pnl": 17.593232405158336
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "regime",
+          "trades": 1,
+          "net_pnl": 7.0498422997253956
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "baseline",
+          "trades": 10,
+          "net_pnl": 16.970442461957635
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "regime",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "baseline",
+          "trades": 9,
+          "net_pnl": 62.36720735336841
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "regime",
+          "trades": 1,
+          "net_pnl": 7.0498422997253956
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "scoring",
+          "trades": 1,
+          "net_pnl": 6.50915562765032
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "baseline",
+          "trades": 2,
+          "net_pnl": 31.762115887183874
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "regime",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "baseline",
+          "trades": 7,
+          "net_pnl": 5.4631612147665995
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "regime",
+          "trades": 3,
+          "net_pnl": -1.1988555465362012
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        }
+      ]
+    },
+    "doubled_costs": {
+      "checks": {
+        "identical_control_ledgers": 12,
+        "verified_sweep_normalizations": 88,
+        "verified_structure_normalizations": 51,
+        "verified_zone_normalizations": 92,
+        "verified_scores": 100
+      },
+      "changed_ledgers": [
+        [
+          2,
+          "train",
+          "scoring"
+        ]
+      ],
+      "paired_baseline_scores": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790830800,
+          "previous_score": 0.4826409943909195,
+          "corrected_score": 0.5026679366957866,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790852700,
+          "previous_score": 0.3803376165480396,
+          "corrected_score": 0.3996947668123365,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790878200,
+          "previous_score": 0.6674741119022083,
+          "corrected_score": 0.6718951416217283,
+          "previous_reasons": [],
+          "corrected_reasons": []
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790922600,
+          "previous_score": 0.5854846144617318,
+          "corrected_score": 0.585491193654791,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1790946900,
+          "previous_score": 0.2958871063390257,
+          "corrected_score": 0.30481168704099787,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1791269700,
+          "previous_score": 0.4154788886286567,
+          "corrected_score": 0.4155050822537787,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1791275400,
+          "previous_score": 0.7631079448884899,
+          "corrected_score": 0.7765414592516806,
+          "previous_reasons": [],
+          "corrected_reasons": []
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "timestamp": 1791349500,
+          "previous_score": 0.3267286577394951,
+          "corrected_score": 0.3267301718693659,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "timestamp": 1791547800,
+          "previous_score": 0.28145600044420843,
+          "corrected_score": 0.2991720048457324,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1791869400,
+          "previous_score": 0.11150999446799878,
+          "corrected_score": 0.16490676183340786,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1791909300,
+          "previous_score": 0.19260877126055065,
+          "corrected_score": 0.21578632708453518,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1791972900,
+          "previous_score": 0.2685374346434328,
+          "corrected_score": 0.26853692239486354,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792055700,
+          "previous_score": 0.0,
+          "corrected_score": 0.0,
+          "previous_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792064100,
+          "previous_score": 0.4043486217375416,
+          "corrected_score": 0.40833576059814597,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792127100,
+          "previous_score": 0.5667960953240079,
+          "corrected_score": 0.598856778642215,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792175400,
+          "previous_score": 0.2283158753356342,
+          "corrected_score": 0.24008109444822573,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792401000,
+          "previous_score": 0.43986098813958874,
+          "corrected_score": 0.45626253682882123,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792425900,
+          "previous_score": 0.434756281703676,
+          "corrected_score": 0.4428303729149836,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "timestamp": 1792442700,
+          "previous_score": 0.36196630651088324,
+          "corrected_score": 0.3756191548274657,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791439500,
+          "previous_score": 0.6229873393641934,
+          "corrected_score": 0.6768062633623987,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": []
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791464400,
+          "previous_score": 0.1333444272970463,
+          "corrected_score": 0.13899320464474232,
+          "previous_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791476700,
+          "previous_score": 0.5138437696929081,
+          "corrected_score": 0.5157985658098527,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791547800,
+          "previous_score": 0.28145600044420843,
+          "corrected_score": 0.2991720048457324,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791793200,
+          "previous_score": 0.0,
+          "corrected_score": 0.0,
+          "previous_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:sweep",
+            "required_feature_unavailable:structure",
+            "required_feature_unavailable:regime",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791819600,
+          "previous_score": 0.4243978210319353,
+          "corrected_score": 0.42978838447491075,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791869400,
+          "previous_score": 0.11150999446799878,
+          "corrected_score": 0.16490676183340786,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791909300,
+          "previous_score": 0.19260877126055065,
+          "corrected_score": 0.21578632708453518,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "timestamp": 1791972900,
+          "previous_score": 0.2685374346434328,
+          "corrected_score": 0.26853692239486354,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "timestamp": 1792127100,
+          "previous_score": 0.5667960953240079,
+          "corrected_score": 0.598856778642215,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "timestamp": 1792175400,
+          "previous_score": 0.2283158753356342,
+          "corrected_score": 0.24008109444822573,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792474500,
+          "previous_score": 0.32125151628246607,
+          "corrected_score": 0.3659588385934194,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792559700,
+          "previous_score": 0.1350256164529102,
+          "corrected_score": 0.135031315145809,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792589400,
+          "previous_score": 0.41781349367137033,
+          "corrected_score": 0.471659825403936,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792662600,
+          "previous_score": 0.4474660157117427,
+          "corrected_score": 0.4622832933315321,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792741800,
+          "previous_score": 0.2697089569804554,
+          "corrected_score": 0.2727870742642134,
+          "previous_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "required_feature_unavailable:structure",
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1792766400,
+          "previous_score": 0.6137634072346831,
+          "corrected_score": 0.6298571494267824,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "timestamp": 1793010300,
+          "previous_score": 0.5426137382817843,
+          "corrected_score": 0.5507295930868521,
+          "previous_reasons": [
+            "score_below_threshold"
+          ],
+          "corrected_reasons": [
+            "score_below_threshold"
+          ]
+        }
+      ],
+      "outcomes": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "baseline",
+          "trades": 8,
+          "net_pnl": 43.58958277012083
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "regime",
+          "trades": 4,
+          "net_pnl": 52.34358835721309
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "scoring",
+          "trades": 2,
+          "net_pnl": 12.429341263404249
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "train",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "baseline",
+          "trades": 1,
+          "net_pnl": 16.35254573308126
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "regime",
+          "trades": 1,
+          "net_pnl": 5.809155627648319
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "baseline",
+          "trades": 10,
+          "net_pnl": 53.58583400919024
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "regime",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "baseline",
+          "trades": 9,
+          "net_pnl": 99.68259890060102
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "regime",
+          "trades": 1,
+          "net_pnl": 5.809155627648319
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "scoring",
+          "trades": 1,
+          "net_pnl": 5.268468955573245
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "baseline",
+          "trades": 2,
+          "net_pnl": 29.280742543029724
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "regime",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "baseline",
+          "trades": 7,
+          "net_pnl": -12.683662251057724
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "regime",
+          "trades": 3,
+          "net_pnl": -4.560457781382713
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "scoring",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "adaptive",
+          "trades": 0,
+          "net_pnl": 0
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "arm": "adaptive_shadow",
+          "trades": 0,
+          "net_pnl": 0
+        }
+      ]
+    }
+  },
+  "unchanged_numeric_settings_and_risk": true,
+  "limitation": "Development-window feature audit, not an OOS performance improvement claim"
+}
