@@ -1,0 +1,17 @@
+{
+  "capital": 10000,
+  "risk_pct": 0.5,
+  "legacy_accounts": 24,
+  "separate_new_accounts": 18,
+  "shared_data_period_costs_and_runtime": true,
+  "per_entry_risk_budget_verified": true,
+  "original_stressed_positive_both_clocks": false,
+  "sell_flat_stressed_positive_both_clocks": true,
+  "new_entry_nomination": {
+    "selected": null,
+    "ranking": [],
+    "fallback": "cash"
+  },
+  "tests_passed": 397,
+  "expected_failures": 1
+}
