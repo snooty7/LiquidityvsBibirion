@@ -3,4 +3,5 @@ validate_qait_broad.py -text
 audit_qait_broad.py -text
 audit_qait_broad_coverage.py -text
 audit_qait_broad_risk.py -text
+audit_qait_results.py -text
 qait_broad_artifacts.py -text
