@@ -1,0 +1,8 @@
+{
+  "registered_at_utc": "2026-11-12T09:45:20.327925+00:00",
+  "registered_orchestrator_sha256": "30ad5bbb0c2e33e56811ce37037b5d7629006f5d63ef1b3aa47c803209b5705a",
+  "corrected_orchestrator_sha256": "4163a3eef9be2542e95b982d6ee29237cd62d6c93bc757c8569edbc5508cc847",
+  "original_auditor_commit": "b9621f9",
+  "reason": "The existing artifact manifest stores Windows separators; normalize both sides in post-run report lookup. Accept the explicitly recorded verifier-only correction in future dispatch checks. All eight workers already started under the registered original tool; production signal source and all replay inputs, protocols and parameters are unchanged.",
+  "scope": "Verification/dispatch provenance only. No comparison rerun, output replacement, threshold, risk or calendar change."
+}

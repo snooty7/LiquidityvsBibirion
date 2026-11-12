@@ -177,7 +177,13 @@ def run(symbol, scenario):
     """Run an original frozen protocol into a fresh output, with a broker tripwire."""
     from src.tools.research_adaptive import source_digest, run_protocol
     registration = json.loads((OUTPUT / "repeat_registration.json").read_text())
-    assert digest(Path(__file__)) == registration["orchestrator_sha256"]
+    amendment_path = OUTPUT/"verification_amendment.json"
+    if amendment_path.exists():
+        amendment = json.loads(amendment_path.read_text())
+        assert amendment["registered_orchestrator_sha256"] == registration["orchestrator_sha256"]
+        assert digest(Path(__file__)) == amendment["corrected_orchestrator_sha256"]
+    else:
+        assert digest(Path(__file__)) == registration["orchestrator_sha256"]
     assert source_digest(ROOT) == registration["source_digest"]
     for job in registration["jobs"]:
         assert digest(ROOT/job["protocol"]) == job["protocol_sha256"]
@@ -198,7 +204,7 @@ def verify():
     records = []
     for job in registration["jobs"]:
         raw = OUTPUT/job["symbol"]/job["scenario"]/"report.json"
-        original = next(r for r in artifacts["reports"] if r["raw"] == str((BEFORE/job["symbol"]/job["scenario"]/"report.json").relative_to(ROOT)).replace("\\","/"))
+        original = next(r for r in artifacts["reports"] if r["raw"].replace("\\","/") == str((BEFORE/job["symbol"]/job["scenario"]/"report.json").relative_to(ROOT)).replace("\\","/"))
         assert digest(raw) == original["raw_sha256"]
         assert raw.stat().st_size == original["raw_bytes"]
         records.append(dict(symbol=job["symbol"], scenario=job["scenario"],

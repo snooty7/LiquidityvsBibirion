@@ -24,6 +24,13 @@ raise immediately; only the pure pip-size helper is exempt. Configuration,
 source, effective local overrides, history and protocol hashes are verified by
 the frozen runner. No live trade or adaptive activation is authorized.
 
+The original timestamp audit/orchestrator version is retained in commit
+`b9621f9`. `verification_amendment.json` records a subsequent Windows path
+separator correction in the report lookup and its dispatch hash. All eight
+workers had already started using the original registered version. No replay,
+source, protocol, data or configuration changed; the original registration and
+audit bytes remain immutable.
+
 `repeat_verification.json` is written only when all eight complete reports match
 the original raw report hashes and sizes exactly. Every trade, feature,
 rejection, metric, unavailable phase and shadow observation is included in that
