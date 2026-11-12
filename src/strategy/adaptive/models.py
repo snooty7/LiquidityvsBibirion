@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-VERSION = "adaptive-v3-source-lifecycle-research"
+VERSION = "adaptive-v4-audited-gates-research"
 
 
 class Regime(str, Enum):

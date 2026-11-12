@@ -5,7 +5,7 @@ from dataclasses import replace
 
 from src.backtesting.history import TIMEFRAMES
 from src.strategy.adaptive.config import AdaptiveConfig
-from src.strategy.adaptive.context import directions
+from src.strategy.adaptive.context import directions, timeframe_block_reasons
 from src.strategy.adaptive.models import (
     AlignedEvidence, EntryProposal, Evaluation, FeatureObservation, MarketSnapshot, Regime, SignalAnchor, VERSION,
 )
@@ -64,8 +64,7 @@ def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
         reasons.append("no_matching_sweep")
     if broken is None:
         reasons.append("no_post_sweep_structure")
-    if any(direction != side for _, direction in alignment):
-        reasons.append("timeframe_conflict")
+    reasons.extend(timeframe_block_reasons(alignment, side, config.context_timeframes))
     if regime.regime == Regime.TRENDING_BULLISH and side != "BUY" or regime.regime == Regime.TRENDING_BEARISH and side != "SELL":
         reasons.append("regime_direction_conflict")
     active = [zone for zone in structure.zones if zone.side == side and zone.status == "active"]

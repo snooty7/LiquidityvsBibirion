@@ -1,0 +1,18 @@
+# Volatility and timeframe gates: audit decision record
+
+Date: 2026-11-12. Numerical thresholds, required timeframes, candle roles, costs, equity, data and chronological windows remain frozen. A repair is not required to create a trade.
+
+Initial source/data trace: the score-eligible SELL blocked for volatility has an M5 ATR percentile of 1.0 versus the configured .98 cutoff. Its unannualized realized return standard deviation is approximately .000377, below .01, so ATR rank—not a mistaken percent conversion—causes the block. The other score-eligible SELL has H1 BUY / H4 SELL; the configured policy requires both H1 and H4 to agree with the candidate. Baseline M15 eligibility does not replace that additional adaptive context requirement.
+
+All 22 high-volatility observations in the preceding full-adaptive study are attributable to ATR rank. All 37 timeframe-conflict observations contain an actual opposite direction, rather than a neutral/unavailable value. Across 52 unique candidate decision times, the last completed native H1/H4 close matches the last M1 close in the corresponding completed bucket (104 checks, no discrepancies).
+
+Contract defects found before rerun:
+
+- The engine/replay already trims feature inputs to the configured 100 bars, but direct `detect_regime` and `directions` calls can consume additional older candles. An older prefix can change EMA initialization, ATR rank and classification, violating the fixed-window contract. These entry points must trim to the same declared window; malformed used inputs must fail closed. Unused older inputs must not influence decisions.
+- The engine labels every nonmatching timeframe state as `timeframe_conflict`, including unavailable/neutral data. Neutral/missing context must still block, but should be distinguished from genuine opposite direction. Missing/duplicate timeframe identities must fail closed. No unanimous-alignment requirement is removed.
+
+Controlled fixed-window tests additionally exposed ATR initialization bias: the reused helper includes the first candle's high-low range despite having no previous close for that transition. In an otherwise constant true-range series, that different seed can drift upward toward the real range and falsely rank the current ATR as an extreme. The adaptive regime ATR will instead seed from the mean of 14 actual close-to-close true ranges, then use the same 14-period Wilder recurrence. At 100 bars, the current ATR and 85 prior fully initialized reference values remain the same window sizes. The .98 percentile limit, 1e-6 tie tolerance and all risk settings remain unchanged. Legacy strategy indicator helpers are not modified. The independent oracle will verify the corrected seed explicitly.
+
+Predeclared tests: fixed-window prefix invariance, genuine relative ATR extremes, constant ATR ties, realized-volatility path and threshold boundaries, independent EMA agreement/conflict, unavailable context still blocked, forming/future exclusion, close-time boundary joins, and equivalence of alignment allow/block decisions for valid existing states. No timeframe, indicator period, tolerance or threshold is chosen from P&L.
+
+Independent audit will recompute ATR initialization/rank, unannualized realized volatility and EMA20 directions directly from saved native completed candles, expose their cutoff times and cause flags, compare numerical settings with the previous protocol, and verify all five arms' trading ledgers. New base/stress evidence will use `reports/qait/gates_92001`; previous artifacts remain immutable. Valid extreme-volatility and opposite-direction rejections must remain blocked, even if the full engine still takes no trades.

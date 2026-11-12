@@ -78,6 +78,28 @@ def directions(context: MarketSnapshot, config: AdaptiveConfig) -> tuple[tuple[s
     """Higher-timeframe bias from the same EMA definition as the existing bot."""
     result = []
     for timeframe in config.context_timeframes:
-        bias = evaluate_bias(context.bars(timeframe), 20)
+        bars = context.bars(timeframe)[-config.lookback:]
+        if len(bars) < config.lookback or any(not math.isfinite(bar.close) or bar.close <= 0 for bar in bars):
+            result.append((timeframe, "UNCERTAIN"))
+            continue
+        bias = evaluate_bias(bars, 20)
         result.append((timeframe, "BUY" if bias["ok_buy"] else "SELL" if bias["ok_sell"] else "UNCERTAIN"))
     return tuple(result)
+
+
+def timeframe_block_reasons(alignment: tuple[tuple[str, str], ...], side: str | None,
+                            required: tuple[str, ...]) -> tuple[str, ...]:
+    """Keep unanimous alignment mandatory; distinguish uncertainty from opposition."""
+    if side not in {"BUY", "SELL"}:
+        return ("timeframe_candidate_side_unavailable",)
+    lookup = dict(alignment)
+    if len(lookup) != len(alignment) or set(lookup) != set(required):
+        return ("timeframe_context_invalid",)
+    reasons = []
+    for timeframe in required:
+        direction = lookup[timeframe]
+        if direction not in {"BUY", "SELL"}:
+            reasons.append(f"timeframe_uncertain:{timeframe}")
+        elif direction != side:
+            reasons.extend(("timeframe_conflict", f"timeframe_conflict:{timeframe}"))
+    return tuple(dict.fromkeys(reasons))
