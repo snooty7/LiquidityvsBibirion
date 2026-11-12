@@ -2,6 +2,8 @@
 
 Date: 2026-11-12. **The anchored consumed-liquidity rule falsely rejected active baseline levels. It is corrected without changing numerical thresholds or risk controls. No test-window performance improvement is established. Everything remains disabled, with no live trades.**
 
+Follow-up: [volatility/timeframe gate audit](12_volatility_timeframe_results.md). This document preserves the lifecycle study; the follow-up supplies the latest fixed-window/ATR-seed verification and frozen artifacts.
+
 ## Audited contract
 
 The baseline rebuilds a newest-first high/low pivot map from its rolling rates and keeps `max_levels` entries. It does not permanently delete a level when price crosses it. Duplicate execution is controlled separately by remembered side/level signal keys, pending state, cooldown, positions and recovery.

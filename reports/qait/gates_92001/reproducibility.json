@@ -1,0 +1,6 @@
+{
+  "status": "byte_identical",
+  "base_report_sha256": "f7cc59efa28dfa22076c4b1036a9ca0b3059a3082388c979cc023c0e5bf1bbb2",
+  "repeat_report_sha256": "f7cc59efa28dfa22076c4b1036a9ca0b3059a3082388c979cc023c0e5bf1bbb2",
+  "repeat_command": ".venv/Scripts/python.exe -m src.tools.research_adaptive run --protocol reports/qait/gates_92001/protocol.json --output .git/qait-gates-repeat"
+}
