@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from src.backtesting.costs import ExecutionCosts
 from src.backtesting.swaps import SwapModel, accrue_swaps
@@ -771,7 +771,13 @@ def run_backtest(
     end_exclusive: bool = False,
     swaps: Optional[SwapModel] = None,
     overnight_policy: Optional[OvernightPolicy | ScalpPolicy] = None,
+    signal_provider: Optional[Callable] = None,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
+    if cfg.strategy_mode == "fast_scalp_research" and signal_provider is None:
+        raise ValueError("Fast scalp research requires an explicit offline signal provider")
+    if signal_provider is not None and (history is None or cfg.confirmation_mode != "none"):
+        raise ValueError("Research signal providers require offline history and complete confirmed entries")
+    detect_signal = signal_provider or _detect_signal_for_cfg
     # Match live settings unless the caller explicitly requests a research override.
     side_mode = str(cfg.trade_side_filter if side_mode is None else side_mode).lower()
     if side_mode not in {"both", "buy", "sell"}:
@@ -908,6 +914,16 @@ def run_backtest(
                 break
 
         rollover(decision_time)
+
+        # A provider may already have causal signals cached. Still process every
+        # M1 bar above for stops, fees, daily protection and elapsed exit limits.
+        has_signal = getattr(signal_provider, "has_signal", None)
+        if has_signal is not None and pending is None and not has_signal(decision_time):
+            if interval_m1:
+                last_closed_m1 = interval_m1[-1:]
+            if end_exclusive and decision_time >= int(evaluation_end.timestamp()):
+                break
+            continue
 
         closed_m1 = _available_closed_bars(
             m1,
@@ -1054,17 +1070,19 @@ def run_backtest(
 
         if pending is not None and bool(getattr(cfg, "refresh_pending_on_newer_signal", False)):
             refresh_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
-            refresh_signal, _, _ = _detect_signal_for_cfg(cfg, pip, refresh_rates, closed_setup, closed_bias)
+            refresh_signal, _, _ = detect_signal(cfg, pip, refresh_rates, closed_setup, closed_bias)
             if refresh_signal is not None and _should_refresh_pending_with_new_signal(cfg, pending, refresh_signal):
                 pending = None
 
         if pending is None:
             m5_rates = _append_dummy_forming_bar(closed_m5, TIMEFRAME_SECONDS.get(cfg.timeframe, 300))
-            signal, levels, trend_retest_result = _detect_signal_for_cfg(cfg, pip, m5_rates, closed_setup, closed_bias)
+            signal, levels, trend_retest_result = detect_signal(cfg, pip, m5_rates, closed_setup, closed_bias)
             if signal is not None:
                 if not _side_allowed(side_mode, signal.side):
                     continue
-                if cfg.strategy_mode == "session_open_scalp":
+                if signal_provider is not None:
+                    pass  # The pure provider owns the new entry's sweep/confirmation rules.
+                elif cfg.strategy_mode == "session_open_scalp":
                     compression = evaluate_compression_window(
                         m5_rates[:-2],
                         lookback_bars=cfg.scalp_preopen_lookback_bars,

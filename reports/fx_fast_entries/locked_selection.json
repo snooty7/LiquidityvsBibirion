@@ -1,0 +1,26 @@
+{
+  "EURUSD": {
+    "selected": "m1_sweep_reclaim",
+    "positive_earlier_ranking": [
+      "m1_sweep_reclaim"
+    ],
+    "fallback": null
+  },
+  "GBPUSD": {
+    "selected": null,
+    "positive_earlier_ranking": [],
+    "fallback": "cash"
+  },
+  "NZDUSD": {
+    "selected": null,
+    "positive_earlier_ranking": [],
+    "fallback": "cash"
+  },
+  "USDCHF": {
+    "selected": "m5_sweep_m1_confirm",
+    "positive_earlier_ranking": [
+      "m5_sweep_m1_confirm"
+    ],
+    "fallback": null
+  }
+}

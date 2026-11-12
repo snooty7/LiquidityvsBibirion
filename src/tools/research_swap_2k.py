@@ -35,16 +35,17 @@ def initialize(path):
 
 def worker(task):
     """Replay one independent continuous account and reconcile risk and cash flows."""
-    if len(task) not in (9, 10):
+    if len(task) not in (9, 10, 11):
         raise ValueError("Expected replay task with optional overnight policy")
     name, phase, app, cfg, start, end, costs, swaps, capital = task[:9]
-    overnight_policy = task[9] if len(task) == 10 else None
+    overnight_policy = task[9] if len(task) >= 10 else None
+    signal_provider = task[10] if len(task) == 11 else None
     reason = history_coverage(_history, cfg, start, end, max_gap_days=4)
     if reason:
         raise ValueError(reason)
     result, trades = run_backtest(app, cfg, start, end, initial_equity=capital,
                                  costs=costs, swaps=swaps, history=_history, end_exclusive=True,
-                                 overnight_policy=overnight_policy)
+                                 overnight_policy=overnight_policy, signal_provider=signal_provider)
     cash = capital
     for trade in trades:
         risk = calc_position_risk_money(trade.entry_price, trade.sl_initial, trade.volume, _history.symbol_info)

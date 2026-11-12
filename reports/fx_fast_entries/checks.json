@@ -1,0 +1,10 @@
+{
+  "accounts": 48,
+  "positive_full_normal": 2,
+  "positive_full_stressed": 1,
+  "positive_later_stressed": 0,
+  "no_financing_overnight_or_late_violations": true,
+  "per_entry_price_risk_budget_verified": true,
+  "tests_passed": 391,
+  "expected_failures": 1
+}
