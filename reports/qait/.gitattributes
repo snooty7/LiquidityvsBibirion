@@ -1,2 +1,2 @@
 # Preserve evidence bytes (including report hashes) across Windows checkouts.
-**/*.json -text linguist-generated=true
+**/*.json -text whitespace=cr-at-eol linguist-generated=true
