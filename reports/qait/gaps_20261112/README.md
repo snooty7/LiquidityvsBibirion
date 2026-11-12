@@ -43,3 +43,9 @@ risk and frozen-input audits apply to byte-identical repeats. If any report
 differs, verification fails and this task cannot declare reproduction passed.
 The original development-data and isolated-account limitations remain unchanged;
 this audit creates no untouched holdout or improved-performance claim.
+
+Completed 2026-11-12: all eight raw reports matched exactly. Fresh monetary
+audits passed for 7,519 trade rows across 270 completed ledgers. See the four
+per-instrument `money_audit.json` files and `completion_audit.json` for input,
+archive, source, configuration, disabled-default and provenance checks. No
+signal, risk, calendar or freshness policy change was demonstrated or made.

@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "repeated_reports": 8,
+  "audited_trade_rows": 7519,
+  "audited_ledgers": 270,
+  "source_digest": "bb54d18ed617ebdcea2d36fcc3b49bb3ea0ae5b1585308df5204bc0613001a77",
+  "repeat_registration_sha256": "59211c972f7469145e3bb8f6a0e93966f730cac989f0267c78afd8fe04e94a84",
+  "repeat_verification_sha256": "4a8516612bdb7ad1b38a68494ddb1ba9edcc7fef3845b18f8b8662090e2766f0",
+  "gap_audit_sha256": "9f31588418e737393698ac1d497f7c399324b9427f66d0471e6877378f3bb6dd",
+  "holiday_scope_sha256": "a0de45dac4bd89937d862ec757250f4c4bb4c94940b82b1f02daddace1fcd87f",
+  "checks": [
+    "all original protocol/history/config/source hashes unchanged",
+    "original archives match recorded hashes",
+    "all eight raw reports reproduced exactly",
+    "independent repeat fill-price money/cost/equity/volume and shadow checks",
+    "original auditor source matches recorded hash at b9621f9",
+    "verifier-only amendment source matches recorded corrected hash",
+    "adaptive/ML/leverage/hedging saved defaults false",
+    "protected strategy/risk/execution/production source unchanged"
+  ],
+  "finding": "No confirmed context gap/holiday implementation bug; no market-session calendar is verified; original calendar, gap and freshness contracts retained"
+}

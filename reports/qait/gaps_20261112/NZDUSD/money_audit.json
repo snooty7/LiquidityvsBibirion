@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "audited_trade_rows": 440,
+  "audited_ledgers": 20,
+  "checks": [
+    "fill-price net P&L",
+    "gross/cost reconciliation",
+    "ending equity",
+    "volume step/min/max",
+    "shadow ledger identity"
+  ],
+  "reports": [
+    {
+      "path": "I:\\Liquidity_VS_Birbirion\\reports\\qait\\gaps_20261112\\NZDUSD\\base\\report.json",
+      "sha256": "b30344b9bc1b3fb928e9a71177d730b925643db9121f2ed63fde4adcc1a48f09"
+    },
+    {
+      "path": "I:\\Liquidity_VS_Birbirion\\reports\\qait\\gaps_20261112\\NZDUSD\\doubled_costs\\report.json",
+      "sha256": "1cb5935c57127d7d4fb7ebcca30219073f0d8c96ba0d99ad5a3ec418b0996694"
+    }
+  ],
+  "auditor_sha256": "a7d5e05eb08a5c7b77ba80122765ae6e4a2cdf6109cacdbfb0d0436075e5b0dc",
+  "limitation": "Audit verifies ledger arithmetic, not tick realism, portfolio simulation or profitability"
+}

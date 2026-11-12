@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "audited_trade_rows": 2377,
+  "audited_ledgers": 80,
+  "checks": [
+    "fill-price net P&L",
+    "gross/cost reconciliation",
+    "ending equity",
+    "volume step/min/max",
+    "shadow ledger identity"
+  ],
+  "reports": [
+    {
+      "path": "I:\\Liquidity_VS_Birbirion\\reports\\qait\\gaps_20261112\\GBPUSD\\base\\report.json",
+      "sha256": "f79bb93971dc9576398ae74e9f58a8d42bc5545f917c2ff3058a8c3e9a876737"
+    },
+    {
+      "path": "I:\\Liquidity_VS_Birbirion\\reports\\qait\\gaps_20261112\\GBPUSD\\doubled_costs\\report.json",
+      "sha256": "352d9fbecb53e9994977fea19d45bae2fd4b75027bf123d978fd7e69c3113b05"
+    }
+  ],
+  "auditor_sha256": "a7d5e05eb08a5c7b77ba80122765ae6e4a2cdf6109cacdbfb0d0436075e5b0dc",
+  "limitation": "Audit verifies ledger arithmetic, not tick realism, portfolio simulation or profitability"
+}

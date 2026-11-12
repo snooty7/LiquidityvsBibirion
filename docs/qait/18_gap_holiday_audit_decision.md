@@ -1,4 +1,4 @@
-# Gap and holiday audit decision
+# Gap and holiday audit
 
 ## Frozen policy and audit result
 
@@ -70,3 +70,41 @@ unexpected outages. No such calendar is guessed or activated in this task.
 Adaptive features, ML, leverage and hedging remain disabled. Production profiles,
 existing strategy/risk/execution source and all risk controls remain unchanged.
 No live trades are placed.
+
+## Completed frozen repeats
+
+Completed on 2026-11-12. **All eight complete reports reproduced byte for byte**
+under the original protocols and exact source implementation. This includes
+every trade, feature, rejection, metric, unavailable phase and shadow record.
+There are 270 completed arm ledgers, 54 full/shadow phase/cost pairs and six
+explicit unavailable phase/cost slots, exactly as before. The original 618.89 MiB
+of raw reports remain fully retained in their existing lossless archives; the
+repeat verification records all raw hashes, sizes and archive pointers.
+
+Fresh independent monetary audits on the repeated outputs passed for **7,519
+trade rows across 270 ledgers**, including fill-price P&L, costs, equity, broker
+volume and shadow identity. The closure audit also verified unchanged protocol,
+history, configuration and implementation hashes, original archive hashes,
+auditor source provenance, disabled adaptive/ML/leverage/hedging defaults and
+unchanged protected strategy/risk/execution/production files.
+
+The full Python suite passed: **436 passed, one pre-existing expected failure**.
+Dashboard syntax and DOM checks also passed. No new dependency was installed.
+
+The only correction made was to the new report-verification helper's Windows
+path-separator lookup. Its original version is retained at `b9621f9`; the
+explicit verifier/dispatch amendment records the corrected hash. All workers
+already started with the original registered tool. This correction changed no
+replay, calendar rule, risk setting, protocol or result. Original registration
+and raw timestamp audit bytes were retained.
+
+The empirical result is unchanged: full adaptive has one base-case test
+position, net -2.8648, and none under doubled costs. EURUSD/GBPUSD fold-3 and
+NZDUSD's sole test window remain unavailable under the fixed gap rule. Improved
+tradeable performance remains unproven. No verified broker/instrument historical
+session calendar was available to justify holiday or rollover exemptions.
+
+See `reports/qait/gaps_20261112/repeat_verification.json`, `completion_audit.json`,
+the per-instrument `money_audit.json` files and the evidence README. The previous
+[broader validation results](17_broader_validation_results.md) and all original
+frozen artifacts remain unchanged. No live trades were placed.
