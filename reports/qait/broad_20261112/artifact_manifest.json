@@ -1,0 +1,69 @@
+{
+  "format": "gzip, deterministic mtime=0, exact raw report bytes",
+  "reports": [
+    {
+      "raw": "reports\\qait\\broad_20261112\\EURUSD\\base\\report.json",
+      "raw_sha256": "d24eeef4280ed659702524e6f08db0ee53f66d0f138a27898a43e501e29940fc",
+      "raw_bytes": 97192168,
+      "packed": "reports\\qait\\broad_20261112\\EURUSD\\base\\report.json.gz",
+      "packed_sha256": "1abb8d47782d95544e3241bed76077bd00abe2746df3e6e14b940c59aba7c202",
+      "packed_bytes": 5255622
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\EURUSD\\doubled_costs\\report.json",
+      "raw_sha256": "4ae5d19026ee452733a6920eb72f4bbdd4191e91dd3949073f30675e7639789c",
+      "raw_bytes": 96999031,
+      "packed": "reports\\qait\\broad_20261112\\EURUSD\\doubled_costs\\report.json.gz",
+      "packed_sha256": "7864b0ccb2606e9212af5fe454a0e42964023c1f86676151a72624710e282ef3",
+      "packed_bytes": 5241044
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\GBPUSD\\base\\report.json",
+      "raw_sha256": "f79bb93971dc9576398ae74e9f58a8d42bc5545f917c2ff3058a8c3e9a876737",
+      "raw_bytes": 89138999,
+      "packed": "reports\\qait\\broad_20261112\\GBPUSD\\base\\report.json.gz",
+      "packed_sha256": "af14ffdf10dd01d53d6ef45ef34fe5656988493ec22237ad1f8aa92ed6825235",
+      "packed_bytes": 4933721
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\GBPUSD\\doubled_costs\\report.json",
+      "raw_sha256": "352d9fbecb53e9994977fea19d45bae2fd4b75027bf123d978fd7e69c3113b05",
+      "raw_bytes": 89115731,
+      "packed": "reports\\qait\\broad_20261112\\GBPUSD\\doubled_costs\\report.json.gz",
+      "packed_sha256": "bdf333be7aae7b9025ae25c5f2ce5b0ddf6232d924938e520576acb2ebe3ee0a",
+      "packed_bytes": 4927071
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\USDCHF\\base\\report.json",
+      "raw_sha256": "f44da306f779a45dce9f4cf1331ec54417f42e4c2e803781a63f14b292dbf97b",
+      "raw_bytes": 164711774,
+      "packed": "reports\\qait\\broad_20261112\\USDCHF\\base\\report.json.gz",
+      "packed_sha256": "bc13f03f8089b5c847a7b3798831cd8aa7add60400a2879a5dcb46a4d6f00dce",
+      "packed_bytes": 8479942
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\USDCHF\\doubled_costs\\report.json",
+      "raw_sha256": "e35407dc23e82d290b0a7d0672ef642f627889f5fde609e38fe5b34e07b873b2",
+      "raw_bytes": 67799889,
+      "packed": "reports\\qait\\broad_20261112\\USDCHF\\doubled_costs\\report.json.gz",
+      "packed_sha256": "499c1beb5661e1d13018ec4f94e1424d5f06fd322f129f787588cbe47cc0e47c",
+      "packed_bytes": 3568323
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\NZDUSD\\base\\report.json",
+      "raw_sha256": "b30344b9bc1b3fb928e9a71177d730b925643db9121f2ed63fde4adcc1a48f09",
+      "raw_bytes": 22139291,
+      "packed": "reports\\qait\\broad_20261112\\NZDUSD\\base\\report.json.gz",
+      "packed_sha256": "9719b790df160be086574cc3adda42b947e5e9b366b6760f7f83702670a2180e",
+      "packed_bytes": 1133479
+    },
+    {
+      "raw": "reports\\qait\\broad_20261112\\NZDUSD\\doubled_costs\\report.json",
+      "raw_sha256": "1cb5935c57127d7d4fb7ebcca30219073f0d8c96ba0d99ad5a3ec418b0996694",
+      "raw_bytes": 21856667,
+      "packed": "reports\\qait\\broad_20261112\\NZDUSD\\doubled_costs\\report.json.gz",
+      "packed_sha256": "03fe1732cfcada469b00a33ddca1bf489d5cc606a170233aa76bd5331fc5f6bb",
+      "packed_bytes": 1121214
+    }
+  ]
+}

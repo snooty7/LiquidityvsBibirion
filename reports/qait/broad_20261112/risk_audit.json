@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "records": [
+    {
+      "symbol": "EURUSD",
+      "scenario": "base",
+      "checked_trade_rows": 1199,
+      "maximum_authorized_stop_budget_utilization": 0.1895456882514324
+    },
+    {
+      "symbol": "EURUSD",
+      "scenario": "doubled_costs",
+      "checked_trade_rows": 1189,
+      "maximum_authorized_stop_budget_utilization": 0.1998999271748272
+    },
+    {
+      "symbol": "GBPUSD",
+      "scenario": "base",
+      "checked_trade_rows": 1190,
+      "maximum_authorized_stop_budget_utilization": 0.19503607639663692
+    },
+    {
+      "symbol": "GBPUSD",
+      "scenario": "doubled_costs",
+      "checked_trade_rows": 1187,
+      "maximum_authorized_stop_budget_utilization": 0.20513119470293992
+    },
+    {
+      "symbol": "USDCHF",
+      "scenario": "base",
+      "checked_trade_rows": 1619,
+      "maximum_authorized_stop_budget_utilization": 0.2489456295921042
+    },
+    {
+      "symbol": "USDCHF",
+      "scenario": "doubled_costs",
+      "checked_trade_rows": 695,
+      "maximum_authorized_stop_budget_utilization": 0.25612499580695486
+    },
+    {
+      "symbol": "NZDUSD",
+      "scenario": "base",
+      "checked_trade_rows": 222,
+      "maximum_authorized_stop_budget_utilization": 0.19262064411045562
+    },
+    {
+      "symbol": "NZDUSD",
+      "scenario": "doubled_costs",
+      "checked_trade_rows": 218,
+      "maximum_authorized_stop_budget_utilization": 0.20034216997858198
+    }
+  ],
+  "auditor_sha256": "101820c7401993c59697bd316d41d701e830e9860f455d71670ab7c34702071a",
+  "checks": [
+    "initial-stop risk within configured and portfolio budgets at reconstructed pre-entry equity",
+    "configured min/max volume",
+    "directional initial protection",
+    "exit stop never wider than initial",
+    "isolated single-position chronology"
+  ],
+  "limitation": "Saved initial/final stops only; not proof of every intratrade stop update, margin realism, gap-loss bounds or synchronized portfolio risk"
+}

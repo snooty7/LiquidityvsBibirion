@@ -25,6 +25,7 @@ def audit():
     assert not original.adaptive.hedging
     reference = asdict(next(cfg for cfg in original.symbols if cfg.magic == 92001))
     prior = json.loads((ROOT / "reports/qait/scoring_92001/protocol.json").read_text())
+    assert registration["source_digest"] == prior["source_digest"], "Prior signal implementation changed"
     records = []
     for job in registration["jobs"]:
         path = ROOT / job["protocol"]
