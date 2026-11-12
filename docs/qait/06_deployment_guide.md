@@ -2,7 +2,7 @@
 
 This release is **offline/observational only**. It does not add an adaptive strategy mode to the live orchestrator, install ML libraries, change production configuration, alter credentials, start MT5 or send trades. Existing strategies retain their dispatch, guards and execution adapter. The adaptive evaluator is broker-independent; a future live adapter is a separate, unimplemented boundary.
 
-The latest [alignment validation](08_signal_alignment_results.md) uses `reports/qait/aligned_92001/protocol.json` and `stress_protocol.json`. These supersede the initial research protocols for the corrected code; original evidence remains available at its frozen source revision. This correction does not change activation or risk settings.
+The latest [lifecycle validation](10_level_lifecycle_results.md) uses `reports/qait/lifecycle_92001/protocol.json` and `stress_protocol.json`. These supersede the earlier research protocols for the corrected code; original evidence remains available at its frozen source revision. This correction does not change activation or risk settings.
 
 ## Defaults and configuration
 

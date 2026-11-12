@@ -2,6 +2,8 @@
 
 Date: 2026-11-12. The signal/timeframe defects are repaired. **The frozen scoring/full-adaptive arms still take no historical trades. No threshold was lowered and no performance improvement is claimed.** Everything remains disabled by default, with no adaptive live order route or live trades.
 
+Follow-up: [the baseline lifecycle audit](10_level_lifecycle_results.md) found that the anchored consumed-level rule below did not match baseline retirement semantics. This document preserves the earlier results; the follow-up corrects those false rejections and supplies new frozen evidence.
+
 ## Defects and corrections
 
 1. The adapter omitted M1 although profile 92001 confirms M5 sweeps on M1. It now loads completed confirmation candles from the existing branch configuration and reuses its displacement/recent-extrema confirmation rules. Only bars starting after the M5 sweep closes may confirm it. Break strength uses that confirmation timeframe's causal ATR; the adaptive displacement floor remains in force.

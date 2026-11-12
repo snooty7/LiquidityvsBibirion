@@ -18,6 +18,8 @@ The full arm adapts candidates from the existing strategy; it is not an independ
 
 The [alignment repair](07_signal_alignment_investigation.md) binds liquidity-sweep candidates to their original pending identity and configured confirmation timeframe. Existing source-level provenance can use additional past history without changing fixed feature windows. The qualified lower-timeframe recent-extrema break is explicitly labeled `CONFIRMATION_BREAK`; it is not relabeled as an independent M5 swing BOS/MSS. Only a post-sweep-close confirmation is usable. Other confirmation modes without an anchored definition reject explicitly rather than treating unimplemented evidence as true.
 
+The subsequent [source lifecycle audit](09_level_lifecycle_audit.md) corrects anchored retirement semantics: baseline levels remain active according to their ranked rolling source map, not wick consumption. The adapter verifies exact map membership and detector priority at sweep creation using the inherited rank/window parameters. Duplicate/pending/execution guards remain separate and unchanged. Standalone adaptive structure/target lifecycle rules are not modified by this source-compatibility repair.
+
 ## Frozen inputs and windows
 
 `freeze` records code digest, original configuration-file hash, effective configuration hash (including local override effects), redacted effective settings, source-history file hash, adaptive parameters, broker valuation/volume data via the history bundle, costs, equity, and chronological fold boundaries. Code hashing normalizes newline conventions. Notification URL/token values are redacted in the public protocol; hashes still detect input changes.

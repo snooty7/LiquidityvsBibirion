@@ -1,0 +1,6 @@
+{
+  "status": "byte_identical",
+  "base_report_sha256": "88e0e1d003be8cf1fd52040dbec13c1ef801ea6e54362e7a8585411f7a30ccf5",
+  "repeat_report_sha256": "88e0e1d003be8cf1fd52040dbec13c1ef801ea6e54362e7a8585411f7a30ccf5",
+  "repeat_command": ".venv/Scripts/python.exe -m src.tools.research_adaptive run --protocol reports/qait/lifecycle_92001/protocol.json --output .git/qait-lifecycle-repeat"
+}

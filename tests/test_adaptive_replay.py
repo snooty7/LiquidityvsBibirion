@@ -62,6 +62,18 @@ def test_risk_sizing_remains_after_custom_protection(tmp_path, monkeypatch):
     assert not trades  # The minimum lot cannot fit this much wider initial stop.
 
 
+def test_level_reuse_does_not_bypass_baseline_duplicate_execution_guard(tmp_path, monkeypatch):
+    app, cfg, history, start = fixture(tmp_path)
+    cfg = replace(cfg, max_hold_bars=1)
+    monkeypatch.setattr(replay, "_detect_signal_for_cfg", lambda cfg, pip, rates, *args:
+                        (SweepSignal("BUY", 1.0, rates[-2]["time"]), [], None))
+    result, trades = replay.run_backtest(app, cfg, start, start+timedelta(minutes=60), initial_equity=10000,
+                                        costs=ExecutionCosts("fixed", 1, 3.5, .2), history=history,
+                                        end_exclusive=True, entry_policy=lambda **_: {})
+    assert len(trades) == 1 and trades[0].reason == "time_exit"
+    assert result.skipped_duplicate_setup > 0
+
+
 def test_frozen_protocol_detects_effective_config_drift_and_never_overwrites(tmp_path):
     app, cfg, history, start = fixture(tmp_path)
     config, data, protocol = (tmp_path/name for name in ("settings.json", "history.json", "protocol.json"))

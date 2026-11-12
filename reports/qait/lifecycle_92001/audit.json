@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "audited_trade_rows": 96,
+  "audited_ledgers": 60,
+  "checks": [
+    "fill-price net P&L",
+    "gross/cost reconciliation",
+    "ending equity",
+    "volume step/min/max",
+    "shadow ledger identity"
+  ],
+  "reports": [
+    {
+      "path": "reports\\qait\\lifecycle_92001\\base\\report.json",
+      "sha256": "88e0e1d003be8cf1fd52040dbec13c1ef801ea6e54362e7a8585411f7a30ccf5"
+    },
+    {
+      "path": "reports\\qait\\lifecycle_92001\\doubled_costs\\report.json",
+      "sha256": "0f50cd68e8d5b42064bb2be4ffadd8bbceb70bbafd8f0124bd2a4bedb0468e4c"
+    }
+  ],
+  "auditor_sha256": "a7d5e05eb08a5c7b77ba80122765ae6e4a2cdf6109cacdbfb0d0436075e5b0dc",
+  "limitation": "Audit verifies ledger arithmetic, not tick realism, portfolio simulation or profitability"
+}
