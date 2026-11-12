@@ -1,0 +1,45 @@
+{
+  "accounts_checked": 72,
+  "ledger_trades_checked": 7288,
+  "cached_controls_exact": true,
+  "locked_nominee": "sell_flat",
+  "descriptive_full_stress_winner": "triple_exit",
+  "diagnostics": {
+    "original": {
+      "positive_full_both_costs_both_clocks": false,
+      "positive_later_stress_both_clocks": true,
+      "beats_known_sell_flat_full_stress_both_clocks": false,
+      "positive_earlier_stress": false
+    },
+    "sell_flat": {
+      "positive_full_both_costs_both_clocks": true,
+      "positive_later_stress_both_clocks": true,
+      "beats_known_sell_flat_full_stress_both_clocks": false,
+      "positive_earlier_stress": false
+    },
+    "triple_exit": {
+      "positive_full_both_costs_both_clocks": true,
+      "positive_later_stress_both_clocks": true,
+      "beats_known_sell_flat_full_stress_both_clocks": false,
+      "positive_earlier_stress": false
+    },
+    "one_unit_carry": {
+      "positive_full_both_costs_both_clocks": false,
+      "positive_later_stress_both_clocks": true,
+      "beats_known_sell_flat_full_stress_both_clocks": false,
+      "positive_earlier_stress": false
+    },
+    "avoid_late_sell_entries": {
+      "positive_full_both_costs_both_clocks": false,
+      "positive_later_stress_both_clocks": false,
+      "beats_known_sell_flat_full_stress_both_clocks": false,
+      "positive_earlier_stress": false
+    },
+    "trail_gap_0_75": {
+      "positive_full_both_costs_both_clocks": false,
+      "positive_later_stress_both_clocks": false,
+      "beats_known_sell_flat_full_stress_both_clocks": false,
+      "positive_earlier_stress": false
+    }
+  }
+}

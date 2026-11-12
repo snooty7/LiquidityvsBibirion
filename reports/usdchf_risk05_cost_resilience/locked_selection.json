@@ -1,0 +1,12 @@
+{
+  "selected": "sell_flat",
+  "ranking": [
+    "sell_flat",
+    "one_unit_carry",
+    "avoid_late_sell_entries",
+    "original",
+    "triple_exit",
+    "trail_gap_0_75"
+  ],
+  "basis": "earlier GMT+3 stressed only"
+}
