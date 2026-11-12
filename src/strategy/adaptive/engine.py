@@ -1,13 +1,15 @@
 """Broker-independent deterministic proposals; no order submission path."""
 import hashlib
 import math
+from dataclasses import replace
 
 from src.backtesting.history import TIMEFRAMES
 from src.strategy.adaptive.config import AdaptiveConfig
 from src.strategy.adaptive.context import directions
 from src.strategy.adaptive.models import (
-    EntryProposal, Evaluation, FeatureObservation, MarketSnapshot, Regime, VERSION,
+    AlignedEvidence, EntryProposal, Evaluation, FeatureObservation, MarketSnapshot, Regime, SignalAnchor, VERSION,
 )
+from src.strategy.adaptive.alignment import align_signal
 from src.strategy.adaptive.regime import detect_regime
 from src.strategy.adaptive.scoring import score_features
 from src.strategy.adaptive.structure import analyze_structure
@@ -15,13 +17,17 @@ from src.strategy.adaptive.structure import analyze_structure
 
 def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
              tick_size: float, entry_price: float, candidate_side: str | None = None,
+             anchor: SignalAnchor | None = None,
+             signal_context: MarketSnapshot | None = None,
              order_flow: FeatureObservation | None = None, seen_keys: frozenset[str] = frozenset()) -> Evaluation:
     """Create a structure/ATR stop and existing-liquidity target, subject to gates.
 
     Risk sizing is deliberately separate and authoritative. Callers must not send
     this proposal without the existing guard chain and adaptive preflight.
     """
-    bars = context.bars(config.entry_timeframe)
+    # Extra history proves the original level's provenance; it must not change
+    # fixed regime, ATR percentile or zone feature windows.
+    bars = context.bars(config.entry_timeframe)[-config.lookback:]
     regime = detect_regime(bars, config)
     structure = analyze_structure(bars, config, regime.atr, pip) if pip > 0 else analyze_structure((), config, 0, 1)
     alignment = directions(context, config)
@@ -35,13 +41,25 @@ def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
     step = TIMEFRAMES[config.entry_timeframe]
     sweeps = [event for event in structure.events if event.kind == "SWEEP"
               and context.decision_time-event.available_at <= config.sweep_expiry_bars*step]
-    side = candidate_side or (sweeps[-1].side if sweeps else None)
+    side = candidate_side or (anchor.side if anchor else sweeps[-1].side if sweeps else None)
     if side not in {"BUY", "SELL"}:
         reasons.append("no_sweep")
     sweep = next((event for event in reversed(sweeps) if event.side == side), None)
     breaks = [event for event in structure.events if event.kind in {"BOS", "MSS"} and event.side == side
               and sweep is not None and event.available_at > sweep.available_at]
     broken = breaks[-1] if breaks else None
+    if anchor is not None:
+        proof = signal_context or context
+        evidence = (align_signal(proof, anchor, config)
+                    if proof.symbol == context.symbol and proof.decision_time == context.decision_time
+                    else AlignedEvidence(None, None, ("anchor_context_mismatch",)))
+        sweep, broken = evidence.sweep, evidence.confirmation
+        reasons.extend(proof.reasons)
+        reasons.extend(evidence.reasons)
+        if anchor.side != side:
+            reasons.append("anchor_side_mismatch")
+        structure = replace(structure, events=structure.events+tuple(
+            event for event in (sweep, broken) if event is not None))
     if sweep is None:
         reasons.append("no_matching_sweep")
     if broken is None:
@@ -55,7 +73,8 @@ def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
     observations = (
         FeatureObservation("sweep", min(1.0, sweep.strength) if sweep else None, "penetration_atr", context.decision_time,
                            (("penetration_atr", sweep.strength),) if sweep else ()),
-        FeatureObservation("structure", min(1.0, broken.strength) if broken else None, "break_strength_atr", context.decision_time,
+        FeatureObservation("structure", min(1.0, broken.strength) if broken else None,
+                           f"break_strength_atr:{broken.timeframe}" if broken and broken.timeframe else "break_strength_atr", context.decision_time,
                            (("break_strength_atr", broken.strength),) if broken else ()),
         FeatureObservation("zone", zone_quality if active else None, "max_fvg_ob_proximity" if active else "no_active_zone", context.decision_time,
                            (("active_zone_count", float(len(active))),)),
@@ -84,10 +103,13 @@ def evaluate(context: MarketSnapshot, config: AdaptiveConfig, *, pip: float,
             if sl <= 0 or risk_distance <= 0 or reward < config.min_rr*risk_distance:
                 reasons.append("invalid_stop_or_reward_risk")
             else:
-                key = hashlib.sha256(f"{VERSION}:{context.symbol}:{side}:{sweep.available_at}:{broken.available_at}:{config.digest()}".encode()).hexdigest()
+                identity = f"{anchor.branch_id}:{anchor.candle_time}:{anchor.level}" if anchor else "independent"
+                key = hashlib.sha256(f"{VERSION}:{context.symbol}:{identity}:{side}:{sweep.available_at}:{broken.available_at}:{config.digest()}".encode()).hexdigest()
                 if key in seen_keys:
                     reasons.append("duplicate_signal")
                 else:
+                    digest = (hashlib.sha256(f"{context.source_digest}:{signal_context.source_digest}".encode()).hexdigest()
+                              if signal_context is not None else context.source_digest)
                     proposal = EntryProposal(key, context.symbol, side, context.decision_time, entry_price, sl, tp,
-                                             score, regime, alignment, structure, config.digest(), context.source_digest)
+                                             score, regime, alignment, structure, config.digest(), digest)
     return Evaluation(proposal, tuple(dict.fromkeys(reasons)), regime, score, alignment, structure)

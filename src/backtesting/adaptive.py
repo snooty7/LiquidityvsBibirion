@@ -11,7 +11,7 @@ from src.strategy.adaptive.context import snapshot
 from src.strategy.adaptive.engine import evaluate
 from src.strategy.adaptive.exits import decide_exit
 from src.strategy.adaptive.ml_shadow import observe
-from src.strategy.adaptive.models import Regime
+from src.strategy.adaptive.models import Regime, SignalAnchor
 
 ARMS = ("baseline", "regime", "scoring", "adaptive", "adaptive_shadow")
 
@@ -36,15 +36,39 @@ class AdaptiveReplayPolicy:
               quoted_price, pending, costs, spread_pips):
         """Filter a legacy candidate or supply adaptive protection before sizing."""
         config = self.config
-        required = (config.entry_timeframe, *config.context_timeframes)
+        anchor = None
+        lookbacks = {}
+        additional = ()
+        if cfg.strategy_mode == "liquidity_sweep" and pending is not None:
+            from src.tools.backtest_mt5 import confirmation_timeframe
+
+            timeframe = confirmation_timeframe(cfg)
+            anchor = SignalAnchor(
+                f"{cfg.symbol}:{cfg.magic}", pending.side, pending.level, pending.candle_time,
+                pending.expires_at, cfg.timeframe, timeframe, cfg.confirmation_mode,
+                cfg.pivot_len, cfg.buffer_pips*pip_size(info.digits, info.point),
+                cfg.sweep_significance_lookback_bars, cfg.sweep_significance_range_multiple,
+                cfg.sweep_min_penetration_pips*pip_size(info.digits, info.point), cfg.cisd_structure_bars,
+                cfg.confirmation_displacement_body_ratio_min, cfg.confirmation_displacement_range_multiple)
+            additional = (cfg.timeframe, timeframe)
+            lookbacks[cfg.timeframe] = max(config.lookback, cfg.bars, 600)
+            elapsed = max(0, timestamp-(pending.candle_time+TIMEFRAMES[cfg.timeframe]))
+            confirmation_warmup = config.lookback+(elapsed+TIMEFRAMES[timeframe]-1)//TIMEFRAMES[timeframe]
+            lookbacks[timeframe] = max(lookbacks.get(timeframe, 0), confirmation_warmup, cfg.cisd_lookback_bars)
+        required = tuple(dict.fromkeys((config.entry_timeframe, *config.context_timeframes, *additional)))
         rates = {}
         for tf in required:
             end = bisect_right(self.history.timestamps(tf), timestamp-TIMEFRAMES[tf])
-            rates[tf] = self.history.bars(tf)[max(0, end-config.lookback):end]
+            rates[tf] = self.history.bars(tf)[max(0, end-lookbacks.get(tf, config.lookback)):end]
+        # Regime-only/baseline observations retain the original fixed windows.
+        # Longer level provenance and lower-timeframe data cannot alter those gates.
         context = snapshot(cfg.symbol, timestamp, rates, config)
+        signal_context = (snapshot(cfg.symbol, timestamp, rates, config, additional_timeframes=additional,
+                                   lookbacks=lookbacks) if anchor is not None else None)
         pip = pip_size(info.digits, info.point)
         result = evaluate(context, config, pip=pip, tick_size=info.trade_tick_size,
-                          entry_price=price, candidate_side=side, seen_keys=frozenset(self.seen))
+                          entry_price=price, candidate_side=side, anchor=anchor, signal_context=signal_context,
+                          seen_keys=frozenset(self.seen))
         reasons = [] if self.arm == "baseline" else list(context.reasons)
         if self.arm == "regime":
             if result.regime.regime in {Regime.UNCERTAIN, Regime.HIGH_VOLATILITY}:
@@ -58,6 +82,9 @@ class AdaptiveReplayPolicy:
         event = dict(timestamp=timestamp, side=side, regime=result.regime.regime.value,
                      evaluation=asdict(result), reasons=reasons, shadow=None,
                      signal_key=pending.signal_key if pending else None)
+        event["anchor"] = asdict(anchor) if anchor is not None else None
+        event["feature_source_digest"] = context.source_digest
+        event["anchor_source_digest"] = signal_context.source_digest if signal_context is not None else None
         if self.arm == "adaptive_shadow":
             event["shadow"] = asdict(observe(tuple(item.value or 0 for item in result.score.observations)))
         self.observations.append(event)

@@ -5,6 +5,7 @@ from src.risk.sizing import RiskSizingError, calc_lot_by_risk, calc_position_ris
 from src.strategy.adaptive.context import snapshot
 from src.strategy.adaptive.engine import evaluate
 from src.strategy.adaptive.ml_shadow import observe
+from src.strategy.adaptive.models import VERSION
 
 
 def build_observation(*, symbol, decision_time, rates, config, info, equity, risk_pct,
@@ -26,7 +27,7 @@ def build_observation(*, symbol, decision_time, rates, config, info, equity, ris
         except RiskSizingError as exc:
             risk = dict(status="sizing_rejected", reason=str(exc))
     return dict(status="observation_only_no_live_route", decision_time=decision_time,
-                price_basis="last_completed_entry_close_not_executable_quote", version="adaptive-v1-research",
+                price_basis="last_completed_entry_close_not_executable_quote", version=VERSION,
                 evaluation=asdict(result), proposed_risk=risk,
                 shadow=asdict(observe(tuple(item.value or 0 for item in result.score.observations))) if config.ml_shadow else None,
                 comparison=list(comparison), config_digest=config.digest(), source_digest=context.source_digest)

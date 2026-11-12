@@ -11,14 +11,21 @@ from src.strategy.adaptive.models import Candle, MarketSnapshot
 from src.strategy.filters import evaluate_bias
 
 
-def snapshot(symbol: str, decision_time: int, rates: dict, config: AdaptiveConfig) -> MarketSnapshot:
+def snapshot(symbol: str, decision_time: int, rates: dict, config: AdaptiveConfig, *,
+             additional_timeframes: tuple[str, ...] = (), lookbacks: dict[str, int] | None = None) -> MarketSnapshot:
     """Ignore future/forming rows before validating; never let them alter past features.
 
     D1 is an explicit UTC calendar. Native non-UTC daily bars must be converted
     by a separate session-aware importer rather than relabeled as UTC.
     """
     series, reasons = [], []
-    for timeframe in dict.fromkeys((config.entry_timeframe, *config.context_timeframes)):
+    lookbacks = lookbacks or {}
+    for timeframe in dict.fromkeys((config.entry_timeframe, *config.context_timeframes, *additional_timeframes)):
+        if timeframe not in TIMEFRAMES:
+            raise ValueError("Unknown additional timeframe")
+        count = lookbacks.get(timeframe, config.lookback)
+        if type(count) is not int or count < config.lookback:
+            raise ValueError("Provenance lookbacks cannot reduce the configured warmup")
         step = TIMEFRAMES[timeframe]
         bars = []
         previous = None
@@ -29,7 +36,7 @@ def snapshot(symbol: str, decision_time: int, rates: dict, config: AdaptiveConfi
                     raise ValueError("invalid_timestamp")
                 if row["time"] + step <= decision_time:
                     rows.append(row)
-            for row in rows[-config.lookback:]:
+            for row in rows[-count:]:
                 bar = Candle(**{name: row[name] for name in ("time", "open", "high", "low", "close")},
                              tick_volume=float(row.get("tick_volume", 0)) if isinstance(row, dict) else float(row["tick_volume"]))
                 if (type(bar.time) is not int or bar.time % step or
@@ -46,7 +53,7 @@ def snapshot(symbol: str, decision_time: int, rates: dict, config: AdaptiveConfi
                         raise ValueError("gapped_or_unordered")
                 previous = bar.time
                 bars.append(bar)
-            if len(bars) < config.lookback:
+            if len(bars) < count:
                 raise ValueError("insufficient_bars")
             if decision_time - (bars[-1].time + step) > config.max_age_bars * step:
                 raise ValueError("stale_bars")

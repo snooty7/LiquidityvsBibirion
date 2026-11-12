@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-VERSION = "adaptive-v1-research"
+VERSION = "adaptive-v2-aligned-research"
 
 
 class Regime(str, Enum):
@@ -67,6 +67,36 @@ class StructureEvent:
     pivot_time: int
     available_at: int
     strength: float = 0.0
+    timeframe: str = ""
+
+
+@dataclass(frozen=True)
+class SignalAnchor:
+    """Identity and existing rules of a pending liquidity-sweep candidate."""
+
+    branch_id: str
+    side: str
+    level: float
+    candle_time: int
+    expires_at: int
+    signal_timeframe: str
+    confirmation_timeframe: str
+    confirmation_mode: str
+    pivot_length: int
+    buffer_price: float
+    significance_lookback: int
+    significance_range_multiple: float
+    minimum_penetration_price: float
+    structure_bars: int
+    displacement_body_ratio_min: float
+    displacement_range_multiple: float
+
+
+@dataclass(frozen=True)
+class AlignedEvidence:
+    sweep: StructureEvent | None
+    confirmation: StructureEvent | None
+    reasons: tuple[str, ...]
 
 
 @dataclass(frozen=True)
