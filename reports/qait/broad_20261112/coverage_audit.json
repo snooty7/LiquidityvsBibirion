@@ -1,0 +1,305 @@
+{
+  "status": "complete",
+  "fixed_max_gap_days": 3,
+  "records": [
+    {
+      "symbol": "EURUSD",
+      "history_sha256": "c20cda4c4fa8c1a3a959ad8ca190f2ec02ebeaaef72d7d9369d72fbcc9dbe92b",
+      "first_m1_utc": "2024-10-01T00:00:00+00:00",
+      "last_m1_utc": "2026-11-10T23:59:00+00:00",
+      "m1_bars": 783050,
+      "windows": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "start": "2024-11-01T00:00:00+00:00",
+          "end": "2025-01-30T00:00:00+00:00",
+          "m1_bars": 88934,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "start": "2025-01-31T00:00:00+00:00",
+          "end": "2025-03-02T00:00:00+00:00",
+          "m1_bars": 30071,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "start": "2025-03-03T00:00:00+00:00",
+          "end": "2025-08-30T00:00:00+00:00",
+          "m1_bars": 186106,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "start": "2025-04-30T00:00:00+00:00",
+          "end": "2025-07-29T00:00:00+00:00",
+          "m1_bars": 91659,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "start": "2025-07-30T00:00:00+00:00",
+          "end": "2025-08-29T00:00:00+00:00",
+          "m1_bars": 31540,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "start": "2025-08-30T00:00:00+00:00",
+          "end": "2026-02-26T00:00:00+00:00",
+          "m1_bars": 180753,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "train",
+          "start": "2025-10-27T00:00:00+00:00",
+          "end": "2026-01-25T00:00:00+00:00",
+          "m1_bars": 90453,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "validation",
+          "start": "2026-01-26T00:00:00+00:00",
+          "end": "2026-02-25T00:00:00+00:00",
+          "m1_bars": 31612,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "test",
+          "start": "2026-02-26T00:00:00+00:00",
+          "end": "2026-08-25T00:00:00+00:00",
+          "m1_bars": 182424,
+          "gaps_over_fixed_limit": [
+            {
+              "previous_boundary_utc": "2026-04-02T23:59:00+00:00",
+              "next_boundary_utc": "2026-04-06T00:05:00+00:00",
+              "separation_seconds": 259560,
+              "separation_hours": 72.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "symbol": "GBPUSD",
+      "history_sha256": "3de2e25011e7137fdf67258542c0c5a8f2b321545c360205f3ff152b3ae8b9f0",
+      "first_m1_utc": "2024-10-01T00:00:00+00:00",
+      "last_m1_utc": "2026-11-10T23:59:00+00:00",
+      "m1_bars": 782952,
+      "windows": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "start": "2024-11-01T00:00:00+00:00",
+          "end": "2025-01-30T00:00:00+00:00",
+          "m1_bars": 89144,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "start": "2025-01-31T00:00:00+00:00",
+          "end": "2025-03-02T00:00:00+00:00",
+          "m1_bars": 30216,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "start": "2025-03-03T00:00:00+00:00",
+          "end": "2025-08-30T00:00:00+00:00",
+          "m1_bars": 185912,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "start": "2025-04-30T00:00:00+00:00",
+          "end": "2025-07-29T00:00:00+00:00",
+          "m1_bars": 91410,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "start": "2025-07-30T00:00:00+00:00",
+          "end": "2025-08-29T00:00:00+00:00",
+          "m1_bars": 31439,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "start": "2025-08-30T00:00:00+00:00",
+          "end": "2026-02-26T00:00:00+00:00",
+          "m1_bars": 180552,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "train",
+          "start": "2025-10-27T00:00:00+00:00",
+          "end": "2026-01-25T00:00:00+00:00",
+          "m1_bars": 90356,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "validation",
+          "start": "2026-01-26T00:00:00+00:00",
+          "end": "2026-02-25T00:00:00+00:00",
+          "m1_bars": 31620,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "test",
+          "start": "2026-02-26T00:00:00+00:00",
+          "end": "2026-08-25T00:00:00+00:00",
+          "m1_bars": 182358,
+          "gaps_over_fixed_limit": [
+            {
+              "previous_boundary_utc": "2026-04-02T23:59:00+00:00",
+              "next_boundary_utc": "2026-04-06T00:05:00+00:00",
+              "separation_seconds": 259560,
+              "separation_hours": 72.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "symbol": "USDCHF",
+      "history_sha256": "23617686bff6ef70b2838d36622099c979851052348d1ed2ff2ded24a0ed680a",
+      "first_m1_utc": "2024-10-01T00:00:00+00:00",
+      "last_m1_utc": "2026-11-10T23:59:00+00:00",
+      "m1_bars": 783556,
+      "windows": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "start": "2024-11-01T00:00:00+00:00",
+          "end": "2025-01-30T00:00:00+00:00",
+          "m1_bars": 88950,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "start": "2025-01-31T00:00:00+00:00",
+          "end": "2025-03-02T00:00:00+00:00",
+          "m1_bars": 30212,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "start": "2025-03-03T00:00:00+00:00",
+          "end": "2025-08-30T00:00:00+00:00",
+          "m1_bars": 185635,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "train",
+          "start": "2025-04-30T00:00:00+00:00",
+          "end": "2025-07-29T00:00:00+00:00",
+          "m1_bars": 91175,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "validation",
+          "start": "2025-07-30T00:00:00+00:00",
+          "end": "2025-08-29T00:00:00+00:00",
+          "m1_bars": 31428,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 2,
+          "phase": "test",
+          "start": "2025-08-30T00:00:00+00:00",
+          "end": "2026-02-26T00:00:00+00:00",
+          "m1_bars": 180528,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "train",
+          "start": "2025-10-27T00:00:00+00:00",
+          "end": "2026-01-25T00:00:00+00:00",
+          "m1_bars": 90374,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "validation",
+          "start": "2026-01-26T00:00:00+00:00",
+          "end": "2026-02-25T00:00:00+00:00",
+          "m1_bars": 31615,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 3,
+          "phase": "test",
+          "start": "2026-02-26T00:00:00+00:00",
+          "end": "2026-08-25T00:00:00+00:00",
+          "m1_bars": 183789,
+          "gaps_over_fixed_limit": []
+        }
+      ]
+    },
+    {
+      "symbol": "NZDUSD",
+      "history_sha256": "fd83a5b68f8c1b5987c9214a17deeff31ea803296ea8d6211c883dcd5cbc5f9c",
+      "first_m1_utc": "2025-07-28T00:05:00+00:00",
+      "last_m1_utc": "2026-11-10T23:59:00+00:00",
+      "m1_bars": 478773,
+      "windows": [
+        {
+          "fold": 1,
+          "phase": "train",
+          "start": "2025-08-15T00:00:00+00:00",
+          "end": "2025-11-13T00:00:00+00:00",
+          "m1_bars": 91178,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "validation",
+          "start": "2025-11-14T00:00:00+00:00",
+          "end": "2025-12-14T00:00:00+00:00",
+          "m1_bars": 30141,
+          "gaps_over_fixed_limit": []
+        },
+        {
+          "fold": 1,
+          "phase": "test",
+          "start": "2025-12-15T00:00:00+00:00",
+          "end": "2026-06-13T00:00:00+00:00",
+          "m1_bars": 182410,
+          "gaps_over_fixed_limit": [
+            {
+              "previous_boundary_utc": "2026-04-02T23:59:00+00:00",
+              "next_boundary_utc": "2026-04-06T00:05:00+00:00",
+              "separation_seconds": 259560,
+              "separation_hours": 72.1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auditor_sha256": "bd896ce7f2fd30914424d6b16b7a27a1541377cd31f0ff106386d9a8b8cf529d",
+  "interpretation": "Calendar bar separations, including holidays/closures; not proof of missing tradable prices. Existing fixed coverage rule retained without exceptions."
+}

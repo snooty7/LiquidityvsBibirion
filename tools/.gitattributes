@@ -1,0 +1,5 @@
+# These orchestration/auditor hashes are frozen as exact bytes in study evidence.
+validate_qait_broad.py -text
+audit_qait_broad.py -text
+audit_qait_broad_coverage.py -text
+qait_broad_artifacts.py -text

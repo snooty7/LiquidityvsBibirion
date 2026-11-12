@@ -32,6 +32,7 @@ After all jobs finish:
 ```powershell
 .venv/Scripts/python.exe -m tools.validate_qait_broad summarize
 .venv/Scripts/python.exe -m tools.audit_qait_broad
+.venv/Scripts/python.exe -m tools.audit_qait_broad_coverage
 .venv/Scripts/python.exe -m tools.qait_broad_artifacts pack
 ```
 
