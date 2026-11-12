@@ -61,8 +61,34 @@ def test_point_and_deposit_rates_convert_without_pip_factor_error():
     assert rates_from_snapshot({"swap_mode": 0}, info, "EUR") == (0, 0)
 
 
+@pytest.mark.parametrize("capital", [2000, 10000])
+def test_research_worker_uses_requested_capital_for_replay_and_reports(monkeypatch, capital):
+    from src.tools import research_swap_2k as study
+    def run(*args, **kwargs):
+        assert kwargs["initial_equity"] == capital
+        return SimpleNamespace(ending_equity=capital), []
+    def curve(trades, history, costs, initial_equity):
+        assert initial_equity == capital
+        return {"start_equity": capital, "end_equity": capital}
+    monkeypatch.setattr(study, "run_backtest", run)
+    monkeypatch.setattr(study, "account_curve", curve)
+    monkeypatch.setattr(study, "history_coverage", lambda *a, **k: None)
+    now = datetime(2026, 1, 5, tzinfo=timezone.utc)
+    result = study.worker(("normal", "full", None, None, now, now, None, None, capital))
+    assert result["account"]["start_equity"] == capital
+    assert result["metrics"]["return_pct"] == 0
+
+
+@pytest.mark.parametrize("capital", [0, -100, float("inf"), float("nan")])
+def test_invalid_research_capital_rejected_before_data_or_broker_access(capital):
+    from src.tools.research_swap_2k import run
+    with pytest.raises(ValueError, match="capital"):
+        run(None, None, None, capital=capital)
+
+
 @pytest.mark.parametrize("daily_limit,expected_reason", [(40, "daily_loss_guard_close"), (1000, "end_of_test")])
-def test_replay_books_swap_once_and_daily_guard_sees_it(tmp_path, monkeypatch, daily_limit, expected_reason):
+@pytest.mark.parametrize("capital,volume", [(2000, .07), (10000, .37)])
+def test_replay_books_swap_once_and_daily_guard_sees_it(tmp_path, monkeypatch, daily_limit, expected_reason, capital, volume):
     def forbidden(*args, **kwargs):
         raise AssertionError("No broker or trading allowed")
     monkeypatch.setattr(MT5Adapter, "initialize", forbidden)
@@ -87,18 +113,21 @@ def test_replay_books_swap_once_and_daily_guard_sees_it(tmp_path, monkeypatch, d
         (SweepSignal("BUY", 1.0, rates[-2]["time"]), [], None))
     costs = ExecutionCosts("fixed", 0, 3.5, 0)
     result, trades = replay.run_backtest(app, cfg, start, start+timedelta(hours=3),
-        initial_equity=2000, costs=costs, swaps=SwapModel(-1000, 0), history=history, end_exclusive=True)
+        initial_equity=capital, costs=costs, swaps=SwapModel(-1000, 0), history=history, end_exclusive=True)
     assert len(trades) == 1
     trade = trades[0]
     assert trade.reason == expected_reason
-    assert trade.swap_money == pytest.approx(-70)
-    assert trade.pnl_money == pytest.approx(-70.49)
-    assert result.ending_equity == pytest.approx(1929.51)
+    loss = volume * (1000 + 7)
+    assert trade.volume == pytest.approx(volume)
+    assert trade.swap_money == pytest.approx(-1000*volume)
+    assert trade.pnl_money == pytest.approx(-loss)
+    assert result.ending_equity == pytest.approx(capital-loss)
     assert trade.gross_pnl_money == pytest.approx(0)
     assert len(trade.swap_events) == 1
-    metrics = trade_metrics(trades, 2000)
-    assert metrics["net_pnl"] == pytest.approx(-70.49)
-    assert metrics["max_realized_drawdown"] == pytest.approx(70.49)
-    curve = account_curve(trades, history, costs, initial_equity=2000)
+    metrics = trade_metrics(trades, capital)
+    assert metrics["net_pnl"] == pytest.approx(-loss)
+    assert metrics["return_pct"] == pytest.approx(-loss/capital*100)
+    assert metrics["max_realized_drawdown"] == pytest.approx(loss)
+    curve = account_curve(trades, history, costs, initial_equity=capital)
     assert curve["end_equity"] == pytest.approx(result.ending_equity)
-    assert curve["m1_close_drawdown"] == pytest.approx(70.49)
+    assert curve["m1_close_drawdown"] == pytest.approx(loss)

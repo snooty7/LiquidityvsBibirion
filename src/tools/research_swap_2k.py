@@ -1,4 +1,4 @@
-"""Offline EUR2,000 / 0.75% replay of the fixed USDCHF 1.5R trailing candidate."""
+"""Offline configurable-capital / 0.75% replay of the fixed USDCHF 1.5R candidate."""
 from __future__ import annotations
 
 import argparse
@@ -35,36 +35,38 @@ def initialize(path):
 
 def worker(task):
     """Replay one independent continuous account and reconcile risk and cash flows."""
-    name, phase, app, cfg, start, end, costs, swaps = task
+    name, phase, app, cfg, start, end, costs, swaps, capital = task
     reason = history_coverage(_history, cfg, start, end, max_gap_days=4)
     if reason:
         raise ValueError(reason)
-    result, trades = run_backtest(app, cfg, start, end, initial_equity=CAPITAL,
+    result, trades = run_backtest(app, cfg, start, end, initial_equity=capital,
                                  costs=costs, swaps=swaps, history=_history, end_exclusive=True)
-    cash = CAPITAL
+    cash = capital
     for trade in trades:
         risk = calc_position_risk_money(trade.entry_price, trade.sl_initial, trade.volume, _history.symbol_info)
-        if risk > cash * .0075 + 1e-7 or trade.volume > cfg.max_lot + 1e-9:
+        if risk > cash * cfg.risk_pct / 100 + 1e-7 or trade.volume > cfg.max_lot + 1e-9:
             raise ValueError("Risk budget exceeded")
         expected = (trade.gross_pnl_money - trade.spread_cost_money - trade.commission_cost_money
                     - trade.slippage_cost_money + trade.swap_money)
         if not math.isclose(expected, trade.pnl_money, abs_tol=1e-8):
             raise ValueError("Cost accounting does not reconcile")
         cash += trade.pnl_money
-    account = account_curve(trades, _history, costs, initial_equity=CAPITAL)
+    account = account_curve(trades, _history, costs, initial_equity=capital)
     if not math.isclose(result.ending_equity, cash, abs_tol=1e-7):
         raise ValueError("Replay and trade-ledger balances disagree")
     if not math.isclose(account["end_equity"], cash, abs_tol=1e-7):
         raise ValueError("Equity curve and ledger disagree")
-    return {"scenario": name, "window": phase, **outcomes(trades, CAPITAL), "account": account,
+    return {"scenario": name, "window": phase, **outcomes(trades, capital), "account": account,
             "swap_net": sum(t.swap_money for t in trades),
             "swap_debits": sum(min(0, amount) for t in trades for _, amount in t.swap_events),
             "swap_credits": sum(max(0, amount) for t in trades for _, amount in t.swap_events),
             "trades": [asdict(t) for t in trades]}
 
 
-def run(history_path, snapshot_path, output, workers=3, baseline_only=False):
+def run(history_path, snapshot_path, output, workers=3, baseline_only=False, capital=CAPITAL):
     """Freeze all assumptions before reading scenario outcomes; no parameter search."""
+    if not math.isfinite(capital) or capital <= 0:
+        raise ValueError("Starting capital must be finite and positive")
     _forbid_broker()
     history = load_history(history_path)["USDCHF"]
     source = next(b for b in discover_branches(default_config_paths())
@@ -92,7 +94,7 @@ def run(history_path, snapshot_path, output, workers=3, baseline_only=False):
                 scenarios[name] = (ExecutionCosts("historical", 2, 7, .4) if stress else ExecutionCosts(),
                     SwapModel(buy, sell, f"Etc/GMT-{offset}", tuple(weights), 2 if stress else 1))
     files = sorted(Path("src").rglob("*.py"))
-    plan = {"capital": CAPITAL, "risk_pct": .75, "settings": asdict(cfg),
+    plan = {"capital": capital, "risk_pct": .75, "settings": asdict(cfg),
             "runtime": {key: getattr(app.runtime, key) for key in RISK_KEYS},
             "windows": {n: [a.isoformat(), b.isoformat()] for n, (a, b) in windows.items()},
             "scenarios": {n: {"costs": asdict(c), "swaps": asdict(s) if s else None} for n, (c, s) in scenarios.items()},
@@ -111,7 +113,7 @@ def run(history_path, snapshot_path, output, workers=3, baseline_only=False):
     register(plan, output)
     records = {}
     with ProcessPoolExecutor(max_workers=workers, initializer=initialize, initargs=(str(history_path),)) as pool:
-        jobs = [pool.submit(worker, (name, phase, app, cfg, start, end, costs, swaps))
+        jobs = [pool.submit(worker, (name, phase, app, cfg, start, end, costs, swaps, capital))
                 for name, (costs, swaps) in scenarios.items() for phase, (start, end) in windows.items()]
         for future in as_completed(jobs):
             record = future.result()
@@ -127,8 +129,9 @@ if __name__ == "__main__":
     parser.add_argument("--snapshot", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--capital", type=float, default=CAPITAL)
     parser.add_argument("--baseline-only", action="store_true")
     args = parser.parse_args()
-    if args.workers < 1 or (not args.baseline_only and args.snapshot is None):
+    if args.workers < 1 or not math.isfinite(args.capital) or args.capital <= 0 or (not args.baseline_only and args.snapshot is None):
         parser.error("Positive workers and a swap snapshot required (unless baseline-only)")
-    run(args.history, args.snapshot, args.output, args.workers, args.baseline_only)
+    run(args.history, args.snapshot, args.output, args.workers, args.baseline_only, args.capital)
