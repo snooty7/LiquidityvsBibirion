@@ -103,3 +103,43 @@ def test_spread_stress_multiplies_observed_and_fallback_quotes():
     assert costs.spread({}, info) == 3
     with pytest.raises(ValueError):
         ExecutionCosts(spread_multiplier=float("nan"))
+
+
+def test_shadow_invariance_includes_a_nonempty_trade_ledger(tmp_path, monkeypatch):
+    from src.backtesting.adaptive import AdaptiveReplayPolicy
+    from src.strategy.adaptive.config import AdaptiveConfig
+    from src.strategy.adaptive.models import (EntryProposal, Evaluation, Regime, RegimeResult,
+                                               ScoreBreakdown, StructureContext)
+    from src.backtesting import adaptive
+
+    app, cfg, history, start = fixture(tmp_path)
+    stamp = int(start.timestamp())
+    history = HistoricalData("EURUSD", history.symbol_info, {
+        "M1": [dict(time=stamp+(i-600)*60, open=1.1, high=1.1001, low=1.0999, close=1.1, spread=10)
+               for i in range(750)],
+        "H1": [dict(time=stamp+(i-110)*3600, open=1.1, high=1.1001, low=1.0999, close=1.1, spread=10)
+               for i in range(112)]})
+    config = AdaptiveConfig(enabled=True, context_timeframes=("H1",))
+    regime = RegimeResult(Regime.TRENDING_BULLISH, .0001, 30, .5, .001, 1, "controlled_candidate")
+    structure = StructureContext((), (), (1.103,), 1.099, 1.103)
+    score = ScoreBreakdown(.9, (), (), ())
+
+    def candidate(context, config, **kwargs):
+        proposal = EntryProposal(str(context.decision_time), "EURUSD", "BUY", context.decision_time,
+                                 kwargs["entry_price"], 1.099, 1.103, score, regime,
+                                 (("H1", "BUY"),), structure, config.digest(), context.source_digest)
+        return Evaluation(proposal, (), regime, score, (("H1", "BUY"),), structure)
+
+    monkeypatch.setattr(adaptive, "evaluate", candidate)
+    monkeypatch.setattr(replay, "_detect_signal_for_cfg", lambda cfg, pip, rates, *args: (SweepSignal("BUY", 1, rates[-2]["time"]), [], None))
+    ledgers, observations = [], []
+    for arm in ("adaptive", "adaptive_shadow"):
+        policy = AdaptiveReplayPolicy(history, config, arm)
+        _, trades = replay.run_backtest(app, cfg, start, start+timedelta(minutes=60), initial_equity=10000,
+                                       costs=ExecutionCosts("fixed", 1, 3.5, .2), history=history,
+                                       entry_policy=policy.entry, exit_policy=policy.exit, end_exclusive=True)
+        ledgers.append([asdict(trade) for trade in trades])
+        observations.append(policy.observations)
+    assert ledgers[0] and ledgers[0] == ledgers[1]
+    assert observations[0][0]["shadow"] is None
+    assert observations[1][0]["shadow"]["status"] == "model_unavailable"

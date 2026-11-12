@@ -24,13 +24,14 @@ def observe(features: tuple[float, ...], *, predictor: Callable | None = None,
 def chronological_split(rows: list[dict], train_end: int, validation_end: int,
                         test_end: int, embargo_seconds: int) -> dict[str, list[dict]]:
     """Purge labels crossing boundaries; rows contain time and label_available_at."""
-    if not train_end < validation_end < test_end or embargo_seconds < 0:
+    if (any(type(value) is not int for value in (train_end, validation_end, test_end, embargo_seconds))
+            or not train_end < validation_end < test_end or embargo_seconds < 0):
         raise ValueError("Invalid chronological split")
     output = {"train": [], "validation": [], "test": []}
     previous = -1
     for row in rows:
         timestamp, available = row["time"], row["label_available_at"]
-        if timestamp <= previous or available < timestamp:
+        if type(timestamp) is not int or type(available) is not int or timestamp <= previous or available < timestamp:
             raise ValueError("Rows must be ordered with causal label availability")
         previous = timestamp
         if available < train_end:

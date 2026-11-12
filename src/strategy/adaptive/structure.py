@@ -20,7 +20,7 @@ def analyze_structure(bars: tuple[Candle, ...], config: AdaptiveConfig, atr: flo
         # Add newly confirmed pivots only after evaluating the current event.
         # Consequently no current bar can create the level it allegedly swept.
         for pivot_index, kind, level, available in pivots:
-            if available >= current.time + step:
+            if available >= current.time + step or (pivot_index, kind) in broken | consumed:
                 continue
             side = "SELL" if kind == "HIGH" else "BUY"
             swept = current.high > level and current.close < level if side == "SELL" else current.low < level and current.close > level
@@ -62,7 +62,21 @@ def analyze_structure(bars: tuple[Candle, ...], config: AdaptiveConfig, atr: flo
             block = find_local_order_block(bars, len(bars)-1, side, pip, config.zone_expiry_bars,
                                           config.zone_expiry_bars, "body", max(atr/pip*.25, .1))
             if block:
-                zones.append(Zone("OB", side, block["low"], block["high"], bars[-1].time+step, "active"))
+                index = block["index"]
+                minimum_impulse = max(atr*.25, pip*.1)
+                confirmation = None
+                for later_index in range(index+1, len(bars)):
+                    bar = bars[later_index]
+                    if (bar.close > bars[index].high and bar.high-bars[index].high >= minimum_impulse
+                            if side == "BUY" else bar.close < bars[index].low and bars[index].low-bar.low >= minimum_impulse):
+                        confirmation = later_index
+                        break
+                if confirmation is not None:
+                    later = bars[confirmation+1:]
+                    invalid = any(bar.close < block["low"] if side == "BUY" else bar.close > block["high"] for bar in later)
+                    touched = any(bar.low <= block["high"] if side == "BUY" else bar.high >= block["low"] for bar in later)
+                    status = "invalidated" if invalid else "expired" if len(later) > config.zone_expiry_bars else "mitigated" if touched else "active"
+                    zones.append(Zone("OB", side, block["low"], block["high"], bars[confirmation].time+step, status))
     confirmed = [level for _, _, level, _ in pivots]
     levels = tuple(sorted(set(level for index, kind, level, _ in pivots
                               if (index, kind) not in broken | consumed)))

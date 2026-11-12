@@ -151,6 +151,8 @@ def test_pivot_cannot_be_swept_before_confirmation_and_zone_lifecycle():
     assert any(event.kind == "SWEEP" and event.price == 15 and event.available_at == 1800 for event in structure.events)
     earlier = analyze_structure(tuple(rows[:4]), config, 1, .1)
     assert 15 not in earlier.liquidity
+    repeated = analyze_structure(tuple(rows)+(Candle(1800, 10, 17, 8, 9),), config, 1, .1)
+    assert len([event for event in repeated.events if event.kind == "SWEEP" and event.price == 15]) == 1
     gap_rows = (Candle(0, 10, 11, 9, 10), Candle(300, 12, 13, 11, 12), Candle(600, 14, 15, 13, 14))
     active = analyze_structure(gap_rows, config, 1, .1)
     assert active.zones[0].status == "active" and active.zones[0].available_at == 900
@@ -313,6 +315,10 @@ def test_bad_timestamp_is_explicit_unavailable():
 def test_currency_and_concentration_fail_closed(info):
     assert "currency_mapping_unavailable" in preflight(info, symbol="BTCUSD").reasons
     assert "currency_limit:USD" in preflight(info, positions=(Exposure(1, "GBPUSD", "SELL", 45),), correlations={"GBPUSD": .1}).reasons
+    assert not preflight(info, max_positions=float("nan")).allowed
+    assert partial_close_volume(.3, .5, replace(info, volume_max=.1)) == 0
+    with pytest.raises(ValueError):
+        chronological_split([dict(time=float("nan"), label_available_at=4)], 10, 20, 30, 1)
 
 
 def test_weekend_gap_requires_explicit_policy():

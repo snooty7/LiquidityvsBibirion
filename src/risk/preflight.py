@@ -83,7 +83,7 @@ def check_entry(*, side: str, symbol: str, price: float, sl: float, tp: float,
     if (side not in {"BUY", "SELL"} or not valid_entry_protection(side, price, sl, tp)
             or equity <= 0 or risk_pct <= 0 or risk_pct > authorized_risk_pct
             or min(portfolio_cap_pct, currency_cap_pct, correlation_cap_pct, max_quote_age) <= 0
-            or max_positions < 1 or min_rr <= 0 or round_trip_cost_price < 0):
+            or type(max_positions) is not int or max_positions < 1 or min_rr <= 0 or round_trip_cost_price < 0):
         return PreflightResult(False, ("invalid_protection_or_budget",))
     if spread_pips < 0 or max_spread_pips < 0 or spread_pips > max_spread_pips + 1e-9:
         reasons.append("spread_limit")
@@ -108,7 +108,7 @@ def check_entry(*, side: str, symbol: str, price: float, sl: float, tp: float,
         reasons.append("net_reward_risk")
     unique = {}
     for item in positions:
-        if item.ticket <= 0 or item.side not in {"BUY", "SELL"} or not math.isfinite(item.risk_money) or item.risk_money < 0:
+        if type(item.ticket) is not int or item.ticket <= 0 or item.side not in {"BUY", "SELL"} or not math.isfinite(item.risk_money) or item.risk_money < 0:
             reasons.append("unknown_position_exposure")
         if item.ticket in unique and unique[item.ticket] != item:
             reasons.append("conflicting_position_snapshot")
@@ -149,13 +149,13 @@ def check_entry(*, side: str, symbol: str, price: float, sl: float, tp: float,
 
 def partial_close_volume(volume: float, fraction: float, info: SymbolTradeInfo) -> float:
     """Round down a partial close only when both closed and residual lots are valid."""
-    if not all(math.isfinite(v) for v in (volume, fraction, info.volume_step, info.volume_min)):
+    if not all(math.isfinite(v) for v in (volume, fraction, info.volume_step, info.volume_min, info.volume_max)):
         return 0.0
     if not 0 < fraction < 1 or info.volume_step <= 0 or info.volume_min <= 0:
         return 0.0
     step = Decimal(str(info.volume_step))
     amount = (Decimal(str(volume)) * Decimal(str(fraction)) // step) * step
     remainder = Decimal(str(volume)) - amount
-    if amount < Decimal(str(info.volume_min)) or remainder < Decimal(str(info.volume_min)) or remainder % step:
+    if amount < Decimal(str(info.volume_min)) or amount > Decimal(str(info.volume_max)) or remainder < Decimal(str(info.volume_min)) or remainder % step:
         return 0.0
     return float(amount)
