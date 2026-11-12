@@ -1,0 +1,100 @@
+{
+  "status": "preregistered_before_all_replays",
+  "registered_at_utc": "2026-11-12T08:19:17.656598+00:00",
+  "source_digest": "bb54d18ed617ebdcea2d36fcc3b49bb3ea0ae5b1585308df5204bc0613001a77",
+  "orchestration_sha256": "939c1e70ce004a3bfa90b6d559e5efcf596307a331c0b9f7011f66cc45ac57eb",
+  "production_config_sha256": "cd65c097d26037aa011fb0934f0ed80c7a011cab961d1734bd12ab343934f5c6",
+  "universe": {
+    "EURUSD": [
+      "EURUSD_extended.json",
+      "2024-11-01"
+    ],
+    "GBPUSD": [
+      "GBPUSD_extended.json",
+      "2024-11-01"
+    ],
+    "USDCHF": [
+      "USDCHF_extended.json",
+      "2024-11-01"
+    ],
+    "NZDUSD": [
+      "NZDUSD.json",
+      "2025-08-15"
+    ]
+  },
+  "jobs": [
+    {
+      "symbol": "EURUSD",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\EURUSD\\base_protocol.json",
+      "protocol_sha256": "164ca603f640de35ab1be9768797deb54ecb28087f0c8c8d0e3146b5a66687d4"
+    },
+    {
+      "symbol": "EURUSD",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\EURUSD\\doubled_costs_protocol.json",
+      "protocol_sha256": "f38ada9e4cc1b6fea3a23c61064238ab1d38fe8bd63cf3504073bcd7f0006426"
+    },
+    {
+      "symbol": "GBPUSD",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\GBPUSD\\base_protocol.json",
+      "protocol_sha256": "3e83c75d698f1fab528d25326a11d8253fa2fd47103dd58ba101fe1f539c1bef"
+    },
+    {
+      "symbol": "GBPUSD",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\GBPUSD\\doubled_costs_protocol.json",
+      "protocol_sha256": "ee88af80e145189c1355b10a0d4e38641f8c3bd4ee6488bdc9ed873b10f0a45a"
+    },
+    {
+      "symbol": "USDCHF",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\USDCHF\\base_protocol.json",
+      "protocol_sha256": "cb5128089b175020202cf825ae5f22bc675721402ea6f561fecef666300f50b4"
+    },
+    {
+      "symbol": "USDCHF",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\USDCHF\\doubled_costs_protocol.json",
+      "protocol_sha256": "45f209a798adebe6c562c4807c17fd43e47cab81147e729cba1ab53032a867e9"
+    },
+    {
+      "symbol": "NZDUSD",
+      "scenario": "base",
+      "protocol": "reports\\qait\\broad_20261112\\NZDUSD\\base_protocol.json",
+      "protocol_sha256": "95d3e736a7a80b63b8b715d735dda9aea82ab9a0261f727457c0337dc2e99896"
+    },
+    {
+      "symbol": "NZDUSD",
+      "scenario": "doubled_costs",
+      "protocol": "reports\\qait\\broad_20261112\\NZDUSD\\doubled_costs_protocol.json",
+      "protocol_sha256": "83758a824607d9b903d887e332009156c7da1de05d14409ba8d19369a3f16640"
+    }
+  ],
+  "branch_contract": "EURUSD 92001 M5/M1 profile cloned across four FX instruments; only symbol changes; isolated accounts, never portfolio returns",
+  "windows": "90 calendar days train, 1 embargo, 30 validation, 1 embargo, 180 test; rolling, nonoverlapping tests; discard incomplete terminal fold",
+  "parameters": "No fitting, threshold changes, risk changes, symbol selection, or outcome-dependent reruns",
+  "data_role": "Previously researched development exports, including earlier strategies; chronological test windows are NOT untouched holdouts",
+  "provenance": [
+    "reports/fx_htf/plan.json",
+    "reports/walk_forward/report.json",
+    "reports/qait/scoring_92001/protocol.json",
+    "history/mt5_20261111/manifest.json",
+    "history/mt5_20261111/FX_extended_manifest.json",
+    "history/mt5_20261111/USDCHF_extended_manifest.json"
+  ],
+  "untouched_holdout": "None verifiably available in saved exports. Future data after 2026-11-11 requires separate prospective registration, without changes selected from these results.",
+  "endpoints": [
+    "test closed-position count",
+    "net P&L after costs",
+    "profit factor",
+    "mean R",
+    "maximum realized drawdown",
+    "regime and session participation",
+    "shadow ledger identity"
+  ],
+  "inference": "Descriptive paired arm comparisons only; no pooled multi-symbol portfolio, no independent-sample claim for overlapping training phases; no live-profitability or confirmatory significance claim",
+  "coverage": "Existing strict coverage and gap checks remain authoritative; unavailable windows reported, never filled or relaxed",
+  "safety": "Offline saved candles only; adapter access forbidden in worker; adaptive, ML, leverage and hedge defaults remain disabled; no live trades"
+}

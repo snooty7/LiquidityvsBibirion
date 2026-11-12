@@ -1,0 +1,7 @@
+{
+  "registered_at_utc": "2026-11-12T08:20:06.766440+00:00",
+  "registration_sha256": "f5f7574154a32022d9a6128bedb2b0aa54977ca5e27bc6ad35809639c7e1e109",
+  "orchestration_sha256": "e4a0d9290a25b3462215d5c1cdbcd4d54aab6819542fd19e4bd9cf0f19b4cd21",
+  "reason": "Overbroad broker-access guard blocked pure MT5Adapter.pip_size calculation. Exempt only this pure helper. Eight attempts failed before any arm completed; no results were produced or inspected.",
+  "changes_to_frozen_experiment": "None: all protocol bytes, strategy and risk settings, source digest, data hashes, costs and windows retained. Empty failed output directories archived in .git/qait-broad-failed-guard."
+}
