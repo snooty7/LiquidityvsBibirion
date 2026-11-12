@@ -9,6 +9,19 @@ from src.strategy.adaptive.context import snapshot
 from src.strategy.adaptive.engine import evaluate
 from src.strategy.adaptive.models import Candle, MarketSnapshot, Regime, RegimeResult, SignalAnchor
 from src.strategy.adaptive.structure import analyze_structure
+from src.strategy.liquidity import detect_sweep_signal, extract_pivot_levels
+
+
+def source_signal(context, anchor, *, at_entry=False):
+    """Use the unchanged baseline functions as the lifecycle oracle."""
+    rows = context.bars(anchor.signal_timeframe)
+    if not at_entry:
+        rows = tuple(row for row in rows if row.time <= anchor.candle_time)
+    rows = rows[-anchor.source_lookback:]
+    last = rows[-1]
+    rates = (*rows, Candle(last.time+300, last.close, last.close, last.close, last.close))
+    levels = extract_pivot_levels(rates, anchor.pivot_length, anchor.max_levels)
+    return levels, detect_sweep_signal(rates, levels, anchor.buffer_price)
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +36,10 @@ def no_broker(monkeypatch):
 
 def fixture():
     decision = 1_800_000
-    rows = [Candle(decision+(i-600)*300, 1.1, 1.1002, 1.0998, 1.10005) for i in range(600)]
+    # A small monotonic drift prevents artificial equal-price pivots from
+    # filling the source's finite ranked map in this controlled fixture.
+    rows = [Candle(decision+(i-600)*300, 1.1+(i-599)*1e-9, 1.1002+(i-599)*1e-9,
+                   1.0998+(i-599)*1e-9, 1.10005+(i-599)*1e-9) for i in range(600)]
     rows[560] = replace(rows[560], high=1.106)  # untouched upside liquidity
     rows[570] = replace(rows[570], low=1.099)  # original, confirmed sell-side level
     rows[596] = replace(rows[596], open=1.0999, low=1.0984, close=1.1)
@@ -39,7 +55,7 @@ def fixture():
     context = MarketSnapshot("EURUSD", decision, (("M5", tuple(rows)), ("M1", tuple(lower))), "controlled")
     anchor = SignalAnchor("EURUSD:92001", "BUY", 1.099, rows[596].time, decision+300,
                           "M5", "M1", "sweep_displacement_mss", 5, .00003, 12, 1.25,
-                          .00005, 4, .55, 1.8)
+                          .00005, 4, .55, 1.8, source_lookback=500)
     return context, anchor, AdaptiveConfig(enabled=True)
 
 
@@ -83,13 +99,69 @@ def test_wrong_or_stale_anchor_never_falls_back_to_another_sweep(change, reason)
     assert reason in result.reasons and result.confirmation is None
 
 
-def test_previously_taken_liquidity_is_not_resurrected():
+def test_active_baseline_level_is_reusable_despite_prior_crossings():
     context, anchor, config = fixture()
     rows = list(context.bars("M5"))
-    rows[580] = replace(rows[580], low=1.0988)
+    for index in range(580, 596):
+        rows[index] = replace(rows[index], low=1.09899-(index-580)*.00001)
     context = replace(context, series=(("M5", tuple(rows)), ("M1", context.bars("M1"))))
     result = align_signal(context, anchor, config)
-    assert result.sweep is None and "anchor_liquidity_already_consumed" in result.reasons
+    levels, selected = source_signal(context, anchor)
+    assert anchor.level in levels and selected.level == anchor.level and selected.side == anchor.side
+    assert result.sweep and result.confirmation and not result.reasons
+    assert result.sweep.level_lifecycle == "baseline_ranked_rolling_pivots"
+    assert result.sweep.prior_crossings == 16
+
+
+def test_rank_retirement_and_detector_priority_still_reject():
+    context, anchor, config = fixture()
+    rows = list(context.bars("M5"))
+    rows[580] = replace(rows[580], high=1.1008)
+    retired = replace(context, series=(("M5", tuple(rows)), ("M1", context.bars("M1"))))
+    limited = replace(anchor, max_levels=1)
+    assert limited.level not in source_signal(retired, limited)[0]
+    assert "anchor_level_not_active" in align_signal(retired, limited, config).reasons
+    rows = list(context.bars("M5"))
+    rows[580] = replace(rows[580], low=1.0988)
+    priority = replace(context, series=(("M5", tuple(rows)), ("M1", context.bars("M1"))))
+    assert anchor.level in source_signal(priority, anchor)[0]
+    assert source_signal(priority, anchor)[1].level != anchor.level
+    assert "anchor_source_signal_mismatch" in align_signal(priority, anchor, config).reasons
+
+
+def test_window_retirement_and_missing_source_history_cannot_reuse_a_level():
+    context, anchor, config = fixture()
+    short = replace(anchor, source_lookback=20)
+    assert anchor.level not in source_signal(context, short)[0]
+    assert align_signal(context, short, config).sweep is None
+    missing = replace(anchor, source_lookback=1000)
+    assert "anchor_source_history_unavailable" in align_signal(context, missing, config).reasons
+
+
+def test_pending_anchor_survives_a_later_source_map_change():
+    context, anchor, config = fixture()
+    anchor = replace(anchor, pivot_length=1, max_levels=3)
+    rows = list(context.bars("M5"))
+    rows[598] = replace(rows[598], high=1.2, low=1.0995)
+    context = replace(context, series=(("M5", tuple(rows)), ("M1", context.bars("M1"))))
+    assert anchor.level in source_signal(context, anchor)[0]
+    assert anchor.level not in source_signal(context, anchor, at_entry=True)[0]
+    assert align_signal(context, anchor, config).confirmation is not None
+
+
+def test_reusable_source_level_and_confirmation_are_sell_symmetric():
+    context, anchor, config = fixture()
+    rows = list(context.bars("M5"))
+    for index in range(580, 596):
+        rows[index] = replace(rows[index], low=1.09899-(index-580)*.00001)
+    def mirror(bar):
+        return Candle(bar.time, 2.2-bar.open, 2.2-bar.low, 2.2-bar.high, 2.2-bar.close)
+    context = replace(context, series=(("M5", tuple(mirror(row) for row in rows)),
+                                       ("M1", tuple(mirror(row) for row in context.bars("M1")))))
+    anchor = replace(anchor, side="SELL", level=2.2-anchor.level)
+    assert source_signal(context, anchor)[1].side == "SELL"
+    result = align_signal(context, anchor, config)
+    assert result.sweep and result.confirmation and result.sweep.prior_crossings == 16
 
 
 def test_baseline_untyped_pivot_map_keeps_high_level_provenance_for_a_buy():
@@ -97,7 +169,8 @@ def test_baseline_untyped_pivot_map_keeps_high_level_provenance_for_a_buy():
     rows = list(context.bars("M5"))
     rows[570] = replace(rows[570], high=1.101)
     for i in range(576, 596):
-        rows[i] = replace(rows[i], open=1.102, high=1.1025, low=1.1015, close=1.102)
+        drift = (i-576)*1e-9
+        rows[i] = replace(rows[i], open=1.102+drift, high=1.1025+drift, low=1.1015+drift, close=1.102+drift)
     rows[596] = replace(rows[596], open=1.1015, high=1.1025, low=1.1008, close=1.1015)
     for i in range(597, 600):
         rows[i] = replace(rows[i], open=1.1019, high=1.1025, low=1.10135, close=1.10195)
@@ -172,6 +245,8 @@ def test_real_policy_alignment_still_uses_final_risk_sizing_and_spread_guard(tmp
     context, anchor, config = fixture()
     info = SymbolTradeInfo(5, .00001, .01, 100, .01, 1, .00001)
     rates = {tf: [asdict(row) for row in rows] for tf, rows in context.series}
+    first = rates["M5"][0]
+    rates["M5"] = [dict(first, time=first["time"]-i*300) for i in range(20, 0, -1)]+rates["M5"]
     for tf, step in (("H1", 3600), ("H4", 14400)):
         rates[tf] = [asdict(Candle(context.decision_time+(i-100)*step, 1.1, 1.101, 1.099, 1.1)) for i in range(100)]
     history = HistoricalData("EURUSD", info, rates)

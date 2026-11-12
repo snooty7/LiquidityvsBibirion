@@ -49,10 +49,12 @@ class AdaptiveReplayPolicy:
                 cfg.pivot_len, cfg.buffer_pips*pip_size(info.digits, info.point),
                 cfg.sweep_significance_lookback_bars, cfg.sweep_significance_range_multiple,
                 cfg.sweep_min_penetration_pips*pip_size(info.digits, info.point), cfg.cisd_structure_bars,
-                cfg.confirmation_displacement_body_ratio_min, cfg.confirmation_displacement_range_multiple)
+                cfg.confirmation_displacement_body_ratio_min, cfg.confirmation_displacement_range_multiple,
+                cfg.max_levels, max(cfg.bars, 600))
             additional = (cfg.timeframe, timeframe)
-            lookbacks[cfg.timeframe] = max(config.lookback, cfg.bars, 600)
             elapsed = max(0, timestamp-(pending.candle_time+TIMEFRAMES[cfg.timeframe]))
+            source_delay = (elapsed+TIMEFRAMES[cfg.timeframe]-1)//TIMEFRAMES[cfg.timeframe]
+            lookbacks[cfg.timeframe] = max(config.lookback, anchor.source_lookback)+source_delay
             confirmation_warmup = config.lookback+(elapsed+TIMEFRAMES[timeframe]-1)//TIMEFRAMES[timeframe]
             lookbacks[timeframe] = max(lookbacks.get(timeframe, 0), confirmation_warmup, cfg.cisd_lookback_bars)
         required = tuple(dict.fromkeys((config.entry_timeframe, *config.context_timeframes, *additional)))

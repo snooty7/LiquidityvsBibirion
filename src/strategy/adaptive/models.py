@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-VERSION = "adaptive-v2-aligned-research"
+VERSION = "adaptive-v3-source-lifecycle-research"
 
 
 class Regime(str, Enum):
@@ -69,6 +69,8 @@ class StructureEvent:
     strength: float = 0.0
     timeframe: str = ""
     level_kind: str = ""
+    level_lifecycle: str = ""
+    prior_crossings: int = 0
 
 
 @dataclass(frozen=True)
@@ -91,6 +93,8 @@ class SignalAnchor:
     structure_bars: int
     displacement_body_ratio_min: float
     displacement_range_multiple: float
+    max_levels: int = 25
+    source_lookback: int = 600
 
 
 @dataclass(frozen=True)
