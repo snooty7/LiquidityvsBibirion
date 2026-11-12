@@ -9,7 +9,7 @@ from pathlib import Path
 from src.risk.sizing import SymbolTradeInfo, pip_value_per_lot
 
 
-TIMEFRAMES = {"M1": 60, "M5": 300, "M15": 900, "M30": 1800, "H1": 3600, "H4": 14400}
+TIMEFRAMES = {"M1": 60, "M5": 300, "M15": 900, "M30": 1800, "H1": 3600, "H4": 14400, "D1": 86400}
 
 
 def validate_bars(rows: list[dict], timeframe: str) -> list[dict]:
@@ -34,7 +34,12 @@ def validate_bars(rows: list[dict], timeframe: str) -> list[dict]:
 
 
 def resample_m1(rows: list[dict], timeframe: str) -> list[dict]:
-    """Aggregate complete UTC buckets only; incomplete/gapped bars are discarded."""
+    """Aggregate complete UTC buckets only; incomplete/gapped bars are discarded.
+
+    D1 explicitly means midnight-to-midnight UTC research bars. A daily bucket
+    requires all 1440 minutes, including for FX; short sessions are discarded,
+    never filled. Broker-session D1 requires a separate session-aware importer.
+    """
     step = TIMEFRAMES[timeframe]
     buckets: dict[int, list[dict]] = {}
     for row in rows:

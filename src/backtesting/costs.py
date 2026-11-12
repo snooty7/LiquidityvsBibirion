@@ -13,6 +13,7 @@ class ExecutionCosts:
     spread_pips: float = 1.0
     commission_per_lot: float = 3.5
     slippage_pips: float = 0.2
+    spread_multiplier: float = 1.0
 
     def __post_init__(self) -> None:
         if self.spread_mode not in {"historical", "fixed"}:
@@ -21,6 +22,8 @@ class ExecutionCosts:
             self.spread_pips, self.commission_per_lot, self.slippage_pips,
         )):
             raise ValueError("Costs must be finite and nonnegative")
+        if not math.isfinite(self.spread_multiplier) or self.spread_multiplier <= 0:
+            raise ValueError("Spread multiplier must be finite and positive")
 
     def spread(self, bar: dict, info: SymbolTradeInfo) -> float:
         """Use MT5's historical spread in points; missing values use the declared fallback."""
@@ -28,8 +31,8 @@ class ExecutionCosts:
             points = float(bar["spread"])
             if not math.isfinite(points) or points < 0:
                 raise ValueError("Historical spread must be finite and nonnegative")
-            return points * info.point / pip_size(info.digits, info.point)
-        return self.spread_pips
+            return points * info.point / pip_size(info.digits, info.point) * self.spread_multiplier
+        return self.spread_pips * self.spread_multiplier
 
     def exit_quote(self, side: str, bid: float, spread: float, pip: float) -> float:
         """Longs close on bid; shorts close on ask."""

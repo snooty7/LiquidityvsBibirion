@@ -41,13 +41,19 @@ STATIC_FILES = {
 
 
 class DashboardState:
-    def __init__(self, config_path: Path, csv_path: Path) -> None:
+    def __init__(self, config_path: Path, csv_path: Path, adaptive_report: Path | None = None) -> None:
         self.config_path = config_path
         self.csv_path = csv_path
         self.app_config = load_config(config_path)
         self.symbols = sorted({cfg.symbol for cfg in self.app_config.symbols})
         self.adapter = MT5Adapter(default_deviation=self.app_config.runtime.default_deviation)
         self._lock = Lock()
+        self.adaptive_comparison = []
+        if adaptive_report is not None:
+            report = json.loads(adaptive_report.read_text(encoding="utf-8"))
+            self.adaptive_comparison = [
+                {key: item.get(key) for key in ("fold", "phase", "arm", "status", "metrics", "reason")}
+                for item in report.get("comparisons", []) if item.get("phase") == "test"]
         with self._lock:
             self.adapter.initialize()
 
@@ -106,6 +112,26 @@ class DashboardState:
                 "levels": levels,
                 "windowHours": int(window.total_seconds() // 3600),
             }
+        if self.app_config.adaptive.enabled:
+            from dashboard.adaptive import build_observation
+            from src.risk.sizing import SymbolTradeInfo
+
+            config = self.app_config.adaptive
+            adaptive_rates = {}
+            with self._lock:
+                for tf in dict.fromkeys((config.entry_timeframe, *config.context_timeframes)):
+                    raw = self.adapter.copy_rates(symbol.upper(), tf, config.lookback+2)
+                    adaptive_rates[tf] = [dict(time=int(bar["time"]), open=float(bar["open"]),
+                                              high=float(bar["high"]), low=float(bar["low"]),
+                                              close=float(bar["close"]), tick_volume=float(bar["tick_volume"])) for bar in raw]
+                info = SymbolTradeInfo.from_mt5(self.adapter.symbol_info(symbol.upper()))
+                equity = self.adapter.account_equity()
+            branches = [cfg for cfg in self.app_config.symbols if cfg.symbol == symbol.upper()]
+            branch = min(branches, key=lambda cfg: cfg.risk_pct)
+            result["adaptive"] = build_observation(
+                symbol=symbol.upper(), decision_time=int(now_utc.timestamp()), rates=adaptive_rates,
+                config=config, info=info, equity=equity, risk_pct=branch.risk_pct,
+                max_lot=branch.max_lot, min_lot=branch.min_lot, comparison=self.adaptive_comparison)
         return result
 
 
@@ -189,6 +215,7 @@ def main() -> None:
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--config", default=str(CONFIG_PATH), help="Path to bot config")
     parser.add_argument("--csv", default="", help="Optional explicit bot_events.csv path override")
+    parser.add_argument("--adaptive-report", type=Path, default=None, help="Optional offline comparison report")
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
@@ -197,7 +224,7 @@ def main() -> None:
     print(f"Dashboard config={config_path}")
     print(f"Dashboard log={csv_path}")
 
-    state = DashboardState(config_path, csv_path)
+    state = DashboardState(config_path, csv_path, adaptive_report=args.adaptive_report)
     DashboardHandler.state = state
     server = ThreadingHTTPServer((args.host, args.port), DashboardHandler)
     print(f"Dashboard running on http://{args.host}:{args.port}")

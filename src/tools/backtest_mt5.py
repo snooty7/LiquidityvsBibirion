@@ -4,11 +4,11 @@ import argparse
 import bisect
 import csv
 import math
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from src.backtesting.costs import ExecutionCosts
 from src.backtesting.history import HistoricalData
@@ -648,6 +648,7 @@ def _build_entry_trade(
     costs: Optional[ExecutionCosts] = None,
     spread_pips: float = 0.0,
     long_filter_rates: Optional[Sequence[dict]] = None,
+    entry_policy: Optional[Callable] = None,
 ) -> Optional[OpenTrade]:
     if not math.isfinite(commission_per_lot) or commission_per_lot < 0:
         raise ValueError("Commission per lot must be finite and nonnegative.")
@@ -657,6 +658,19 @@ def _build_entry_trade(
     quoted_price = entry_price + (spread_pips * pip if costs is not None and entry_side == "BUY" else 0.0)
     entry_slippage = costs.slippage_pips * pip if costs is not None else 0.0
     entry_price = quoted_price + (entry_slippage if entry_side == "BUY" else -entry_slippage)
+    if entry_policy is not None:
+        # Offline-only extension point, after legacy entry filters, before risk
+        # sizing. A policy may reject or propose protection; it cannot send orders.
+        protection = entry_policy(cfg=cfg, runtime=runtime, info=symbol_info, equity=equity,
+                                  side=entry_side, timestamp=entry_time, price=entry_price,
+                                  quoted_price=quoted_price, pending=pending,
+                                  costs=costs, spread_pips=spread_pips)
+        if protection is None:
+            return None
+        context = dict(pending.context or {}) if pending is not None else {}
+        context["risk"] = {**context.get("risk", {}), **protection}
+        pending = replace(pending, context=context) if pending is not None else PendingSetupLite(
+            signal_key, entry_side, quoted_price, entry_time, entry_time, context=context)
     sl, tp, resolved_sl_pips, _, risk_pct = _resolve_entry_protection(
         cfg, pending, entry_side, quoted_price, pip,
     )
@@ -743,7 +757,11 @@ def run_backtest(
     costs: Optional[ExecutionCosts] = None,
     history: Optional[HistoricalData] = None,
     end_exclusive: bool = False,
+    entry_policy: Optional[Callable] = None,
+    exit_policy: Optional[Callable] = None,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
+    if (entry_policy is not None or exit_policy is not None) and history is None:
+        raise ValueError("Research policies require explicit offline history")
     # Match live settings unless the caller explicitly requests a research override.
     side_mode = str(cfg.trade_side_filter if side_mode is None else side_mode).lower()
     if side_mode not in {"both", "buy", "sell"}:
@@ -863,6 +881,15 @@ def run_backtest(
                                                 "daily_loss_guard_close", symbol_info, spread_pips=spread)
                 else:
                     open_trade, maybe_closed = _apply_open_trade_bar(cfg, app_config.runtime, open_trade, bar, symbol_info)
+                    if maybe_closed is None and exit_policy is not None:
+                        # Applied after the closed bar; never retroactively fills
+                        # a stop computed using that bar's close.
+                        partials = exit_policy(open_trade, bar, symbol_info) or []
+                        for partial in partials:
+                            closed_trades.append(partial)
+                            rollover(int(datetime.fromisoformat(partial.exit_time_utc).timestamp()))
+                            # The allocated entry cost was already booked at entry.
+                            book_pnl(partial.pnl_money + partial.commission_cost_money/2)
                 if maybe_closed is None:
                     continue
                 rollover(int(datetime.fromisoformat(maybe_closed.exit_time_utc).timestamp()))
@@ -1004,6 +1031,7 @@ def run_backtest(
                     pending,
                     commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
                     long_filter_rates=closed_bias,
+                    entry_policy=entry_policy,
                 )
                 if open_trade is not None:
                     book_pnl(-open_trade.entry_commission_money)
@@ -1177,6 +1205,7 @@ def run_backtest(
                         pending_candidate,
                         commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
                         long_filter_rates=closed_bias,
+                        entry_policy=entry_policy,
                     )
                     if open_trade is not None:
                         book_pnl(-open_trade.entry_commission_money)

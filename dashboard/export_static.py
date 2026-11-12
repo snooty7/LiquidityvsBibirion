@@ -23,7 +23,8 @@ ONLINE_CONFIG_SNIPPET = """  <script>
 """
 
 
-def build_static_dashboard(output_dir: Path, config_path: Path, csv_path: Path | None = None) -> None:
+def build_static_dashboard(output_dir: Path, config_path: Path, csv_path: Path | None = None,
+                           adaptive_report: Path | None = None) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     data_dir = output_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -44,7 +45,7 @@ def build_static_dashboard(output_dir: Path, config_path: Path, csv_path: Path |
         app_config = load_config(config_path)
         app_csv_path = resolve_runtime_path(config_path, app_config.runtime.log_file)
 
-    state = DashboardState(config_path, app_csv_path)
+    state = DashboardState(config_path, app_csv_path, adaptive_report=adaptive_report)
     try:
         manifest = {
             "symbols": state.symbols,
@@ -76,11 +77,12 @@ def main() -> None:
     )
     parser.add_argument("--config", default=str(CONFIG_PATH), help="Path to bot config")
     parser.add_argument("--csv", default="", help="Optional explicit bot_events.csv path override")
+    parser.add_argument("--adaptive-report", type=Path, default=None, help="Optional offline comparison report")
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
     csv_path = resolve_runtime_path(config_path, args.csv) if args.csv else None
-    build_static_dashboard(Path(args.output_dir).resolve(), config_path, csv_path)
+    build_static_dashboard(Path(args.output_dir).resolve(), config_path, csv_path, adaptive_report=args.adaptive_report)
     print(f"Static dashboard exported to {Path(args.output_dir).resolve()}")
 
 

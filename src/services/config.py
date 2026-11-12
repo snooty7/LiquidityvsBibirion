@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import math
 from typing import Any, Union
+from src.strategy.adaptive.config import AdaptiveConfig, load_adaptive
 
 
 DEFAULT_CONFIG: dict[str, Any] = {
@@ -247,6 +248,7 @@ class SymbolConfig:
 class AppConfig:
     runtime: RuntimeConfig
     symbols: tuple[SymbolConfig, ...]
+    adaptive: AdaptiveConfig = AdaptiveConfig()
 
 
 def _merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -583,4 +585,7 @@ def load_config(path: Union[str, Path]) -> AppConfig:
         if symbol.refresh_pending_min_age_bars < 1:
             raise ValueError(f"refresh_pending_min_age_bars must be >= 1 for {symbol.symbol}")
 
-    return AppConfig(runtime=runtime, symbols=tuple(symbols))
+    adaptive = load_adaptive(raw.get("adaptive", {}))
+    if adaptive.enabled and any(symbol.ignore_portfolio_cap for symbol in symbols):
+        raise ValueError("Adaptive observation forbids ignore_portfolio_cap")
+    return AppConfig(runtime=runtime, symbols=tuple(symbols), adaptive=adaptive)

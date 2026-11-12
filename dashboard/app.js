@@ -152,6 +152,49 @@ function renderSignals(items) {
   }
 }
 
+function renderAdaptive(payload) {
+  const panel = document.getElementById("adaptivePanel");
+  const cards = document.getElementById("adaptiveCards");
+  if (!panel || !cards) return;
+  panel.hidden = !payload;
+  cards.replaceChildren();
+  if (!payload) return;
+  const evaluation = payload.evaluation || {};
+  const structure = evaluation.structure || {};
+  const proposal = evaluation.proposal;
+  const score = evaluation.score || {};
+  const fields = [
+    ["Status", payload.status],
+    ["Observation", new Date(payload.decision_time * 1000).toISOString()],
+    ["Regime", evaluation.regime?.regime || "Unavailable"],
+    ["Timeframe direction", evaluation.directions || []],
+    ["Liquidity levels", structure.liquidity || []],
+    ["Premium / discount", structure.price_zone || "Unavailable"],
+    ["BOS / MSS / sweeps", structure.events || []],
+    ["FVG / order blocks", structure.zones || []],
+    ["Evidence score (not probability)", score.score],
+    ["Contributions / availability", score.observations || []],
+    ["Indicative entry / SL / TP", proposal ? { entry: proposal.entry, sl: proposal.sl, tp: proposal.tp } : "No eligible proposal"],
+    ["Proposed risk", payload.proposed_risk || "Unavailable"],
+    ["ML shadow", payload.shadow || "Disabled"],
+    ["Rejection reasons", evaluation.reasons || []],
+    ["Strategy comparison", payload.comparison?.length ? payload.comparison : "No offline report attached"],
+  ];
+  for (const [label, value] of fields) {
+    const card = document.createElement("div");
+    card.className = "signal-card";
+    const title = document.createElement("div");
+    title.className = "title";
+    title.textContent = label;
+    const body = document.createElement("pre");
+    body.style.whiteSpace = "pre-wrap";
+    body.style.overflowWrap = "anywhere";
+    body.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    card.append(title, body);
+    cards.appendChild(card);
+  }
+}
+
 async function loadStaticManifest() {
   if (snapshotMode !== "static") {
     return null;
@@ -212,6 +255,7 @@ async function loadSnapshot() {
 
   generatedAt.textContent = `updated ${new Date(data.generated_at_utc).toLocaleString()}`;
   renderSignals(data.recentSignals || []);
+  renderAdaptive(data.adaptive);
 
   for (const def of chartDefs) {
     const bundle = charts.get(def.tf);
