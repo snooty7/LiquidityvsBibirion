@@ -1,0 +1,291 @@
+{
+  "capital": 10000.0,
+  "risk_pct": 0.5,
+  "windows": {
+    "earlier": [
+      "2024-11-15T00:00:00+00:00",
+      "2025-11-15T00:00:00+00:00"
+    ],
+    "later": [
+      "2025-11-16T00:00:00+00:00",
+      "2026-11-11T00:00:00+00:00"
+    ],
+    "full": [
+      "2024-11-15T00:00:00+00:00",
+      "2026-11-11T00:00:00+00:00"
+    ]
+  },
+  "runtime": {
+    "daily_loss_limit_usd": 150.0,
+    "close_positions_on_daily_loss": true,
+    "max_loss_per_trade_usd": 30.0,
+    "per_trade_loss_guard_mode": "position_risk",
+    "per_trade_loss_risk_multiple": 1.0,
+    "max_profit_per_trade_usd": 0.0,
+    "trailing_stop_mode": "r_multiple",
+    "trailing_activation_r": 1.0,
+    "trailing_gap_r": 1.0,
+    "trailing_remove_tp_on_activation": true,
+    "max_open_positions_total": 5,
+    "max_total_open_risk_pct": 0.5,
+    "news_filter_enabled": false,
+    "news_provider": "investpy",
+    "news_block_minutes_before": 30,
+    "news_block_minutes_after": 15
+  },
+  "history_file": "USDCHF_extended.json",
+  "history_digest": "8748d7a5373716b692d9e9168c2c2fe315911b643e07afb8bec74fa0b031a6a3",
+  "symbol_info": {
+    "digits": 5,
+    "point": 1e-05,
+    "volume_min": 0.01,
+    "volume_max": 100.0,
+    "volume_step": 0.01,
+    "trade_tick_value": 1.0823916525955752,
+    "trade_tick_size": 1e-05
+  },
+  "snapshot": {
+    "captured_at_utc": "2026-11-12T07:36:08.075754+00:00",
+    "account_currency": "EUR",
+    "autotrading": false,
+    "trading_calls": false,
+    "symbols": {
+      "EURUSD": {
+        "name": "EURUSD-",
+        "swap_mode": 1,
+        "swap_long": -9.595905,
+        "swap_short": -1.28532273,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 0.0,
+        "trade_tick_size": 1e-05,
+        "currency_base": "EUR",
+        "currency_profit": "USD"
+      },
+      "GBPUSD": {
+        "name": "GBPUSD-",
+        "swap_mode": 1,
+        "swap_long": -1.6800000000000002,
+        "swap_short": -2.86,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 0.0,
+        "trade_tick_size": 1e-05,
+        "currency_base": "GBP",
+        "currency_profit": "USD"
+      },
+      "NZDUSD": {
+        "name": "NZDUSD-",
+        "swap_mode": 1,
+        "swap_long": -1.76,
+        "swap_short": -2.31,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 0.0,
+        "trade_tick_size": 1e-05,
+        "currency_base": "NZD",
+        "currency_profit": "USD"
+      },
+      "USDCHF": {
+        "name": "USDCHF-",
+        "swap_mode": 1,
+        "swap_long": 1.41113636,
+        "swap_short": -25.75364,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 1.0840931019155928,
+        "trade_tick_size": 1e-05,
+        "currency_base": "USD",
+        "currency_profit": "CHF"
+      }
+    }
+  },
+  "swaps": {
+    "buy_per_lot": 1.5274022167381045,
+    "sell_per_lot": -27.875524959951512,
+    "timezone": "Etc/GMT-3",
+    "weekday_weights": [
+      1,
+      1,
+      3,
+      1,
+      1,
+      0,
+      0
+    ],
+    "debit_multiplier": 1.0
+  },
+  "triple_day_override": 3,
+  "costs": {
+    "spread_mode": "historical",
+    "spread_pips": 1.0,
+    "commission_per_lot": 3.5,
+    "slippage_pips": 0.2
+  },
+  "stress_costs": {
+    "spread_mode": "historical",
+    "spread_pips": 2,
+    "commission_per_lot": 7,
+    "slippage_pips": 0.4
+  },
+  "limitations": [
+    "Historical dates and prior strategy outcomes have been examined repeatedly; this is exploratory validation, not an untouched holdout.",
+    "Current swap snapshot held constant over history, with historical constant EUR tick valuation. Daily historical financing and conversion rates unavailable.",
+    "MT5 returned invalid triple-day code7; explicit Wednesday triple assumption retained. Primary broker midnight GMT+3 with GMT+2 sensitivity; historical clock/DST policy not reconstructed.",
+    "Stress doubles commissions, adverse market/stop slippage and negative swap debits, leaves credits unchanged. Observed spreads unchanged; fallback1 to2 pips.",
+    "Independent continuous EUR10k accounts per window/model; no monthly resets or concurrent portfolio aggregation. Drawdown samples M1-close equity and actual fills; intrabar loss can be larger.",
+    "Historical margin, execution latency, missing liquidity, tick paths and changing broker stop/volume constraints not reconstructed. No live settings, bot or orders.",
+    "Five additional hypotheses on repeatedly examined dates increase selection/overfitting risk; no independent future validation. Weighted means can have fewer effective samples than raw count8; this is an exploratory heuristic, not a statistical confidence guarantee."
+  ],
+  "group": "agent_cadence_memory_weighting_exit",
+  "settings": {
+    "symbol": "USDCHF",
+    "timeframe": "M30",
+    "bars": 500,
+    "pivot_len": 5,
+    "buffer_pips": 0.3,
+    "sl_pips": 20.0,
+    "rr": 2.0,
+    "risk_pct": 0.5,
+    "max_lot": 0.5,
+    "max_spread_pips": 0.9,
+    "cooldown_sec": 3600,
+    "magic": 92024,
+    "trade_side_filter": "both",
+    "min_lot": 0.0,
+    "max_levels": 25,
+    "one_position_per_symbol": true,
+    "strategy_mode": "liquidity_sweep",
+    "allowed_sessions_utc": [
+      "05:00-11:55",
+      "12:00-22:00"
+    ],
+    "use_bias_filter": true,
+    "bias_timeframe": "H4",
+    "bias_ema_period": 20,
+    "bias_lookback_bars": 80,
+    "use_order_block_filter": true,
+    "ignore_portfolio_cap": false,
+    "order_block_lookback_bars": 20,
+    "order_block_max_distance_pips": 12.0,
+    "order_block_strong_override_max_distance_pips": 12.0,
+    "order_block_strong_override_min_impulse_pips": 20.0,
+    "order_block_zone_mode": "body",
+    "order_block_min_impulse_pips": 3.0,
+    "order_block_max_age_bars": 15,
+    "confirmation_mode": "sweep_displacement_mss",
+    "confirm_expiry_bars": 5,
+    "cisd_timeframe": "M1",
+    "cisd_lookback_bars": 300,
+    "cisd_structure_bars": 4,
+    "scalp_session_start_utc": "06:00",
+    "scalp_open_range_minutes": 15,
+    "scalp_watch_minutes": 180,
+    "scalp_preopen_lookback_bars": 12,
+    "scalp_preopen_max_compression_ratio": 2.0,
+    "sweep_significance_lookback_bars": 12,
+    "sweep_significance_range_multiple": 1.25,
+    "sweep_min_penetration_pips": 0.5,
+    "range_filter_lookback_bars": 8,
+    "range_filter_max_compression_ratio": 2.5,
+    "range_filter_min_overlap_ratio": 0.75,
+    "confirmation_displacement_body_ratio_min": 0.55,
+    "confirmation_displacement_range_multiple": 1.8,
+    "micro_burst_pullback_bars": 2,
+    "micro_burst_body_ratio_min": 0.45,
+    "setup_timeframe": "H1",
+    "setup_lookback_bars": 120,
+    "ema_fast_period": 9,
+    "ema_mid_period": 21,
+    "ema_slow_period": 50,
+    "atr_period": 14,
+    "adx_period": 14,
+    "adx_threshold": 18.0,
+    "volume_sma_period": 20,
+    "breakout_volume_multiple": 1.2,
+    "structure_pivot_len": 3,
+    "setup_max_age_bars": 6,
+    "trigger_sweep_lookback_bars": 4,
+    "retest_zone_atr_multiple": 0.25,
+    "reclaim_max_atr_multiple": 1.8,
+    "stop_atr_multiple": 0.15,
+    "entry_max_atr_multiple": 1.6,
+    "htf_target_min_r": 1.0,
+    "overlap_lookback_bars": 8,
+    "max_overlap_ratio": 0.6,
+    "weekend_risk_multiplier": 1.0,
+    "max_hold_bars": 0,
+    "early_exit_consecutive_adverse_closes": 0,
+    "early_exit_large_adverse_body_r": 0.0,
+    "trailing_stop_mode": "",
+    "trailing_activation_r": 1.5,
+    "trailing_gap_r": null,
+    "trailing_remove_tp_on_activation": null,
+    "refresh_pending_on_newer_signal": false,
+    "refresh_pending_min_age_bars": 1,
+    "long_entry_filter_mode": "off",
+    "long_entry_min_slope_atr": 0.0,
+    "long_entry_slope_bars": 3,
+    "long_entry_atr_period": 14
+  },
+  "reference_report_digest": "6db94bbc8231996e53fb8c533a126a85a7ccfa6dd415f8c2c6101eb92764526a",
+  "live_status": "Research policies only; core replay and live configurations unchanged; terminal initialization/order APIs forbidden.",
+  "registered_at_utc": "2026-11-12T09:33:32.896862+00:00",
+  "agent_limits": "Deterministic adviser without execution dependencies. Simulated entry gate only; does not generate new market signals or claim general AI knowledge/guaranteed returns. Agent can reduce opportunity and overfit; shadow strategy is fixed based on reused historical research.",
+  "risk_unchanged": "EUR10k,0.5% initial price risk,current equity sizing,maxlot0.5,one position,20pipSL,spread0.9,sessions,cooldown,dailyEUR150 and loss guards unchanged. Only direction gate or fixed2R exit differs. No stop widening or volume increase.",
+  "variants": {
+    "baseline": "Previous monthly best-side agent:180day window,>=8 trades/side,positive stressed mean netR",
+    "weekly": "Only refit cadence changes to Monday00:00 UTC",
+    "lookback_90": "Only history window changes to90calendar days; minimum8 unchanged",
+    "lookback_365": "Only history window changes to365calendar days; minimum8 unchanged",
+    "recent_weighted": "Only mean weighting changes: exponential60day half life,180day window",
+    "trail_gap_1_25": "Same monthly advice, only candidate trailing gap changes to1.25R; activation1.5R and initial20pipSL unchanged"
+  },
+  "advice_configs": {
+    "baseline": {
+      "cadence": "monthly",
+      "lookback_days": 180,
+      "minimum_trades": 8,
+      "half_life_days": null
+    },
+    "weekly": {
+      "cadence": "weekly",
+      "lookback_days": 180,
+      "minimum_trades": 8,
+      "half_life_days": null
+    },
+    "lookback_90": {
+      "cadence": "monthly",
+      "lookback_days": 90,
+      "minimum_trades": 8,
+      "half_life_days": null
+    },
+    "lookback_365": {
+      "cadence": "monthly",
+      "lookback_days": 365,
+      "minimum_trades": 8,
+      "half_life_days": null
+    },
+    "recent_weighted": {
+      "cadence": "monthly",
+      "lookback_days": 180,
+      "minimum_trades": 8,
+      "half_life_days": 60
+    },
+    "trail_gap_1_25": {
+      "cadence": "monthly",
+      "lookback_days": 180,
+      "minimum_trades": 8,
+      "half_life_days": null
+    }
+  },
+  "code_digest": "c5c4a761327b413c4d7cfc66a47035428d65e81480ce2c9f9eccd7e78237d003",
+  "control_reuse": "12 previous agent_best accounts reused after exact previous-source/history/config checks; labels renamed only. Default advice has regression parity with old fit_month(best_only=True).",
+  "selection": "Earlier GMT+3 stressed net only, include baseline and cash0. Highest positive net, ties smaller M1 drawdown then name. Lock before later/full new candidates. No combinations or retuning after results; full winners descriptive only.",
+  "agent_protocol": "Each declared update fits only shadow reference trades EXITED strictly BEFORE UTC month/Monday boundary within its declared calendar-day window. >=8 per side and positive stressed mean netR, best side only, BUY on tie, otherwise cash. Weighted variant uses2^(-age_days/60). Same stressed shadow labels train normal/stressed runs separately per broker clock. Initial shadow history starts15Nov2024; no invented warmup. Existing trades retain original exits across adviser updates; no account resets.",
+  "exit_training": "Trailing-gap hypothesis uses exactly the same original shadow outcomes/advice as baseline, isolating execution of exits; it does not retrain on its own future results. Initial risk and1.5R activation unchanged; shared helper never loosens an already tightened stop."
+}

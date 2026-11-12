@@ -1,0 +1,12 @@
+{
+  "selected": "cash",
+  "ranking": [
+    "baseline",
+    "lookback_365",
+    "lookback_90",
+    "recent_weighted",
+    "trail_gap_1_25",
+    "weekly"
+  ],
+  "basis": "Earlier GMT+3 stressed only, cash0 benchmark"
+}
