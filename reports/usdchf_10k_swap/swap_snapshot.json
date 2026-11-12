@@ -1,0 +1,19 @@
+{
+  "captured_at_utc": "2026-11-12T06:55:29.843809+00:00",
+  "account_currency": "EUR",
+  "autotrading": false,
+  "symbols": [
+    {
+      "name": "USDCHF-",
+      "swap_mode": 1,
+      "swap_long": 1.41113636,
+      "swap_short": -25.75364,
+      "swap_rollover3days": 7,
+      "point": 1e-05,
+      "digits": 5,
+      "trade_tick_value": 0.0,
+      "trade_tick_size": 1e-05,
+      "currency_profit": "CHF"
+    }
+  ]
+}

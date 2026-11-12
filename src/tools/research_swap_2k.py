@@ -12,7 +12,7 @@ from pathlib import Path
 
 from src.backtesting.costs import ExecutionCosts
 from src.backtesting.history import load_history
-from src.backtesting.swaps import SwapModel, rates_from_snapshot
+from src.backtesting.swaps import SwapModel, rates_from_snapshot, weekday_weights
 from src.risk.sizing import calc_position_risk_money
 from src.tools.backtest_mt5 import run_backtest
 from src.tools.research_capital_20k import outcomes
@@ -63,7 +63,8 @@ def worker(task):
             "trades": [asdict(t) for t in trades]}
 
 
-def run(history_path, snapshot_path, output, workers=3, baseline_only=False, capital=CAPITAL):
+def run(history_path, snapshot_path, output, workers=3, baseline_only=False, capital=CAPITAL,
+        triple_day_override=None):
     """Freeze all assumptions before reading scenario outcomes; no parameter search."""
     if not math.isfinite(capital) or capital <= 0:
         raise ValueError("Starting capital must be finite and positive")
@@ -85,9 +86,7 @@ def run(history_path, snapshot_path, output, workers=3, baseline_only=False, cap
         snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
         symbol = next(s for s in snapshot["symbols"] if s["name"].rstrip("-") == "USDCHF")
         buy, sell = rates_from_snapshot(symbol, history.symbol_info, snapshot["account_currency"])
-        weights = [1, 1, 1, 1, 1, 0, 0]
-        triple_day = (symbol["swap_rollover3days"]-1) % 7
-        weights[triple_day] = 3
+        weights = weekday_weights(symbol, triple_day_override)
         for offset in (3, 2):
             for stress in (False, True):
                 name = f"swap_gmt{offset}" + ("_stress" if stress else "")
@@ -98,7 +97,8 @@ def run(history_path, snapshot_path, output, workers=3, baseline_only=False, cap
             "runtime": {key: getattr(app.runtime, key) for key in RISK_KEYS},
             "windows": {n: [a.isoformat(), b.isoformat()] for n, (a, b) in windows.items()},
             "scenarios": {n: {"costs": asdict(c), "swaps": asdict(s) if s else None} for n, (c, s) in scenarios.items()},
-            "swap_snapshot": snapshot, "history_digest": history.digest(),
+            "swap_snapshot": snapshot, "triple_day_override": triple_day_override,
+            "history_digest": history.digest(),
             "code_digest": hashlib.sha256(b"".join(p.read_bytes() for p in files)).hexdigest(),
             "limitations": ["Reused historical dates; no untouched holdout or new strategy selection.",
                 "Current swap snapshot held constant over history; actual historical daily swap rates unavailable.",
@@ -130,8 +130,10 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--capital", type=float, default=CAPITAL)
+    parser.add_argument("--triple-day", type=int, choices=range(7),
+                        help="Explicit documented weekday override (Sunday=0); recorded in plan")
     parser.add_argument("--baseline-only", action="store_true")
     args = parser.parse_args()
     if args.workers < 1 or not math.isfinite(args.capital) or args.capital <= 0 or (not args.baseline_only and args.snapshot is None):
         parser.error("Positive workers and a swap snapshot required (unless baseline-only)")
-    run(args.history, args.snapshot, args.output, args.workers, args.baseline_only, args.capital)
+    run(args.history, args.snapshot, args.output, args.workers, args.baseline_only, args.capital, args.triple_day)

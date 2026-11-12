@@ -1,6 +1,6 @@
 # USDCHF M30/M1 — EUR10,000, risk 0.75%, trailing activation 1.5R
 
-**PARTIAL: actual offline reference replays completed, but swap-inclusive comparison is blocked by MT5 authorization. These results EXCLUDE swap.**
+**Follow-up completed:** see [the financing-inclusive study](../usdchf_10k_swap/README.md). This original reference excludes swap and its historical status is retained below.
 
 Metadata capture was attempted against the already-running terminal with trading calls prohibited. MT5 returned `(-6, Terminal: Authorization failed)`. The terminal journal also reported `Invalid account`. No swap snapshot was available. Rates were not fabricated. No bot or trading engine was started and no orders were submitted.
 

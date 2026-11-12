@@ -7,7 +7,7 @@ import pytest
 
 from src.backtesting.costs import ExecutionCosts
 from src.backtesting.history import HistoricalData
-from src.backtesting.swaps import SwapModel, accrue_swaps, rates_from_snapshot
+from src.backtesting.swaps import SwapModel, accrue_swaps, rates_from_snapshot, weekday_weights
 from src.execution.mt5_adapter import MT5Adapter
 from src.risk.sizing import SymbolTradeInfo
 from src.services.config import AppConfig, load_config
@@ -25,6 +25,17 @@ def test_wednesday_triple_friday_single_and_no_weekend_rollover():
     events = list(model.events(ts("2026-01-07T20:00"), ts("2026-01-12T22:00"), "BUY", .1))
     assert events == [(ts("2026-01-07T21:00"), -3), (ts("2026-01-08T21:00"), -1),
                       (ts("2026-01-09T21:00"), -1), (ts("2026-01-12T21:00"), -1)]
+
+
+@pytest.mark.parametrize("day", [-1, 7, True, 1.5])
+def test_invalid_broker_triple_day_cannot_silently_wrap_to_weekend(day):
+    with pytest.raises(ValueError, match="weekday"):
+        weekday_weights({"swap_rollover3days": day})
+    assert weekday_weights({"swap_rollover3days": day}, 3) == (1, 1, 3, 1, 1, 0, 0)
+
+
+def test_broker_weekday_mapping_preserves_friday_triple():
+    assert weekday_weights({"swap_rollover3days": 5}) == (1, 1, 1, 1, 3, 0, 0)
 
 
 def test_stress_doubles_debits_but_never_inflates_credits():

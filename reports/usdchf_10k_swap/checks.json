@@ -1,0 +1,10 @@
+{
+  "swap_gmt3": {
+    "base_profitable": true,
+    "stress_profitable": false
+  },
+  "swap_gmt2": {
+    "base_profitable": true,
+    "stress_profitable": false
+  }
+}

@@ -80,3 +80,17 @@ def rates_from_snapshot(snapshot: dict, info, account_currency: str):
     else:
         raise ValueError(f"Unsupported swap mode {mode}; explicit currency/interest conversion required")
     return snapshot["swap_long"] * factor, snapshot["swap_short"] * factor
+
+
+def weekday_weights(snapshot: dict, triple_day_override: int | None = None):
+    """Reject invalid MT5 weekday codes unless the caller declares an override.
+
+    MT5 weekdays are Sunday=0 through Saturday=6. Never modulo-wrap an
+    unexpected value: it can otherwise silently invent a financing schedule.
+    """
+    day = snapshot["swap_rollover3days"] if triple_day_override is None else triple_day_override
+    if isinstance(day, bool) or not isinstance(day, int) or not 0 <= day <= 6:
+        raise ValueError("Invalid triple-swap weekday; supply an explicit documented override")
+    weights = [1, 1, 1, 1, 1, 0, 0]
+    weights[(day-1) % 7] = 3
+    return tuple(weights)
