@@ -1,0 +1,12 @@
+{
+  "selected": "cash",
+  "ranking": [
+    "agent_best",
+    "agent_positive",
+    "sell_only",
+    "buy_only",
+    "baseline",
+    "fixed_2r"
+  ],
+  "basis": "Earlier GMT+3 stressed only; cash0 included"
+}

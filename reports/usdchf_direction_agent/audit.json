@@ -1,0 +1,48 @@
+{
+  "accounts_checked": 72,
+  "trades_checked": 4392,
+  "monthly_fits_checked": 248,
+  "entry_decisions_checked": 3784,
+  "cached_controls_exact": true,
+  "earlier_locked_selection": "cash",
+  "descriptive_primary_stress_winner": "agent_best",
+  "descriptive_best_worst_clock_stress": "agent_best",
+  "diagnostics": {
+    "baseline": {
+      "positive_full_both_costs_both_clocks": true,
+      "beats_reference_full_stress_both_clocks": false,
+      "positive_earlier_stress": false,
+      "earlier_stress_trades": 18
+    },
+    "buy_only": {
+      "positive_full_both_costs_both_clocks": false,
+      "beats_reference_full_stress_both_clocks": false,
+      "positive_earlier_stress": false,
+      "earlier_stress_trades": 11
+    },
+    "sell_only": {
+      "positive_full_both_costs_both_clocks": false,
+      "beats_reference_full_stress_both_clocks": false,
+      "positive_earlier_stress": false,
+      "earlier_stress_trades": 8
+    },
+    "fixed_2r": {
+      "positive_full_both_costs_both_clocks": false,
+      "beats_reference_full_stress_both_clocks": false,
+      "positive_earlier_stress": false,
+      "earlier_stress_trades": 16
+    },
+    "agent_positive": {
+      "positive_full_both_costs_both_clocks": true,
+      "beats_reference_full_stress_both_clocks": true,
+      "positive_earlier_stress": false,
+      "earlier_stress_trades": 0
+    },
+    "agent_best": {
+      "positive_full_both_costs_both_clocks": true,
+      "beats_reference_full_stress_both_clocks": true,
+      "positive_earlier_stress": false,
+      "earlier_stress_trades": 0
+    }
+  }
+}
