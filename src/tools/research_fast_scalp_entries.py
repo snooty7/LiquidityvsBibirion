@@ -34,9 +34,10 @@ def initialize(paths):
     _feature_symbol, _features, _signals = None, None, {}
 
 
-def configurations_for_pair(base, pair):
+def configurations_for_pair(base, pair, broker_max_lot=None):
     """Use M1 decisions/M5 context, retaining risk, position ceiling and daily guard."""
     return replace(base, symbol=pair, timeframe="M1", bars=120,
+        max_lot=base.max_lot if broker_max_lot is None else broker_max_lot,
         strategy_mode="fast_scalp_research", confirmation_mode="none",
         bias_timeframe="M5", setup_timeframe="M5", bias_lookback_bars=120,
         setup_lookback_bars=120, cisd_lookback_bars=120,
@@ -76,7 +77,7 @@ def nominate(records):
     return (ranking[0] if ranking else None), ranking
 
 
-def run(root, reference_path, output, workers=6):
+def run(root, reference_path, output, workers=6, risk_sized_volume=False):
     """Register three entry families, lock earlier nominations, disclose all alternatives."""
     _forbid_broker()
     reference = json.loads(reference_path.read_text(encoding="utf-8"))
@@ -90,7 +91,7 @@ def run(root, reference_path, output, workers=6):
         history = load_history(Path(paths[pair]))[pair]
         if history.digest() != original["pairs"][pair]["history_digest"]:
             raise ValueError("History changed; use the same reference inputs")
-        cfgs[pair] = configurations_for_pair(base, pair)
+        cfgs[pair] = configurations_for_pair(base, pair, history.symbol_info.volume_max if risk_sized_volume else None)
         for start, end in original["windows"].values():
             reason = history_coverage(history, cfgs[pair], datetime.fromisoformat(start), datetime.fromisoformat(end), max_gap_days=4)
             if reason:
@@ -101,6 +102,8 @@ def run(root, reference_path, output, workers=6):
         metadata[pair] = original["pairs"][pair]
         del history
     plan = {"capital_per_account": 10000, "risk_pct": .75,
+        "risk_sized_volume": risk_sized_volume,
+        "sizing_amendment": ("Supplementary sizing-fidelity study after the retained0.5-lot outcomes were observed. All entry/exit definitions, thresholds, dates, costs and0.75% risk remain identical. Only the paper lot ceiling is the recorded broker maximum, so the shared sizer can actually use the requested risk budget. Earlier-only nominations are repeated and locked before later/full supplementary results; both studies retained. No live setting changed." if risk_sized_volume else None),
         "settings": {p: asdict(c) for p, c in cfgs.items()}, "runtime": {k: getattr(app.runtime, k) for k in RISK_KEYS},
         "pairs": metadata, "windows": original["windows"], "models": list(MODELS),
         "entry_rules": {"common": "M1 decision after its close; M5 EMA20 above/below EMA50 and EMA20 slope over3 prior M5 bars. Confirming M1 body>=60% of range; range>=1.2*mean of20 preceding M1 ranges. Sweep penetration>0.2 pip. Spread<=0.7 pip. Structure SL behind swept/last5 M1 extreme plus0.2 pip; accept only6-15 pip raw distances. No future/forming candles.",
@@ -108,7 +111,7 @@ def run(root, reference_path, output, workers=6):
             "m1_ema_reclaim": "Previous M1 sweeps4 preceding extrema and closes across M1 EMA20 against the M5 trend; current M1 reclaims EMA20 and breaks the previous candle's opposite edge.",
             "m5_sweep_m1_confirm": "Most recent CLOSED M5 sweeps12 preceding M5 extrema and closes back inside. A subsequent M1 closes beyond its previous2 M1 extrema within1-5 minutes after setup close; one confirmation per sweep."},
         "exits": "Original2R initial target, trailing activation1.5R/gap1R, target removal at activation. Both sides capped at30 elapsed minutes, weekday entries05:00-18:00 UTC intersecting existing sessions, flat by19:00 UTC. Missing quotes cannot fabricate an earlier fill; financing remains active as violation watchdog.",
-        "risk_constraints": "Initial price-risk budget<=0.75%, original0.5-lot ceiling,0.75% aggregate exposure,EUR150 daily trigger and single-position rule. Original3600-second cooldown retained. Tight structural stops can use LESS than0.75% because lot ceiling is unchanged; actual utilization is disclosed. No widened existing stops or averaging/martingale.",
+        "risk_constraints": ("Initial price-risk budget<=0.75%; paper volume ceiling is each symbol's recorded broker maximum, not a fixed lot size. Shared risk sizer rounds down from the requested risk budget and actual stop distance.0.75% aggregate exposure,EUR150 daily trigger,single-position rule and original3600-second cooldown retained. No widened existing stops, averaging or martingale. Margin constraints not reconstructed." if risk_sized_volume else "Initial price-risk budget<=0.75%, original0.5-lot ceiling,0.75% aggregate exposure,EUR150 daily trigger and single-position rule. Original3600-second cooldown retained. Tight structural stops can use LESS than0.75% because lot ceiling is unchanged; actual utilization is disclosed. No widened existing stops or averaging/martingale."),
         "confirmation_adapter": "Pure prototype returns a fully confirmed entry and structural SL. Research mode confirmation=none avoids applying the old second confirmation; legacy H4 bias/order-block gates are replaced by the explicit M5 trend, sweep and structure definitions. Provider is forbidden without offline history. No live mode or configuration enabled.",
         "costs": original["costs"], "stress_costs": original["stress_costs"],
         "swaps": {p: asdict(s) for p, s in swaps.items()}, "snapshot": original["snapshot"],
@@ -163,7 +166,9 @@ if __name__ == "__main__":
     parser.add_argument("--reference", type=Path, default=Path("reports/fx_intraday_scalping/report.json"))
     parser.add_argument("--output", type=Path, default=Path("reports/fx_fast_entries"))
     parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument("--risk-sized-volume", action="store_true",
+                        help="Use recorded broker volume ceiling; price-risk budget remains0.75%%")
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("Positive worker count required")
-    run(args.history_root, args.reference, args.output, args.workers)
+    run(args.history_root, args.reference, args.output, args.workers, args.risk_sized_volume)

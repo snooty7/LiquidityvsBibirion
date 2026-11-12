@@ -73,6 +73,14 @@ lines += ["", "All trades, losses and target-band counts use net results after m
     f"**{args.tests_passed} passed, one existing expected failure.** New tests cover each setup on BUY/SELL, future-bar invariance, M5-close ordering, insufficient displacement/structural width, immutable structural protection, offline-only guards, decision-clock validation, earlier-only/cash nomination and cached-vs-full replay equality for final/time/daily/stop exits in both directions.", "",
     "Only entry feature construction is skipped on no-signal minutes. Every open-position M1 bar is still processed for SL/TP, financing, daily protection and elapsed exits; the regression comparison verifies identical trades and balances with this optimization disabled. Independent report audit reconciles all48 trade/cost ledgers, target-band counts, lot ceilings and per-entry0.75% price-risk bounds.", "",
     "The frozen plan records all hypotheses, reference/history/source digests, precise settings and selection rules. Keep the original source commit and use a new output directory after changing source or assumptions. No bot was started and no order was placed."]
+if p.get("risk_sized_volume"):
+    lines[1:1] = ["", "## Sizing-only supplementary study", "", p["sizing_amendment"], "",
+        "The [initial 0.5-lot-ceiling study](../fx_fast_entries/README.md) is retained with its original source commit and all outcomes. Only the paper volume ceiling changed here. This is not increased percentage risk or a new signal chosen after the later period. Risk is0.75% of current simulated equity, so the euro budget can change as equity compounds.", ""]
+lines += ["", "Reproduction for this source version:", "", "```powershell",
+    "python -m src.tools.research_fast_scalp_entries --history-root history/mt5_20261111 --output "
+    + (Path("reports")/folder.name).as_posix()
+    + (" --risk-sized-volume" if p.get("risk_sized_volume") else "") + " --workers 6",
+    "```"]
 (folder/"README.md").write_text("\n".join(lines)+"\n", encoding="utf-8")
 checks = {"accounts": 48, "positive_full_normal": sum(v["metrics"]["net_pnl"] > 0 for v in full),
     "positive_full_stressed": sum(v["metrics"]["net_pnl"] > 0 for v in stressed),

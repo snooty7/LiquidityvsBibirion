@@ -121,6 +121,26 @@ def test_new_entry_configuration_keeps_existing_risk_and_nomination_holds_cash(t
     assert nominate({"candidate": row(1), "loser": row(-1)}) == ("candidate", ["candidate"])
 
 
+@pytest.mark.parametrize("side,sign", [("BUY", 1), ("SELL", -1)])
+def test_broker_ceiling_allows_requested_risk_budget_without_arbitrary_lot_increase(tmp_path, side, sign):
+    from src.tools.research_fast_scalp_entries import configurations_for_pair
+    from src.tools.backtest_mt5 import PendingSetupLite, _build_entry_trade
+    from src.risk.sizing import calc_position_risk_money
+    app = load_config(tmp_path/"defaults.json")
+    base = replace(app.symbols[0], risk_pct=.75, max_lot=.5)
+    info = SymbolTradeInfo(5, .00001, .01, 100, .01, .9, .00001)
+    cfg = configurations_for_pair(base, "EURUSD", info.volume_max)
+    runtime = replace(app.runtime, max_total_open_risk_pct=.75)
+    pending = PendingSetupLite("key", side, 1.1, 0, 60,
+        context={"risk": {"sl_price": 1.1-sign*.0006, "tp_r_multiple": 2}})
+    trade = _build_entry_trade(cfg, runtime, info, 10000, side, 0, 1.1, "key", "test", pending,
+                               costs=ExecutionCosts(), spread_pips=.7)
+    assert trade is not None and .5 < trade.volume <= info.volume_max
+    risk = calc_position_risk_money(trade.entry_price, trade.sl, trade.volume, info)
+    assert 74 <= risk <= 75
+    assert cfg.risk_pct == .75 and trade.sl == pending.context["risk"]["sl_price"]
+
+
 @pytest.mark.parametrize("side", ["BUY", "SELL"])
 @pytest.mark.parametrize("exit_kind", ["final", "time", "daily", "stop"])
 def test_cached_entry_schedule_preserves_risk_fees_time_exits_and_final_quote(tmp_path, monkeypatch, side, exit_kind):

@@ -1,3 +1,5 @@
+**Supplement:** a [risk-budget sizing check](../fx_fast_entries_risk_sized/README.md) repeats the unchanged entries using recorded broker volume ceilings, retaining the0.75% budget. The original0.5-lot results below are preserved.
+
 # New M1/M5 scalp entries: EUR10,000, risk ceiling 0.75%
 
 This is new entry research, not merely a shortened M30 exit. Three pure closed-bar entry definitions were fixed before outcomes and tested on all four available FX exports. No bot, orders, live configuration or production entry mode was enabled.
@@ -73,3 +75,5 @@ Pure signal definitions contain no broker calls and can be reused by a future li
 Only entry feature construction is skipped on no-signal minutes. Every open-position M1 bar is still processed for SL/TP, financing, daily protection and elapsed exits; the regression comparison verifies identical trades and balances with this optimization disabled. Independent report audit reconciles all48 trade/cost ledgers, target-band counts, lot ceilings and per-entry0.75% price-risk bounds.
 
 The frozen plan records all hypotheses, reference/history/source digests, precise settings and selection rules. Keep the original source commit and use a new output directory after changing source or assumptions. No bot was started and no order was placed.
+
+The original capped study source is preserved at commit `3449655`; the later sizing supplement does not rewrite its trading outcomes.
