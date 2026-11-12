@@ -1,0 +1,27 @@
+{
+  "baseline": {
+    "full_stressed_positive_both_clocks": true,
+    "full_net_improves_baseline_both_costs_and_clocks": false
+  },
+  "spread_0_7": {
+    "full_stressed_positive_both_clocks": false,
+    "full_net_improves_baseline_both_costs_and_clocks": false
+  },
+  "stronger_confirmation": {
+    "full_stressed_positive_both_clocks": false,
+    "full_net_improves_baseline_both_costs_and_clocks": false
+  },
+  "trailing_gap_1_25": {
+    "full_stressed_positive_both_clocks": false,
+    "full_net_improves_baseline_both_costs_and_clocks": false
+  },
+  "audit": {
+    "new_replays": 36,
+    "exact_cached_baselines": 12,
+    "cutoff_tp_conflicts": 0,
+    "tests_passed": 347,
+    "expected_failures": 1,
+    "earlier_selected": "spread_0_7",
+    "nominated_later_stress_positive": false
+  }
+}
