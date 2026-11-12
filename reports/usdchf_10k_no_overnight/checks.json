@@ -1,0 +1,21 @@
+{
+  "baseline": {
+    "normal_full_profitable": true,
+    "stressed_full_profitable_both_clocks": false
+  },
+  "sell_flat": {
+    "normal_full_profitable": true,
+    "stressed_full_profitable_both_clocks": true
+  },
+  "all_flat": {
+    "normal_full_profitable": true,
+    "stressed_full_profitable_both_clocks": false
+  },
+  "audit": {
+    "replays": 36,
+    "baseline_ledgers_exact": 12,
+    "cutoff_tp_conflicts": 0,
+    "tests_passed": 343,
+    "expected_failures": 1
+  }
+}

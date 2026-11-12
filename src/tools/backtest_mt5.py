@@ -12,6 +12,7 @@ from typing import Optional, Sequence
 
 from src.backtesting.costs import ExecutionCosts
 from src.backtesting.swaps import SwapModel, accrue_swaps
+from src.backtesting.overnight import OvernightPolicy
 from src.backtesting.history import HistoricalData
 
 from src.engine.orchestrator import (
@@ -656,7 +657,10 @@ def _build_entry_trade(
     costs: Optional[ExecutionCosts] = None,
     spread_pips: float = 0.0,
     long_filter_rates: Optional[Sequence[dict]] = None,
+    overnight_policy: Optional[OvernightPolicy] = None,
 ) -> Optional[OpenTrade]:
+    if overnight_policy is not None and overnight_policy.blocks_entry(entry_side, entry_time):
+        return None
     if not math.isfinite(commission_per_lot) or commission_per_lot < 0:
         raise ValueError("Commission per lot must be finite and nonnegative.")
     if not entry_long_filter(cfg, entry_side, long_filter_rates or []).allowed:
@@ -752,6 +756,7 @@ def run_backtest(
     history: Optional[HistoricalData] = None,
     end_exclusive: bool = False,
     swaps: Optional[SwapModel] = None,
+    overnight_policy: Optional[OvernightPolicy] = None,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
     # Match live settings unless the caller explicitly requests a research override.
     side_mode = str(cfg.trade_side_filter if side_mode is None else side_mode).lower()
@@ -874,6 +879,11 @@ def run_backtest(
                     quote = costs.exit_quote(open_trade.side, float(bar["open"]), spread, pip) if costs is not None else float(bar["open"])
                     maybe_closed = _close_trade(cfg, open_trade, int(bar["time"]), quote,
                                                 "daily_loss_guard_close", symbol_info, spread_pips=spread)
+                elif overnight_policy is not None and overnight_policy.exit_due(open_trade.side, open_trade.entry_time, int(bar["time"])):
+                    spread = costs.spread(bar, symbol_info) if costs is not None else 0.0
+                    quote = costs.exit_quote(open_trade.side, float(bar["open"]), spread, pip) if costs is not None else float(bar["open"])
+                    maybe_closed = _close_trade(cfg, open_trade, int(bar["time"]), quote,
+                                                "pre_rollover_exit", symbol_info, spread_pips=spread)
                 else:
                     open_trade, maybe_closed = _apply_open_trade_bar(cfg, app_config.runtime, open_trade, bar, symbol_info)
                 if maybe_closed is None:
@@ -1016,7 +1026,7 @@ def run_backtest(
                     str(confirm_result.note),
                     pending,
                     commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
-                    long_filter_rates=closed_bias,
+                    long_filter_rates=closed_bias, overnight_policy=overnight_policy,
                 )
                 if open_trade is not None:
                     book_pnl(-open_trade.entry_commission_money)
@@ -1189,7 +1199,7 @@ def run_backtest(
                         "confirm=none",
                         pending_candidate,
                         commission_per_lot=commission_per_lot, costs=costs, spread_pips=spread_pips,
-                        long_filter_rates=closed_bias,
+                        long_filter_rates=closed_bias, overnight_policy=overnight_policy,
                     )
                     if open_trade is not None:
                         book_pnl(-open_trade.entry_commission_money)
