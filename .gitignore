@@ -28,6 +28,8 @@ logs/
 *.csv
 *.sqlite3
 /history/
+# Full broader-study ledgers are committed as lossless, hash-verified gzip files.
+/reports/qait/broad_20261112/*/*/report.json
 
 # OS
 .DS_Store
