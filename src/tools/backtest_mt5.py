@@ -4,13 +4,14 @@ import argparse
 import bisect
 import csv
 import math
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Optional, Sequence
 
 from src.backtesting.costs import ExecutionCosts
+from src.backtesting.swaps import SwapModel, accrue_swaps
 from src.backtesting.history import HistoricalData
 
 from src.engine.orchestrator import (
@@ -97,6 +98,9 @@ class OpenTrade:
     costs: Optional[ExecutionCosts] = None
     entry_spread_cost_money: float = 0.0
     entry_slippage_cost_money: float = 0.0
+    swap_money: float = 0.0
+    swap_events: list = field(default_factory=list)
+    swap_last_timestamp: int | None = None
 
 
 @dataclass
@@ -121,6 +125,8 @@ class ClosedTrade:
     spread_cost_money: float = 0.0
     commission_cost_money: float = 0.0
     slippage_cost_money: float = 0.0
+    swap_money: float = 0.0
+    swap_events: list = field(default_factory=list)
 
 
 @dataclass
@@ -494,6 +500,7 @@ def _close_trade(
         pvl = symbol_info.trade_tick_value * (pip / symbol_info.trade_tick_size)
     pnl_money = float((pnl_price / pip) * pvl * trade.volume) if pip > 0 and pvl > 0 else 0.0
     pnl_money -= trade.entry_commission_money + trade.exit_commission_money
+    pnl_money += trade.swap_money
     spread_cost = trade.entry_spread_cost_money + (
         spread_pips * pvl * trade.volume if trade.side == "SELL" else 0.0
     )
@@ -518,7 +525,8 @@ def _close_trade(
         reason=reason,
         confirm_note=trade.confirm_note,
         signal_key=trade.signal_key,
-        gross_pnl_money=pnl_money + spread_cost + slippage_cost + commission_cost,
+        gross_pnl_money=pnl_money + spread_cost + slippage_cost + commission_cost - trade.swap_money,
+        swap_money=trade.swap_money, swap_events=list(trade.swap_events),
         spread_cost_money=spread_cost,
         commission_cost_money=commission_cost,
         slippage_cost_money=slippage_cost,
@@ -743,6 +751,7 @@ def run_backtest(
     costs: Optional[ExecutionCosts] = None,
     history: Optional[HistoricalData] = None,
     end_exclusive: bool = False,
+    swaps: Optional[SwapModel] = None,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
     # Match live settings unless the caller explicitly requests a research override.
     side_mode = str(cfg.trade_side_filter if side_mode is None else side_mode).lower()
@@ -855,6 +864,10 @@ def run_backtest(
 
         if open_trade is not None:
             for bar in interval_m1:
+                # Financing is booked before decisions, sizing and the daily guard.
+                for timestamp, amount in accrue_swaps(open_trade, int(bar["time"]), swaps):
+                    rollover(timestamp)
+                    book_pnl(amount)
                 rollover(int(bar["time"]))
                 if daily_loss_reached and app_config.runtime.close_positions_on_daily_loss:
                     spread = costs.spread(bar, symbol_info) if costs is not None else 0.0
@@ -868,7 +881,7 @@ def run_backtest(
                 rollover(int(datetime.fromisoformat(maybe_closed.exit_time_utc).timestamp()))
                 closed_trades.append(maybe_closed)
                 # Entry costs were already booked on their own trading day.
-                book_pnl(maybe_closed.pnl_money + open_trade.entry_commission_money)
+                book_pnl(maybe_closed.pnl_money + open_trade.entry_commission_money - open_trade.swap_money)
                 open_trade = None
                 break
 
@@ -1284,10 +1297,13 @@ def run_backtest(
         final_spread = costs.spread(last_closed_m1[-1], symbol_info) if costs is not None else 0.0
         final_close_price = (costs.exit_quote(open_trade.side, float(last_closed_m1[-1]["close"]), final_spread, pip)
                              if costs is not None else float(last_closed_m1[-1]["close"]))
+        for timestamp, amount in accrue_swaps(open_trade, final_close_time-1, swaps):
+            rollover(timestamp)
+            book_pnl(amount)
         closed = _close_trade(cfg, open_trade, final_close_time, final_close_price, "end_of_test", symbol_info, spread_pips=final_spread)
         closed_trades.append(closed)
         rollover(final_close_time)
-        book_pnl(closed.pnl_money + open_trade.entry_commission_money)
+        book_pnl(closed.pnl_money + open_trade.entry_commission_money - open_trade.swap_money)
 
     gross_profit = sum(item.pnl_money for item in closed_trades if item.pnl_money > 0)
     gross_loss = abs(sum(item.pnl_money for item in closed_trades if item.pnl_money < 0))

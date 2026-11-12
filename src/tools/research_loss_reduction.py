@@ -80,13 +80,13 @@ def atr_gate(history, enabled):
         replay._build_entry_trade = original
 
 
-def account_curve(trades, history, costs=None):
+def account_curve(trades, history, costs=None, initial_equity=CAPITAL):
     """Continuous account equity at observed M1 closes, including open P&L and incurred entry fees.
 
     Exit-bar equity uses the actual simulated fill, not the bar close after that
     fill. This is a minute-close estimate; intrabar/tick drawdown can be greater.
     """
-    cash = peak = minimum = CAPITAL
+    cash = peak = minimum = initial_equity
     drawdown = 0.
     count = 0
     info = history.symbol_info
@@ -105,25 +105,43 @@ def account_curve(trades, history, costs=None):
             raise ValueError("Account has overlapping positions")
         entry_fee = t.commission_cost_money/2
         mark(cash-entry_fee)
+        last_float = 0.0
         before = bisect.bisect_right(times, start-60)-1
         if before >= 0:
             bar = rows[before]
             quote = costs.exit_quote(t.side, float(bar["close"]), costs.spread(bar, info), pip)
             move = quote-t.entry_price if t.side == "BUY" else t.entry_price-quote
-            mark(cash-entry_fee+move/info.trade_tick_size*info.trade_tick_value*t.volume)
+            last_float = move/info.trade_tick_size*info.trade_tick_value*t.volume
+            mark(cash-entry_fee+last_float)
+        carry = 0.0
+        if any(not start < timestamp <= end for timestamp, _ in t.swap_events):
+            raise ValueError("Swap event outside position lifetime")
+        events = iter(sorted(t.swap_events))
+        event = next(events, None)
         a, b = bisect.bisect_left(times, start), bisect.bisect_left(times, end-60)
         for bar in rows[a:b]:
             # Mark only after entry and strictly before its exit timestamp.
             if not start < int(bar["time"])+60 < end:
                 continue
+            while event is not None and event[0] <= int(bar["time"])+60:
+                carry += event[1]
+                mark(cash-entry_fee+carry+last_float)
+                event = next(events, None)
             spread = costs.spread(bar, info)
             quote = costs.exit_quote(t.side, float(bar["close"]), spread, pip)
             move = quote-t.entry_price if t.side == "BUY" else t.entry_price-quote
-            mark(cash-entry_fee+move/info.trade_tick_size*info.trade_tick_value*t.volume)
+            last_float = move/info.trade_tick_size*info.trade_tick_value*t.volume
+            mark(cash-entry_fee+carry+last_float)
+        while event is not None:
+            carry += event[1]
+            mark(cash-entry_fee+carry+last_float)
+            event = next(events, None)
+        if not math.isclose(carry, t.swap_money, abs_tol=1e-8):
+            raise ValueError("Swap cash flows do not reconcile")
         cash += t.pnl_money
         mark(cash)
         previous_exit = end
-    return {"start_equity": CAPITAL, "end_equity": cash, "minimum_sampled_equity": minimum,
+    return {"start_equity": initial_equity, "end_equity": cash, "minimum_sampled_equity": minimum,
             "peak_sampled_equity": peak, "m1_close_drawdown": drawdown, "observations": count}
 
 

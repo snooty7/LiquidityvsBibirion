@@ -122,7 +122,9 @@ def trade_metrics(trades: list[ClosedTrade], equity: float) -> dict:
         # This model charges the same commission per side.
         entry_fee = trade.commission_cost_money / 2
         events.extend([(trade.entry_time_utc, -entry_fee),
-                       (trade.exit_time_utc, trade.pnl_money+entry_fee)])
+                       (trade.exit_time_utc, trade.pnl_money+entry_fee-trade.swap_money)])
+        events.extend((datetime.fromtimestamp(ts, timezone.utc).isoformat(), amount)
+                      for ts, amount in trade.swap_events)
     balance = peak = equity
     drawdown = 0.0
     for _, amount in sorted(events, key=lambda event: event[0]):

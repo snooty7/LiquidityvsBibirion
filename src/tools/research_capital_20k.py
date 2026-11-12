@@ -26,11 +26,11 @@ PAPER_LOT_CAP = .5
 _history = None
 
 
-def outcomes(trades):
+def outcomes(trades, initial_equity=CAPITAL):
     """Separate a winning trade from the average result including losing trades."""
     wins = [t.pnl_money for t in trades if t.pnl_money > 0]
     losses = [t.pnl_money for t in trades if t.pnl_money < 0]
-    return {"metrics": trade_metrics(trades, CAPITAL),
+    return {"metrics": trade_metrics(trades, initial_equity),
             "mean_winner": statistics.mean(wins) if wins else 0,
             "mean_loser": statistics.mean(losses) if losses else 0,
             "mean_all": statistics.mean(t.pnl_money for t in trades) if trades else 0,
