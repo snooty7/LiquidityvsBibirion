@@ -1,6 +1,6 @@
 # Proposed adaptive architecture and implementation plan
 
-Status: **DESIGN ONLY — awaiting user approval before implementation.** This document fulfills the post-research proposal, not Phase 3 completion. Phases 4–6 results and deployment documents will be written when those activities actually occur. All names below are proposed interfaces/paths, not existing features.
+Status: **Approved by the user on 2026-11-12; implemented as an offline research release.** The proposal below is retained as the design record. See [methodology](04_backtesting_methodology.md), [observed results and gaps](05_results.md), and [deployment boundaries](06_deployment_guide.md) for the implementation's actual scope. Live adaptive execution, fitted ML and synchronized multi-symbol evaluation are not claimed complete.
 
 ## Decision boundary and data contracts
 
@@ -90,4 +90,4 @@ Add an optional `adaptive` snapshot object carrying regime, MTF directions, liqu
 
 Required tests span missing/gapped data, incomplete candles, stale signals/quotes, abnormal spreads, MTF conflicts, volatility extremes, invalid stop distances, broker min/max/step restrictions, duplicate proposals and restarts, unavailable model/flow, no-trade conditions, daily-loss boundaries and correlation/exposure failures. Use fake adapters that prohibit initialization/order calls; keep real history downloads an explicit separate operation. Run full regressions before the eventual push, plus reproducibility reruns of the approved study. Do not use new tests that merely mirror implementation arithmetic.
 
-Approval requested: the above risk-first, disabled-by-default implementation scope. Research access limitations remain documented; approval would authorize independent engine development, not claim that QAIT internals were verified.
+Approval received for this risk-first, disabled-by-default implementation scope. Research access limitations remain documented; that approval authorizes independent development and does not establish that QAIT internals were verified. No live trades are authorized or required for development.

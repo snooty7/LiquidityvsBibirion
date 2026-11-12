@@ -1,0 +1,6 @@
+{
+  "status": "byte_identical",
+  "base_report_sha256": "43a0b4a64de2620e352ff731a8941cdea116be5a8c0affd9b65b451e7649f6ca",
+  "repeat_report_sha256": "43a0b4a64de2620e352ff731a8941cdea116be5a8c0affd9b65b451e7649f6ca",
+  "repeat_command": ".venv/Scripts/python.exe -m src.tools.research_adaptive run --protocol reports/qait/eurusd_92001/protocol.json --output .git/qait-reviewed-repeat"
+}
