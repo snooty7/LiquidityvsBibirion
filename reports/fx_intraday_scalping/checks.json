@@ -1,0 +1,19 @@
+{
+  "accounts": 48,
+  "configurations": 12,
+  "positive_normal": 0,
+  "positive_stressed": 0,
+  "overnight_positions": 0,
+  "financing_events_both_clocks": 0,
+  "late_exits": 0,
+  "least_negative_normal": {
+    "scenario": "GBPUSD_15",
+    "net": -825.8299161657467
+  },
+  "least_negative_stressed": {
+    "scenario": "NZDUSD_15_stress",
+    "net": -1570.8741878805972
+  },
+  "tests_passed": 368,
+  "expected_failures": 1
+}

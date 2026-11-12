@@ -13,6 +13,7 @@ from typing import Optional, Sequence
 from src.backtesting.costs import ExecutionCosts
 from src.backtesting.swaps import SwapModel, accrue_swaps
 from src.backtesting.overnight import OvernightPolicy
+from src.backtesting.scalping import ScalpPolicy
 from src.backtesting.history import HistoricalData
 
 from src.engine.orchestrator import (
@@ -641,6 +642,19 @@ def _apply_open_trade_bar(
     return trade, None
 
 
+def _scheduled_exit_at_open(cfg, trade, bar, symbol_info, costs, reason):
+    """Honor protection already triggered by the opening quote before a timed exit."""
+    pip = MT5Adapter.pip_size(symbol_info)
+    spread = costs.spread(bar, symbol_info) if costs is not None else 0.0
+    quote = costs.exit_quote(trade.side, float(bar["open"]), spread, pip) if costs is not None else float(bar["open"])
+    sign = 1 if trade.side == "BUY" else -1
+    if trade.sl > 0 and sign*(quote-trade.sl) <= 0:
+        reason = "trailing_stop" if sign*(trade.sl-trade.entry_price) > 0 else "stop_loss"
+    elif trade.tp > 0 and sign*(quote-trade.tp) >= 0:
+        quote, reason = trade.tp, "take_profit"
+    return _close_trade(cfg, trade, int(bar["time"]), quote, reason, symbol_info, spread_pips=spread)
+
+
 def _build_entry_trade(
     cfg: SymbolConfig,
     runtime: RuntimeConfig,
@@ -657,7 +671,7 @@ def _build_entry_trade(
     costs: Optional[ExecutionCosts] = None,
     spread_pips: float = 0.0,
     long_filter_rates: Optional[Sequence[dict]] = None,
-    overnight_policy: Optional[OvernightPolicy] = None,
+    overnight_policy: Optional[OvernightPolicy | ScalpPolicy] = None,
 ) -> Optional[OpenTrade]:
     if overnight_policy is not None and overnight_policy.blocks_entry(entry_side, entry_time):
         return None
@@ -756,7 +770,7 @@ def run_backtest(
     history: Optional[HistoricalData] = None,
     end_exclusive: bool = False,
     swaps: Optional[SwapModel] = None,
-    overnight_policy: Optional[OvernightPolicy] = None,
+    overnight_policy: Optional[OvernightPolicy | ScalpPolicy] = None,
 ) -> tuple[BacktestResult, list[ClosedTrade]]:
     # Match live settings unless the caller explicitly requests a research override.
     side_mode = str(cfg.trade_side_filter if side_mode is None else side_mode).lower()
@@ -880,10 +894,8 @@ def run_backtest(
                     maybe_closed = _close_trade(cfg, open_trade, int(bar["time"]), quote,
                                                 "daily_loss_guard_close", symbol_info, spread_pips=spread)
                 elif overnight_policy is not None and overnight_policy.exit_due(open_trade.side, open_trade.entry_time, int(bar["time"])):
-                    spread = costs.spread(bar, symbol_info) if costs is not None else 0.0
-                    quote = costs.exit_quote(open_trade.side, float(bar["open"]), spread, pip) if costs is not None else float(bar["open"])
-                    maybe_closed = _close_trade(cfg, open_trade, int(bar["time"]), quote,
-                                                "pre_rollover_exit", symbol_info, spread_pips=spread)
+                    maybe_closed = _scheduled_exit_at_open(cfg, open_trade, bar, symbol_info, costs,
+                        getattr(overnight_policy, "exit_reason", "pre_rollover_exit"))
                 else:
                     open_trade, maybe_closed = _apply_open_trade_bar(cfg, app_config.runtime, open_trade, bar, symbol_info)
                 if maybe_closed is None:

@@ -1,0 +1,34 @@
+{
+  "EURUSD": {
+    "selected_minutes": 15,
+    "earlier_ranking": [
+      "15",
+      "60",
+      "30"
+    ]
+  },
+  "GBPUSD": {
+    "selected_minutes": 15,
+    "earlier_ranking": [
+      "15",
+      "60",
+      "30"
+    ]
+  },
+  "NZDUSD": {
+    "selected_minutes": 15,
+    "earlier_ranking": [
+      "15",
+      "30",
+      "60"
+    ]
+  },
+  "USDCHF": {
+    "selected_minutes": 15,
+    "earlier_ranking": [
+      "15",
+      "30",
+      "60"
+    ]
+  }
+}

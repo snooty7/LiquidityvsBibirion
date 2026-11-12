@@ -1,0 +1,334 @@
+{
+  "capital_per_account": 10000,
+  "risk_pct": 0.75,
+  "base_settings": {
+    "symbol": "USDCHF",
+    "timeframe": "M30",
+    "bars": 500,
+    "pivot_len": 5,
+    "buffer_pips": 0.3,
+    "sl_pips": 20.0,
+    "rr": 2.0,
+    "risk_pct": 0.75,
+    "max_lot": 0.5,
+    "max_spread_pips": 0.9,
+    "cooldown_sec": 3600,
+    "magic": 92024,
+    "trade_side_filter": "both",
+    "min_lot": 0.0,
+    "max_levels": 25,
+    "one_position_per_symbol": true,
+    "strategy_mode": "liquidity_sweep",
+    "allowed_sessions_utc": [
+      "05:00-11:55",
+      "12:00-22:00"
+    ],
+    "use_bias_filter": true,
+    "bias_timeframe": "H4",
+    "bias_ema_period": 20,
+    "bias_lookback_bars": 80,
+    "use_order_block_filter": true,
+    "ignore_portfolio_cap": false,
+    "order_block_lookback_bars": 20,
+    "order_block_max_distance_pips": 12.0,
+    "order_block_strong_override_max_distance_pips": 12.0,
+    "order_block_strong_override_min_impulse_pips": 20.0,
+    "order_block_zone_mode": "body",
+    "order_block_min_impulse_pips": 3.0,
+    "order_block_max_age_bars": 15,
+    "confirmation_mode": "sweep_displacement_mss",
+    "confirm_expiry_bars": 5,
+    "cisd_timeframe": "M1",
+    "cisd_lookback_bars": 300,
+    "cisd_structure_bars": 4,
+    "scalp_session_start_utc": "06:00",
+    "scalp_open_range_minutes": 15,
+    "scalp_watch_minutes": 180,
+    "scalp_preopen_lookback_bars": 12,
+    "scalp_preopen_max_compression_ratio": 2.0,
+    "sweep_significance_lookback_bars": 12,
+    "sweep_significance_range_multiple": 1.25,
+    "sweep_min_penetration_pips": 0.5,
+    "range_filter_lookback_bars": 8,
+    "range_filter_max_compression_ratio": 2.5,
+    "range_filter_min_overlap_ratio": 0.75,
+    "confirmation_displacement_body_ratio_min": 0.55,
+    "confirmation_displacement_range_multiple": 1.8,
+    "micro_burst_pullback_bars": 2,
+    "micro_burst_body_ratio_min": 0.45,
+    "setup_timeframe": "H1",
+    "setup_lookback_bars": 120,
+    "ema_fast_period": 9,
+    "ema_mid_period": 21,
+    "ema_slow_period": 50,
+    "atr_period": 14,
+    "adx_period": 14,
+    "adx_threshold": 18.0,
+    "volume_sma_period": 20,
+    "breakout_volume_multiple": 1.2,
+    "structure_pivot_len": 3,
+    "setup_max_age_bars": 6,
+    "trigger_sweep_lookback_bars": 4,
+    "retest_zone_atr_multiple": 0.25,
+    "reclaim_max_atr_multiple": 1.8,
+    "stop_atr_multiple": 0.15,
+    "entry_max_atr_multiple": 1.6,
+    "htf_target_min_r": 1.0,
+    "overlap_lookback_bars": 8,
+    "max_overlap_ratio": 0.6,
+    "weekend_risk_multiplier": 1.0,
+    "max_hold_bars": 0,
+    "early_exit_consecutive_adverse_closes": 0,
+    "early_exit_large_adverse_body_r": 0.0,
+    "trailing_stop_mode": "",
+    "trailing_activation_r": 1.5,
+    "trailing_gap_r": null,
+    "trailing_remove_tp_on_activation": null,
+    "refresh_pending_on_newer_signal": false,
+    "refresh_pending_min_age_bars": 1,
+    "long_entry_filter_mode": "off",
+    "long_entry_min_slope_atr": 0.0,
+    "long_entry_slope_bars": 3,
+    "long_entry_atr_period": 14
+  },
+  "runtime": {
+    "daily_loss_limit_usd": 150.0,
+    "close_positions_on_daily_loss": true,
+    "max_loss_per_trade_usd": 30.0,
+    "per_trade_loss_guard_mode": "position_risk",
+    "per_trade_loss_risk_multiple": 1.0,
+    "max_profit_per_trade_usd": 0.0,
+    "trailing_stop_mode": "r_multiple",
+    "trailing_activation_r": 1.0,
+    "trailing_gap_r": 1.0,
+    "trailing_remove_tp_on_activation": true,
+    "max_open_positions_total": 5,
+    "max_total_open_risk_pct": 0.75,
+    "news_filter_enabled": false,
+    "news_provider": "investpy",
+    "news_block_minutes_before": 30,
+    "news_block_minutes_after": 15
+  },
+  "pairs": {
+    "EURUSD": {
+      "input_file": "EURUSD_extended.json",
+      "history_digest": "bf2241bcffa4df6f8be616a0402cd8d660d5f0f6b956c97a6c35d95606377edd",
+      "symbol_info": {
+        "digits": 5,
+        "point": 1e-05,
+        "volume_min": 0.01,
+        "volume_max": 100.0,
+        "volume_step": 0.01,
+        "trade_tick_value": 0.901436890403303,
+        "trade_tick_size": 1e-05
+      }
+    },
+    "GBPUSD": {
+      "input_file": "GBPUSD_extended.json",
+      "history_digest": "4e14c968ea91fc8af3fb6fc6b5f450de460ce8591a5c8de19275602d7d41533c",
+      "symbol_info": {
+        "digits": 5,
+        "point": 1e-05,
+        "volume_min": 0.01,
+        "volume_max": 100.0,
+        "volume_step": 0.01,
+        "trade_tick_value": 0.9014287645918782,
+        "trade_tick_size": 1e-05
+      }
+    },
+    "NZDUSD": {
+      "input_file": "NZDUSD.json",
+      "history_digest": "3e29f2615ea4976442c0582d72039da662ede44174cbe736d476e531a798b3f3",
+      "symbol_info": {
+        "digits": 5,
+        "point": 1e-05,
+        "volume_min": 0.01,
+        "volume_max": 100.0,
+        "volume_step": 0.01,
+        "trade_tick_value": 0.9011038522189684,
+        "trade_tick_size": 1e-05
+      }
+    },
+    "USDCHF": {
+      "input_file": "USDCHF_extended.json",
+      "history_digest": "8748d7a5373716b692d9e9168c2c2fe315911b643e07afb8bec74fa0b031a6a3",
+      "symbol_info": {
+        "digits": 5,
+        "point": 1e-05,
+        "volume_min": 0.01,
+        "volume_max": 100.0,
+        "volume_step": 0.01,
+        "trade_tick_value": 1.0823916525955752,
+        "trade_tick_size": 1e-05
+      }
+    }
+  },
+  "snapshot": {
+    "captured_at_utc": "2026-11-12T07:36:08.075754+00:00",
+    "account_currency": "EUR",
+    "autotrading": false,
+    "trading_calls": false,
+    "symbols": {
+      "EURUSD": {
+        "name": "EURUSD-",
+        "swap_mode": 1,
+        "swap_long": -9.595905,
+        "swap_short": -1.28532273,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 0.0,
+        "trade_tick_size": 1e-05,
+        "currency_base": "EUR",
+        "currency_profit": "USD"
+      },
+      "GBPUSD": {
+        "name": "GBPUSD-",
+        "swap_mode": 1,
+        "swap_long": -1.6800000000000002,
+        "swap_short": -2.86,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 0.0,
+        "trade_tick_size": 1e-05,
+        "currency_base": "GBP",
+        "currency_profit": "USD"
+      },
+      "NZDUSD": {
+        "name": "NZDUSD-",
+        "swap_mode": 1,
+        "swap_long": -1.76,
+        "swap_short": -2.31,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 0.0,
+        "trade_tick_size": 1e-05,
+        "currency_base": "NZD",
+        "currency_profit": "USD"
+      },
+      "USDCHF": {
+        "name": "USDCHF-",
+        "swap_mode": 1,
+        "swap_long": 1.41113636,
+        "swap_short": -25.75364,
+        "swap_rollover3days": 7,
+        "point": 1e-05,
+        "digits": 5,
+        "trade_tick_value": 1.0840931019155928,
+        "trade_tick_size": 1e-05,
+        "currency_base": "USD",
+        "currency_profit": "CHF"
+      }
+    }
+  },
+  "durations_minutes": [
+    15,
+    30,
+    60
+  ],
+  "windows": {
+    "earlier": [
+      "2025-09-01T00:00:00+00:00",
+      "2026-03-01T00:00:00+00:00"
+    ],
+    "later": [
+      "2026-03-02T00:00:00+00:00",
+      "2026-11-11T00:00:00+00:00"
+    ],
+    "full": [
+      "2025-09-01T00:00:00+00:00",
+      "2026-11-11T00:00:00+00:00"
+    ]
+  },
+  "entry_and_exit": "Both BUY and SELL; retain M30/M1 entries and existing protections. Weekday entries05:00 inclusive to18:00 exclusive UTC, intersected with original sessions. Deadline is elapsed15/30/60 minutes or19:00 UTC same day, whichever comes first. Close at first available M1 opening quote, after any gap; never fabricate a fill. Existing SL/TP triggered at that opening quote has priority over the timed exit; daily protection retained.",
+  "costs": {
+    "spread_mode": "historical",
+    "spread_pips": 1.0,
+    "commission_per_lot": 3.5,
+    "slippage_pips": 0.2
+  },
+  "stress_costs": {
+    "spread_mode": "historical",
+    "spread_pips": 2,
+    "commission_per_lot": 7,
+    "slippage_pips": 0.4
+  },
+  "swaps": {
+    "EURUSD": {
+      "buy_per_lot": -8.650102763805508,
+      "sell_per_lot": -1.1586373248958843,
+      "timezone": "Etc/GMT-3",
+      "weekday_weights": [
+        1,
+        1,
+        3,
+        1,
+        1,
+        0,
+        0
+      ],
+      "debit_multiplier": 1.0
+    },
+    "GBPUSD": {
+      "buy_per_lot": -1.5144003245143554,
+      "sell_per_lot": -2.5780862667327713,
+      "timezone": "Etc/GMT-3",
+      "weekday_weights": [
+        1,
+        1,
+        3,
+        1,
+        1,
+        0,
+        0
+      ],
+      "debit_multiplier": 1.0
+    },
+    "NZDUSD": {
+      "buy_per_lot": -1.5859427799053845,
+      "sell_per_lot": -2.081549898625817,
+      "timezone": "Etc/GMT-3",
+      "weekday_weights": [
+        1,
+        1,
+        3,
+        1,
+        1,
+        0,
+        0
+      ],
+      "debit_multiplier": 1.0
+    },
+    "USDCHF": {
+      "buy_per_lot": 1.5274022167381045,
+      "sell_per_lot": -27.875524959951512,
+      "timezone": "Etc/GMT-3",
+      "weekday_weights": [
+        1,
+        1,
+        3,
+        1,
+        1,
+        0,
+        0
+      ],
+      "debit_multiplier": 1.0
+    }
+  },
+  "triple_day_override": 3,
+  "clock_sensitivity": "Run GMT+3 swap accounting. Audit each complete entry/exit interval under GMT+2 as well. If no financing events occur under either schedule, the alternate clock is path-equivalent because the scalp policy is UTC based. If any events occur, disclose a failed no-swap constraint, never set financing to zero or delete the trade.",
+  "selection": "For each pair choose duration by earlier stressed net only; require at least one trade and no overnight/financing events under either clock. Tie lower sampled drawdown then name. Lock before later/full results. Report all12 configurations, including negative and disqualified paths. Pair rankings after testing are descriptive, not independent validation.",
+  "history_note": "NZDUSD original history starts2025-07-28. Read-only extension attempt returned a shorter recent M1 slice and is not used. All pairs therefore share2025-09-01 to2026-11-11 with warm-up verified individually; no unequal-period ranking.",
+  "code_digest": "563376bc708f82371958da00517218de3bc4c8dfb1cec7e56dc4c7a209896461",
+  "limitations": [
+    "Prices and some strategy dates were examined previously; this is exploratory comparison, not untouched holdout evidence.",
+    "Three fixed durations and one fixed daylight window, no pair-specific tuning or combinations. Initial stop remains20 pips, initial target2R, trailing activation1.5R/gap1R; this tests timed scalp exits on the existing entry family, not a new M1-only signal.",
+    "Spread cap0.9 pips remains identical across pairs; low/no participation is disclosed. Every pair/window starts independently atEUR10,000, not a concurrent portfolio.",
+    "Historical observed spreads; assumedEUR3.50/lot/side commission and0.2-pip adverse market/stop slippage. Stress doubles these and negative swap debits, credits unchanged; observed spreads unchanged and missing-spread fallback doubles1 to2 pips.",
+    "Current swap snapshot held constant over history with explicit Wednesday triple assumption after invalid weekday7 metadata. Financing is retained if a missed exit crosses rollover. Strict no-swap and no-overnight status is reported separately from profit.",
+    "Constant per-pair EUR tick valuation from historical exports. Historical margin, latency, tick paths, liquidity availability and changing broker minimum-stop requirements are not reconstructed.",
+    "Timed exits are research only; live execution/settings unchanged. No bot or orders."
+  ]
+}
